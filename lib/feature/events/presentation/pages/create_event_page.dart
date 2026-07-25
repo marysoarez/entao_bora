@@ -1,0 +1,372 @@
+import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
+import 'package:entao_bora/shared/enum/music_genre.dart';
+import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+
+import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+
+class CreateEventPage extends StatefulWidget {
+  const CreateEventPage({super.key});
+
+  @override
+  State<CreateEventPage> createState() => _CreateEventPageState();
+}
+
+class _CreateEventPageState extends State<CreateEventPage> {
+  final vm = Modular.get<CreateEventViewModel>();
+
+  final _formKey = GlobalKey<FormState>();
+
+  List<PlaceEntity> places = [];
+
+  bool loadingPlaces = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadPlaces();
+  }
+
+  Future<void> loadPlaces() async {
+    places = await vm.loadPlaces();
+
+    if (mounted) {
+      setState(() {
+        loadingPlaces = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Novo Evento')),
+      body: loadingPlaces
+          ? const Center(child: CircularProgressIndicator())
+          : Observer(
+              builder: (_) {
+                return Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Informações',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        TextFormField(
+                          initialValue: vm.title,
+                          decoration: const InputDecoration(
+                            labelText: 'Nome do evento',
+                          ),
+                          validator: vm.validateTitle,
+                          onChanged: vm.setTitle,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        TextFormField(
+                          initialValue: vm.description,
+                          maxLines: 4,
+                          decoration: const InputDecoration(
+                            labelText: 'Descrição',
+                          ),
+                          validator: vm.validateDescription,
+                          onChanged: vm.setDescription,
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        TextFormField(
+                          initialValue: vm.instagram,
+                          decoration: const InputDecoration(
+                            labelText: 'Instagram',
+                            hintText: '@garagegrindhouse',
+                          ),
+                          validator: vm.validateInstagram,
+                          onChanged: vm.setInstagram,
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        DropdownButtonFormField<PlaceEntity>(
+                          value: vm.place,
+                          decoration: const InputDecoration(labelText: 'Local'),
+                          items: places
+                              .map(
+                                (place) => DropdownMenuItem(
+                                  value: place,
+                                  child: Text(place.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (place) {
+                            if (place != null) {
+                              vm.setPlace(place);
+                            }
+                          },
+                        ),
+
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Data e horário',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.event),
+                                label: Text(
+                                  vm.startDate == null
+                                      ? 'Data início'
+                                      : '${vm.startDate!.day.toString().padLeft(2, '0')}/${vm.startDate!.month.toString().padLeft(2, '0')}/${vm.startDate!.year}',
+                                ),
+                                onPressed: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate: vm.startDate ?? DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime(2100),
+                                  );
+
+                                  if (date == null) return;
+
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.fromDateTime(
+                                      vm.startDate ?? DateTime.now(),
+                                    ),
+                                  );
+
+                                  if (time == null) return;
+
+                                  vm.setStartDate(
+                                    DateTime(
+                                      date.year,
+                                      date.month,
+                                      date.day,
+                                      time.hour,
+                                      time.minute,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                icon: const Icon(Icons.event),
+                                label: Text(
+                                  vm.endDate == null
+                                      ? 'Data término'
+                                      : '${vm.endDate!.day.toString().padLeft(2, '0')}/${vm.endDate!.month.toString().padLeft(2, '0')}/${vm.endDate!.year}',
+                                ),
+                                onPressed: () async {
+                                  final date = await showDatePicker(
+                                    context: context,
+                                    initialDate:
+                                        vm.endDate ??
+                                        vm.startDate ??
+                                        DateTime.now(),
+                                    firstDate: vm.startDate ?? DateTime.now(),
+                                    lastDate: DateTime(2100),
+                                  );
+
+                                  if (date == null) return;
+
+                                  final time = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.fromDateTime(
+                                      vm.endDate ??
+                                          vm.startDate ??
+                                          DateTime.now(),
+                                    ),
+                                  );
+
+                                  if (time == null) return;
+
+                                  vm.setEndDate(
+                                    DateTime(
+                                      date.year,
+                                      date.month,
+                                      date.day,
+                                      time.hour,
+                                      time.minute,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        const Text(
+                          'Gêneros musicais',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: MusicGenre.values.map((genre) {
+                            return FilterChip(
+                              label: Text(genre.label),
+                              selected: vm.musicGenres.contains(genre),
+                              onSelected: (_) {
+                                vm.toggleGenre(genre);
+                              },
+                            );
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        const Text(
+                          'Ingresso',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        RadioListTile<TicketType>(
+                          value: TicketType.free,
+                          groupValue: vm.ticket.type,
+                          title: const Text('Gratuito'),
+                          onChanged: (value) {
+                            if (value != null) {
+                              vm.setTicketType(value);
+                            }
+                          },
+                        ),
+
+                        RadioListTile<TicketType>(
+                          value: TicketType.external,
+                          groupValue: vm.ticket.type,
+                          title: const Text('Venda externa'),
+                          onChanged: (value) {
+                            if (value != null) {
+                              vm.setTicketType(value);
+                            }
+                          },
+                        ),
+
+                        if (vm.hasExternalTicket)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: TextFormField(
+                              initialValue: vm.ticket.ticketUrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Link para compra',
+                                hintText: 'https://...',
+                              ),
+                              keyboardType: TextInputType.url,
+                              onChanged: vm.setTicketUrl,
+                            ),
+                          ),
+
+                        const SizedBox(height: 32),
+                        Observer(
+                          builder: (_) {
+                            return SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                onPressed: vm.loading
+                                    ? null
+                                    : () async {
+                                        if (!_formKey.currentState!
+                                            .validate()) {
+                                          return;
+                                        }
+
+                                        final success = await vm.save();
+
+                                        if (!mounted) {
+                                          return;
+                                        }
+
+                                        if (success) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Evento criado com sucesso!',
+                                              ),
+                                            ),
+                                          );
+
+                                          Navigator.of(context).pop(true);
+                                        } else {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                vm.error ??
+                                                    'Erro ao criar evento.',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                child: vm.loading
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                        child: Text('PUBLICAR EVENTO'),
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
