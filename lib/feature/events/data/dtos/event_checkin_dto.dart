@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:entao_bora/feature/auth/data/dtos/auth_user_dto.dart';
+import 'package:entao_bora/feature/auth/data/dtos/user_summary_dto.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_checkin_entity.dart';
 
 class EventCheckinDto extends EventCheckinEntity {

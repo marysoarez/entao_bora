@@ -1,5 +1,5 @@
 import 'package:entao_bora/feature/auth/data/datasource/auth_datasource.dart';
-import 'package:entao_bora/feature/auth/data/dtos/auth_user_dto.dart';
+import 'package:entao_bora/feature/auth/data/dtos/user_summary_dto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';

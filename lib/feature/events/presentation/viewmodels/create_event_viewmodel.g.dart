@@ -225,6 +225,24 @@ mixin _$CreateEventViewModel on CreateEventViewModelBase, Store {
     });
   }
 
+  late final _$addressAtom = Atom(
+    name: 'CreateEventViewModelBase.address',
+    context: context,
+  );
+
+  @override
+  AddressEntity? get address {
+    _$addressAtom.reportRead();
+    return super.address;
+  }
+
+  @override
+  set address(AddressEntity? value) {
+    _$addressAtom.reportWrite(value, super.address, () {
+      super.address = value;
+    });
+  }
+
   late final _$loadPlacesAsyncAction = AsyncAction(
     'CreateEventViewModelBase.loadPlaces',
     context: context,
@@ -359,6 +377,18 @@ mixin _$CreateEventViewModel on CreateEventViewModelBase, Store {
   }
 
   @override
+  void setAddress(AddressEntity value) {
+    final _$actionInfo = _$CreateEventViewModelBaseActionController.startAction(
+      name: 'CreateEventViewModelBase.setAddress',
+    );
+    try {
+      return super.setAddress(value);
+    } finally {
+      _$CreateEventViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void addAttraction(EventAttractionEntity attraction) {
     final _$actionInfo = _$CreateEventViewModelBaseActionController.startAction(
       name: 'CreateEventViewModelBase.addAttraction',
@@ -420,7 +450,8 @@ endDate: ${endDate},
 musicGenres: ${musicGenres},
 attractions: ${attractions},
 photos: ${photos},
-ticket: ${ticket}
+ticket: ${ticket},
+address: ${address}
     ''';
   }
 }

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_attraction_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_ticket_dto.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
@@ -8,24 +9,33 @@ import 'package:entao_bora/shared/enum/music_genre.dart';
 class EventDto {
   final String id;
 
+  /// Informações básicas
   final String title;
   final String description;
 
-  final String placeId;
-  final String placeName;
+  /// Local
+  final String? placeId;
+  final String locationName;
+  final AddressDto address;
 
+  /// Datas
   final Timestamp startDate;
   final Timestamp endDate;
 
+  /// Imagens
   final String coverImage;
   final List<String> gallery;
 
+  /// Música
   final List<String> musicGenres;
 
+  /// Atrações
   final List<EventAttractionDto> attractions;
 
+  /// Ingresso
   final EventTicketDto ticket;
 
+  /// Instagram
   final String? instagram;
 
   /// Estatísticas
@@ -45,8 +55,9 @@ class EventDto {
     required this.id,
     required this.title,
     required this.description,
-    required this.placeId,
-    required this.placeName,
+    this.placeId,
+    required this.locationName,
+    required this.address,
     required this.startDate,
     required this.endDate,
     required this.coverImage,
@@ -79,8 +90,11 @@ class EventDto {
       id: id,
       title: map['title'] ?? '',
       description: map['description'] ?? '',
-      placeId: map['placeId'] ?? '',
-      placeName: map['placeName'] ?? '',
+      placeId: map['placeId'],
+      locationName: map['locationName'] ?? '',
+      address: AddressDto.fromMap(
+        Map<String, dynamic>.from(map['address'] ?? {}),
+      ),
       startDate: map['startDate'] ?? Timestamp.now(),
       endDate: map['endDate'] ?? Timestamp.now(),
       coverImage: map['coverImage'] ?? '',
@@ -114,7 +128,8 @@ class EventDto {
       title: entity.title,
       description: entity.description,
       placeId: entity.placeId,
-      placeName: entity.placeName,
+      locationName: entity.locationName,
+      address: AddressDto.fromEntity(entity.address),
       startDate: Timestamp.fromDate(entity.startDate),
       endDate: Timestamp.fromDate(entity.endDate),
       coverImage: entity.coverImage,
@@ -143,7 +158,8 @@ class EventDto {
       'title': title,
       'description': description,
       'placeId': placeId,
-      'placeName': placeName,
+      'locationName': locationName,
+      'address': address.toMap(),
       'startDate': startDate,
       'endDate': endDate,
       'coverImage': coverImage,
@@ -174,7 +190,8 @@ class EventDto {
       title: title,
       description: description,
       placeId: placeId,
-      placeName: placeName,
+      locationName: locationName,
+      address: address,
       startDate: startDate.toDate(),
       endDate: endDate.toDate(),
       coverImage: coverImage,
@@ -205,7 +222,8 @@ class EventDto {
     String? title,
     String? description,
     String? placeId,
-    String? placeName,
+    String? locationName,
+    AddressDto? address,
     Timestamp? startDate,
     Timestamp? endDate,
     String? coverImage,
@@ -228,7 +246,8 @@ class EventDto {
       title: title ?? this.title,
       description: description ?? this.description,
       placeId: placeId ?? this.placeId,
-      placeName: placeName ?? this.placeName,
+      locationName: locationName ?? this.locationName,
+      address: address ?? this.address,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       coverImage: coverImage ?? this.coverImage,

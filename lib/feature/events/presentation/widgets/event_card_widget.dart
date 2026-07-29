@@ -23,8 +23,7 @@ class EventCard extends StatefulWidget {
   const EventCard({super.key, required this.event, required this.place});
 
   final EventEntity event;
-  final PlaceEntity place;
-
+  final PlaceEntity? place;
   @override
   State<EventCard> createState() => _EventCardState();
 }
@@ -41,7 +40,6 @@ class _EventCardState extends State<EventCard> {
       Modular.get<ILocationRepository>(),
       Modular.get<AuthRepository>(),
       widget.event,
-      widget.place,
     );
   }
 
@@ -66,7 +64,7 @@ class _EventCardState extends State<EventCard> {
               EventHeader(
                 event: event,
                 onShare: () {
-                  final baseUrl ='https://entaobora.com.br';
+                  final baseUrl = 'https://entaobora.com.br';
 
                   final url = '$baseUrl/events/${event.id}';
 
@@ -97,6 +95,13 @@ class _EventCardState extends State<EventCard> {
                       overflow: TextOverflow.ellipsis,
                     ),
 
+                    const SizedBox(height: 20),
+                    Column(
+                      children: [
+                        Text("Parceiro:"),
+                        Text(event.createdBy),
+                      ],
+                    ),
                     const SizedBox(height: 20),
 
                     EventStats(event: event),
@@ -190,30 +195,3 @@ class _EventCardState extends State<EventCard> {
     return await LoginDialog.show(context);
   }
 }
-
-// Future<void> _showLoginDialog(BuildContext context) async {
-//   final login = await showDialog<bool>(
-//     context: context,
-//     builder: (_) => AlertDialog(
-//       icon: const Icon(Icons.lock_outline),
-//       title: const Text('Entre para continuar'),
-//       content: const Text(
-//         'Faça login para confirmar presença, realizar check-in e aproveitar todos os recursos do Então Bora.',
-//       ),
-//       actions: [
-//         TextButton(
-//           onPressed: () => Navigator.pop(context, false),
-//           child: const Text('Agora não'),
-//         ),
-//         FilledButton(
-//           onPressed: () => Navigator.pop(context, true),
-//           child: const Text('Entrar'),
-//         ),
-//       ],
-//     ),
-//   );
-
-//   if (login == true) {
-//     Modular.to.pushNamed('/login');
-//   }
-// }

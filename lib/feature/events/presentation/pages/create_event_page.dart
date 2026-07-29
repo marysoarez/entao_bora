@@ -1,4 +1,5 @@
 import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
+import 'package:entao_bora/feature/events/presentation/widgets/adress_autocomplete_field.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   List<PlaceEntity> places = [];
 
   bool loadingPlaces = true;
-
+  bool useRegisteredPlace = true;
   @override
   void initState() {
     super.initState();
@@ -100,23 +101,64 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
                         const SizedBox(height: 24),
 
-                        DropdownButtonFormField<PlaceEntity>(
-                          value: vm.place,
-                          decoration: const InputDecoration(labelText: 'Local'),
-                          items: places
-                              .map(
-                                (place) => DropdownMenuItem(
-                                  value: place,
-                                  child: Text(place.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (place) {
-                            if (place != null) {
-                              vm.setPlace(place);
-                            }
+                        const Text(
+                          'Local do evento',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        RadioListTile<bool>(
+                          value: true,
+                          groupValue: useRegisteredPlace,
+                          title: const Text('Estabelecimento cadastrado'),
+                          onChanged: (value) {
+                            setState(() {
+                              useRegisteredPlace = true;
+                            });
                           },
                         ),
+
+                        RadioListTile<bool>(
+                          value: false,
+                          groupValue: useRegisteredPlace,
+                          title: const Text('Outro endereço'),
+                          onChanged: (value) {
+                            setState(() {
+                              useRegisteredPlace = false;
+                            });
+                          },
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        if (useRegisteredPlace)
+                          DropdownButtonFormField<PlaceEntity>(
+                            value: vm.place,
+                            decoration: const InputDecoration(
+                              labelText: 'Estabelecimento',
+                            ),
+                            items: places.map((place) {
+                              return DropdownMenuItem(
+                                value: place,
+                                child: Text(place.name),
+                              );
+                            }).toList(),
+                            onChanged: (place) {
+                              if (place != null) {
+                                vm.setPlace(place);
+                              }
+                            },
+                          )
+                        else
+                          AddressAutocompleteField(
+                            initialValue: vm.address,
+                            search: vm.searchAddress,
+                            onSelected: vm.setAddress,
+                          ),
 
                         const SizedBox(height: 24),
                         const Text(

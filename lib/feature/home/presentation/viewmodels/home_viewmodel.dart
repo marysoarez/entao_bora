@@ -1,3 +1,5 @@
+import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
+import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:mobx/mobx.dart';
@@ -13,8 +15,10 @@ abstract class HomeViewModelBase with Store {
   HomeViewModelBase(
     this._locationRepository,
     this._placeRepository,
+    this._eventRepository,
   );
 
+  final IEventRepository _eventRepository;
   final ILocationRepository _locationRepository;
   final IPlaceRepository _placeRepository;
 
@@ -26,7 +30,8 @@ abstract class HomeViewModelBase with Store {
 
   @readonly
   List<PlaceEntity> _places = [];
-
+  @readonly
+  List<EventEntity> _events = [];
   @readonly
   String? _error;
 
@@ -35,8 +40,7 @@ abstract class HomeViewModelBase with Store {
     _loading = true;
     _error = null;
 
-    final locationResult =
-        await _locationRepository.getCurrentLocation();
+    final locationResult = await _locationRepository.getCurrentLocation();
 
     locationResult.fold(
       (failure) {
@@ -62,20 +66,41 @@ abstract class HomeViewModelBase with Store {
         _places = places;
       },
     );
+    final eventsResult = await _eventRepository.getEvents();
 
+    eventsResult.fold(
+      (failure) {
+        _error = failure.message;
+      },
+      (events) {
+        _events = events;
+      },
+    );
+    print('HomeViewModel -> ${_events.length} eventos');
     _loading = false;
   }
 
   @action
   Future<void> reloadPlaces() async {
-    final result = await _placeRepository.getPlaces();
+    final placesResult = await _placeRepository.getPlaces();
 
-    result.fold(
+    placesResult.fold(
       (failure) {
         _error = failure.message;
       },
       (places) {
         _places = places;
+      },
+    );
+
+    final eventsResult = await _eventRepository.getEvents();
+
+    eventsResult.fold(
+      (failure) {
+        _error = failure.message;
+      },
+      (events) {
+        _events = events;
       },
     );
   }

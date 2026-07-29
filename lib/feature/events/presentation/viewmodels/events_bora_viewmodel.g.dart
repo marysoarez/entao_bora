@@ -24,6 +24,24 @@ mixin _$EventActionsViewModel on EventActionsViewModelBase, Store {
     name: 'EventActionsViewModelBase.canCheckIn',
   )).value;
 
+  late final _$placeAtom = Atom(
+    name: 'EventActionsViewModelBase.place',
+    context: context,
+  );
+
+  @override
+  PlaceEntity? get place {
+    _$placeAtom.reportRead();
+    return super.place;
+  }
+
+  @override
+  set place(PlaceEntity? value) {
+    _$placeAtom.reportWrite(value, super.place, () {
+      super.place = value;
+    });
+  }
+
   late final _$eventAtom = Atom(
     name: 'EventActionsViewModelBase.event',
     context: context,
@@ -101,6 +119,7 @@ mixin _$EventActionsViewModel on EventActionsViewModelBase, Store {
   @override
   String toString() {
     return '''
+place: ${place},
 event: ${event},
 loading: ${loading},
 error: ${error},

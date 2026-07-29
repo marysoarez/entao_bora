@@ -1,3 +1,4 @@
+import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_attraction_entit.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_status_enum.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_ticket_entity.dart';
@@ -11,8 +12,9 @@ class EventEntity {
   final String description;
 
   /// Local
-  final String placeId;
-  final String placeName;
+  final String? placeId;
+  final String locationName;
+  final AddressEntity address;
 
   /// Datas
   final DateTime startDate;
@@ -31,7 +33,7 @@ class EventEntity {
   /// Ingresso
   final EventTicketEntity ticket;
 
-  /// Instagram (somente username)
+  /// Instagram
   final String? instagram;
 
   /// Estatísticas
@@ -40,7 +42,7 @@ class EventEntity {
   final int views;
   final int shares;
 
-  /// Estado do usuário atual
+  /// Estado do usuário
   final bool isBora;
   final bool hasCheckedIn;
 
@@ -55,8 +57,9 @@ class EventEntity {
     required this.id,
     required this.title,
     required this.description,
-    required this.placeId,
-    required this.placeName,
+    this.placeId,
+    required this.locationName,
+    required this.address,
     required this.startDate,
     required this.endDate,
     required this.coverImage,
@@ -81,20 +84,18 @@ class EventEntity {
 
   bool get isRunning {
     final now = DateTime.now();
-
-    return now.isAfter(startDate) &&
-        now.isBefore(endDate);
+    return now.isAfter(startDate) && now.isBefore(endDate);
   }
 
-  bool get isUpcoming =>
-      DateTime.now().isBefore(startDate);
+  bool get isUpcoming => DateTime.now().isBefore(startDate);
 
   EventEntity copyWith({
     String? id,
     String? title,
     String? description,
     String? placeId,
-    String? placeName,
+    String? locationName,
+    AddressEntity? address,
     DateTime? startDate,
     DateTime? endDate,
     String? coverImage,
@@ -119,7 +120,8 @@ class EventEntity {
       title: title ?? this.title,
       description: description ?? this.description,
       placeId: placeId ?? this.placeId,
-      placeName: placeName ?? this.placeName,
+      locationName: locationName ?? this.locationName,
+      address: address ?? this.address,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       coverImage: coverImage ?? this.coverImage,

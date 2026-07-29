@@ -19,19 +19,20 @@ abstract class EventActionsViewModelBase with Store {
     this._locationRepository,
     this._authRepository,
     this.event,
-    this.place,
   );
 
   final IEventRepository _eventRepository;
   final ILocationRepository _locationRepository;
 
-  final PlaceEntity place;
+  @observable
+  PlaceEntity? place;
+
   final AuthRepository _authRepository;
   UserSummaryEntity? get currentUser => _authRepository.currentUser;
 
   @computed
   bool get isLogged => currentUser != null;
-  @computed
+
   @observable
   EventEntity event;
 
@@ -103,9 +104,8 @@ abstract class EventActionsViewModelBase with Store {
     }
     loading = true;
     error = null;
-
     final locationResult = await _locationRepository.getCurrentLocationIfNear(
-      place.address.location,
+      event.address.location,
     );
 
     LocationEntity? location;

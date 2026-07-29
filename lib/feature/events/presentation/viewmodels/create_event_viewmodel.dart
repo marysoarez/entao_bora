@@ -1,3 +1,5 @@
+import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
+import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_attraction_entit.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_status_enum.dart';
@@ -17,8 +19,12 @@ class CreateEventViewModel = CreateEventViewModelBase
     with _$CreateEventViewModel;
 
 abstract class CreateEventViewModelBase with Store {
-  CreateEventViewModelBase(this._eventRepository, this._placeRepository);
-
+  CreateEventViewModelBase(
+    this._eventRepository,
+    this._placeRepository,
+    this._locationRepository,
+  );
+  final ILocationRepository _locationRepository;
   final IEventRepository _eventRepository;
   final IPlaceRepository _placeRepository;
 
@@ -66,6 +72,8 @@ abstract class CreateEventViewModelBase with Store {
   @observable
   EventTicketEntity ticket = const EventTicketEntity(type: TicketType.free);
 
+  @observable
+  AddressEntity? address;
   //==========================================================
   // Actions
   //==========================================================
@@ -78,9 +86,11 @@ abstract class CreateEventViewModelBase with Store {
 
   @action
   void setInstagram(String value) => instagram = value;
-
   @action
-  void setPlace(PlaceEntity value) => place = value;
+  void setPlace(PlaceEntity value) {
+    place = value;
+    address = null;
+  }
 
   @action
   void setStartDate(DateTime value) => startDate = value;
@@ -108,6 +118,12 @@ abstract class CreateEventViewModelBase with Store {
     } else {
       musicGenres.add(genre);
     }
+  }
+
+  @action
+  void setAddress(AddressEntity value) {
+    address = value;
+    place = null;
   }
 
   @action
@@ -172,72 +188,70 @@ abstract class CreateEventViewModelBase with Store {
   //==========================================================
   // Helpers
   //==========================================================
-Future<EventEntity> _buildEvent() async {
-  final now = DateTime.now();
+  Future<EventEntity> _buildEvent() async {
+    final now = DateTime.now();
 
-  final gallery = <String>[];
+    final gallery = <String>[];
 
-  for (final photo in photos) {
-    gallery.add(
-      await ImageHelper.fileToBase64(photo),
+    for (final photo in photos) {
+      gallery.add(await ImageHelper.fileToBase64(photo));
+    }
+
+    final selectedPlace = place;
+    final selectedAddress = address;
+
+    if (selectedPlace == null && selectedAddress == null) {
+      throw Exception('Selecione um local para o evento.');
+    }
+
+    return EventEntity(
+      id: '',
+      title: title.trim(),
+      description: description.trim(),
+
+      // Local
+      placeId: selectedPlace?.id,
+      locationName: selectedPlace?.name ?? selectedAddress!.displayName,
+      address: selectedPlace?.address ?? selectedAddress!,
+
+      // Datas
+      startDate: startDate!,
+      endDate: endDate!,
+
+      // Imagens
+      coverImage: gallery.isNotEmpty ? gallery.first : '',
+      gallery: gallery,
+
+      // Música
+      musicGenres: musicGenres.toList(),
+
+      // Atrações
+      attractions: attractions.toList(),
+
+      // Ingresso
+      ticket: ticket,
+
+      // Instagram
+      instagram: instagram.trim().isEmpty ? null : instagram.trim(),
+
+      // Estatísticas
+      boraCount: 0,
+      checkinCount: 0,
+      views: 0,
+      shares: 0,
+
+      // Estado do usuário
+      isBora: false,
+      hasCheckedIn: false,
+
+      // Auditoria
+      createdBy: '',
+      createdAt: now,
+      updatedAt: now,
+
+      status: EventStatus.published,
     );
   }
-
-  return EventEntity(
-    id: '',
-    title: title.trim(),
-    description: description.trim(),
-    placeId: place!.id,
-    placeName: place!.name,
-    startDate: startDate!,
-    endDate: endDate!,
-    coverImage: gallery.isNotEmpty ? gallery.first : '',
-    gallery: gallery,
-    musicGenres: musicGenres.toList(),
-    attractions: attractions.toList(),
-    ticket: ticket,
-    instagram: instagram.trim().isEmpty ? null : instagram.trim(),
-    boraCount: 0,
-    checkinCount: 0,
-    views: 0,
-    shares: 0,
-    isBora: false,
-    hasCheckedIn: false,
-    createdBy: '',
-    createdAt: now,
-    updatedAt: now,
-    status: EventStatus.published,
-  );
-}
-  // EventEntity _buildEvent() {
-  //   final now = DateTime.now();
-
-  //   return EventEntity(
-  //     id: '',
-  //     title: title.trim(),
-  //     description: description.trim(),
-  //     placeId: place!.id,
-  //     placeName: place!.name,
-  //     startDate: startDate!,
-  //     endDate: endDate!,
-  //     coverImage: '',
-  //     gallery: const [],
-  //     musicGenres: musicGenres.toList(),
-  //     attractions: attractions.toList(),
-  //     ticket: ticket,
-  //     instagram: instagram.trim().isEmpty ? null : instagram.trim(),
-  //     boraCount: 0,
-  //     checkinCount: 0,
-  //     views: 0,
-  //     shares: 0,
-  //     isBora: false,
-  //     hasCheckedIn: false,
-  //     createdBy: '',
-  //     createdAt: now,
-  //     updatedAt: now,
-  //     status: EventStatus.published,
-  //   );
-  // }
 
   String? _validate() {
     if (title.trim().isEmpty) {
@@ -248,10 +262,9 @@ Future<EventEntity> _buildEvent() async {
       return 'Informe uma descrição.';
     }
 
-    if (place == null) {
+    if (place == null && address == null) {
       return 'Selecione um local.';
     }
-
     if (startDate == null) {
       return 'Informe a data de início.';
     }
@@ -318,7 +331,7 @@ Future<EventEntity> _buildEvent() async {
   bool get isValid =>
       title.trim().isNotEmpty &&
       description.trim().isNotEmpty &&
-      place != null &&
+      (place != null || address != null) &&
       startDate != null &&
       endDate != null;
 
@@ -329,4 +342,13 @@ Future<EventEntity> _buildEvent() async {
   bool get hasGenres => musicGenres.isNotEmpty;
 
   bool get hasAttractions => attractions.isNotEmpty;
+
+  Future<List<AddressEntity>> searchAddress(String query) async {
+    final result = await _locationRepository.searchAddress(query);
+
+    return result.fold((failure) {
+      error = failure.message;
+      return [];
+    }, (addresses) => addresses);
+  }
 }

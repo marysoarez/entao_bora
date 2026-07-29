@@ -68,10 +68,11 @@ class _HomePageState extends State<HomePage> {
               Positioned.fill(
                 child: Padding(
                   padding: const EdgeInsets.all(10),
-                  child: MapSection(
-                    currentLocation: vm.currentLocation!,
-                    places: vm.places,
-                  ),
+                  child:MapSection(
+  currentLocation: vm.currentLocation!,
+  places: vm.places,
+  events: vm.events,
+),
                 ),
               ),
 

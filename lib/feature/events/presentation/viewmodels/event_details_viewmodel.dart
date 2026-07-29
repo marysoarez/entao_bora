@@ -13,10 +13,7 @@ abstract class _EventDetailsViewModelBase with Store {
   final IEventRepository eventRepository;
   final IPlaceRepository placeRepository;
 
-  _EventDetailsViewModelBase(
-    this.eventRepository,
-    this.placeRepository,
-  );
+  _EventDetailsViewModelBase(this.eventRepository, this.placeRepository);
 
   @observable
   bool loading = false;
@@ -49,18 +46,20 @@ abstract class _EventDetailsViewModelBase with Store {
 
         event = loadedEvent;
 
-        final placeResult = await placeRepository.getPlaceById(
-          loadedEvent.placeId,
-        );
+        if (loadedEvent.placeId != null) {
+          final placeResult = await placeRepository.getPlaceById(
+            loadedEvent.placeId!,
+          );
 
-        placeResult.fold(
-          (failure) {
-            error = 'Não foi possível carregar o estabelecimento.';
-          },
-          (loadedPlace) {
-            place = loadedPlace;
-          },
-        );
+          placeResult.fold(
+            (failure) {
+              error = 'Não foi possível carregar o estabelecimento.';
+            },
+            (loadedPlace) {
+              place = loadedPlace;
+            },
+          );
+        }
       },
     );
 

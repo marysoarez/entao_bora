@@ -69,6 +69,26 @@ mixin _$HomeViewModel on HomeViewModelBase, Store {
     });
   }
 
+  late final _$_eventsAtom = Atom(
+    name: 'HomeViewModelBase._events',
+    context: context,
+  );
+
+  List<EventEntity> get events {
+    _$_eventsAtom.reportRead();
+    return super._events;
+  }
+
+  @override
+  List<EventEntity> get _events => events;
+
+  @override
+  set _events(List<EventEntity> value) {
+    _$_eventsAtom.reportWrite(value, super._events, () {
+      super._events = value;
+    });
+  }
+
   late final _$_errorAtom = Atom(
     name: 'HomeViewModelBase._error',
     context: context,

@@ -43,18 +43,26 @@ class EventDatasourceImpl implements EventDatasource {
     }
   }
 
-  @override
-  Future<List<EventDto>> getEvents() async {
-    final snapshot = await _runQuery(
-      firestore
-          .collection(FirestorePaths.events)
-          .where('status', isEqualTo: 'published')
-          .where('startDate', isGreaterThan: Timestamp.now())
-          .orderBy('startDate'),
-    );
+@override
+Future<List<EventDto>> getEvents() async {
+  final snapshot = await _runQuery(
+    firestore
+        .collection(FirestorePaths.events)
+        .where('status', isEqualTo: 'published')
+        .where('endDate', isGreaterThanOrEqualTo: Timestamp.now())
+        .orderBy('endDate'),
+  );
 
-    return snapshot.docs.map(EventDto.fromFirestore).toList();
+  print('====================');
+  print('EVENTOS: ${snapshot.docs.length}');
+
+  for (final doc in snapshot.docs) {
+    print(doc.id);
+    print(doc.data());
   }
+
+  return snapshot.docs.map(EventDto.fromFirestore).toList();
+}
 
   @override
   Future<EventDto?> getEvent(String id) async {

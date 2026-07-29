@@ -47,7 +47,7 @@ class EventInfo extends StatelessWidget {
         _InfoTile(
           icon: Icons.location_on_rounded,
           title: "Onde",
-          value: event.placeName,
+          value: event.locationName,
         ),
       ],
     );

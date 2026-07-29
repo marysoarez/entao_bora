@@ -37,7 +37,7 @@ class _EventsDetailsPageState extends State<EventsDetailsPage> {
           );
         }
 
-        if (vm.event == null || vm.place == null) {
+        if (vm.event == null) {
           return const Scaffold(
             body: Center(child: Text("Evento não encontrado")),
           );
@@ -47,7 +47,9 @@ class _EventsDetailsPageState extends State<EventsDetailsPage> {
           appBar: AppAppBar(title: "Então Bora!!"),
           drawer: AppDrawer(),
 
-          body: SingleChildScrollView(child: EventCard(event: vm.event!, place: vm.place!)),
+          body: SingleChildScrollView(
+            child: EventCard(event: vm.event!, place: vm.place),
+          ),
         );
       },
     );
