@@ -129,6 +129,33 @@ mixin _$HomeViewModel on HomeViewModelBase, Store {
     return _$reloadPlacesAsyncAction.run(() => super.reloadPlaces());
   }
 
+  late final _$enableLocationAsyncAction = AsyncAction(
+    'HomeViewModelBase.enableLocation',
+    context: context,
+  );
+
+  @override
+  Future<bool> enableLocation() {
+    return _$enableLocationAsyncAction.run(() => super.enableLocation());
+  }
+
+  late final _$HomeViewModelBaseActionController = ActionController(
+    name: 'HomeViewModelBase',
+    context: context,
+  );
+
+  @override
+  void disableLocation() {
+    final _$actionInfo = _$HomeViewModelBaseActionController.startAction(
+      name: 'HomeViewModelBase.disableLocation',
+    );
+    try {
+      return super.disableLocation();
+    } finally {
+      _$HomeViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''

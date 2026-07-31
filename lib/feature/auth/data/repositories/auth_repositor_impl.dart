@@ -1,49 +1,66 @@
 import 'package:entao_bora/feature/auth/data/datasource/auth_datasource.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
+import 'package:entao_bora/feature/auth/presentation/stores/session_store.dart';
 
-class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._datasource);
-  @override
-  UserSummaryEntity? get currentUser => _currentUser;
+class AuthRepositoryImpl implements IAuthRepository {
+  AuthRepositoryImpl(
+    this._datasource,
+    this._session,
+  );
+
   final AuthDatasource _datasource;
+  final SessionStore _session;
 
-  UserSummaryEntity? _currentUser;
+  @override
+  UserSummaryEntity? get currentUser => _session.currentUser;
 
   @override
   Future<UserSummaryEntity?> signInWithGoogle() async {
     final dto = await _datasource.signInWithGoogle();
 
-    _currentUser = dto?.toEntity();
+    _session.currentUser = dto?.toEntity();
 
-    return _currentUser;
+    return _session.currentUser;
   }
 
   @override
   Future<UserSummaryEntity?> getCurrentUser() async {
-    _currentUser ??= (await _datasource.getCurrentUser())?.toEntity();
-    return _currentUser;
-  }
+    if (_session.currentUser != null) {
+      return _session.currentUser;
+    }
 
-  @override
-  Future<void> signOut() async {
-    _currentUser = null;
-    await _datasource.signOut();
+    _session.currentUser =
+        (await _datasource.getCurrentUser())?.toEntity();
+
+    return _session.currentUser;
   }
 
   @override
   Future<UserSummaryEntity> signInAnonymously() async {
     final dto = await _datasource.signInAnonymously();
 
-    _currentUser = dto.toEntity();
+    _session.currentUser = dto.toEntity();
 
-    return _currentUser!;
+    return _session.currentUser!;
+  }
+
+  @override
+  Future<void> signOut() async {
+    await _datasource.signOut();
+
+    _session.currentUser = null;
   }
 
   @override
   Future<bool> isLogged() async {
-    _currentUser ??= (await _datasource.getCurrentUser())?.toEntity();
+    if (_session.currentUser != null) {
+      return true;
+    }
 
-    return _currentUser != null;
+    _session.currentUser =
+        (await _datasource.getCurrentUser())?.toEntity();
+
+    return _session.currentUser != null;
   }
 }

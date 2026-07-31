@@ -43,14 +43,7 @@ class _EventsDetailsPageState extends State<EventsDetailsPage> {
           );
         }
 
-        return Scaffold(
-          appBar: AppAppBar(title: "Então Bora!!"),
-          drawer: AppDrawer(),
-
-          body: SingleChildScrollView(
-            child: EventCard(event: vm.event!, place: vm.place),
-          ),
-        );
+        return EventCard(event: vm.event!, place: vm.place);
       },
     );
   }

@@ -1,6 +1,6 @@
 import '../entities/user_summary_entity.dart';
 
-abstract class AuthRepository {
+abstract class IAuthRepository {
   UserSummaryEntity? get currentUser;
   Future<UserSummaryEntity?> signInWithGoogle();
 

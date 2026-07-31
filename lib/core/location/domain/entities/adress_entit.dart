@@ -10,7 +10,7 @@ class AddressEntity {
   final String? state;
   final String? country;
   final String? postalCode;
-
+  final String? complement;
   final LocationEntity location;
 
   const AddressEntity({
@@ -23,6 +23,7 @@ class AddressEntity {
     this.state,
     this.country,
     this.postalCode,
+    this.complement,
   });
 
   String get fullAddress {
@@ -32,8 +33,35 @@ class AddressEntity {
       if (neighborhood != null && neighborhood!.isNotEmpty) neighborhood!,
       if (city != null && city!.isNotEmpty) city!,
       if (state != null && state!.isNotEmpty) state!,
+      if (complement?.isNotEmpty ?? false) complement!,
     ];
 
     return parts.join(', ');
+  }
+
+  AddressEntity copyWith({
+    String? displayName,
+    String? street,
+    String? number,
+    String? complement,
+    String? neighborhood,
+    String? city,
+    String? state,
+    String? country,
+    String? postalCode,
+    LocationEntity? location,
+  }) {
+    return AddressEntity(
+      displayName: displayName ?? this.displayName,
+      street: street ?? this.street,
+      number: number ?? this.number,
+      complement: complement ?? this.complement,
+      neighborhood: neighborhood ?? this.neighborhood,
+      city: city ?? this.city,
+      state: state ?? this.state,
+      country: country ?? this.country,
+      postalCode: postalCode ?? this.postalCode,
+      location: location ?? this.location,
+    );
   }
 }

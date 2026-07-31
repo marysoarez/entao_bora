@@ -1,4 +1,5 @@
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
+import 'package:entao_bora/shared/enum/user_role.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserSummaryDto extends UserSummaryEntity {
@@ -8,6 +9,9 @@ class UserSummaryDto extends UserSummaryEntity {
     super.email,
     super.photoUrl,
     super.isAnonymous,
+    super.role,
+    super.partnerId,
+    super.active,
   });
 
   factory UserSummaryDto.fromEntity(UserSummaryEntity entity) {
@@ -17,6 +21,9 @@ class UserSummaryDto extends UserSummaryEntity {
       email: entity.email,
       photoUrl: entity.photoUrl,
       isAnonymous: entity.isAnonymous,
+      role: entity.role,
+      partnerId: entity.partnerId,
+      active: entity.active,
     );
   }
 
@@ -27,6 +34,9 @@ class UserSummaryDto extends UserSummaryEntity {
       email: map['email'] as String?,
       photoUrl: map['photoUrl'] as String?,
       isAnonymous: map['isAnonymous'] as bool? ?? false,
+      role: UserRole.fromSlug(map['role'] as String?),
+      partnerId: map['partnerId'] as String?,
+      active: map['active'] as bool? ?? true,
     );
   }
 
@@ -39,6 +49,11 @@ class UserSummaryDto extends UserSummaryEntity {
       email: user.email,
       photoUrl: user.photoURL,
       isAnonymous: user.isAnonymous,
+
+      // Valores padrão até sincronizar com o Firestore.
+      role: UserRole.user,
+      partnerId: null,
+      active: true,
     );
   }
 
@@ -49,6 +64,9 @@ class UserSummaryDto extends UserSummaryEntity {
       email: email,
       photoUrl: photoUrl,
       isAnonymous: isAnonymous,
+      role: role,
+      partnerId: partnerId,
+      active: active,
     );
   }
 
@@ -59,6 +77,9 @@ class UserSummaryDto extends UserSummaryEntity {
       'email': email,
       'photoUrl': photoUrl,
       'isAnonymous': isAnonymous,
+      'role': role.slug,
+      'partnerId': partnerId,
+      'active': active,
     };
   }
 }

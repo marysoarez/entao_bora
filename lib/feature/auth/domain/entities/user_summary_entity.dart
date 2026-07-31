@@ -11,6 +11,12 @@ class UserSummaryEntity {
 
   final UserRole role;
 
+  /// Id do parceiro caso este usuário seja um parceiro.
+  final String? partnerId;
+
+  /// Permite bloquear um usuário sem excluir sua conta.
+  final bool active;
+
   const UserSummaryEntity({
     required this.id,
     required this.name,
@@ -18,6 +24,8 @@ class UserSummaryEntity {
     this.photoUrl,
     this.isAnonymous = false,
     this.role = UserRole.user,
+    this.partnerId,
+    this.active = true,
   });
 
   bool get isPartner => role == UserRole.partner;
@@ -31,6 +39,8 @@ class UserSummaryEntity {
     String? photoUrl,
     bool? isAnonymous,
     UserRole? role,
+    String? partnerId,
+    bool? active,
   }) {
     return UserSummaryEntity(
       id: id ?? this.id,
@@ -39,6 +49,8 @@ class UserSummaryEntity {
       photoUrl: photoUrl ?? this.photoUrl,
       isAnonymous: isAnonymous ?? this.isAnonymous,
       role: role ?? this.role,
+      partnerId: partnerId ?? this.partnerId,
+      active: active ?? this.active,
     );
   }
 }

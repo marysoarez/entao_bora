@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class CreateFab extends StatefulWidget {
   final VoidCallback onCreateEvent;
   final VoidCallback onCreatePlace;
+  final VoidCallback onMyLocation;
+  final bool locationEnabled;
 
   const CreateFab({
     super.key,
     required this.onCreateEvent,
     required this.onCreatePlace,
+    required this.onMyLocation,
+    required this.locationEnabled,
   });
 
   @override
@@ -102,19 +106,70 @@ class _CreateFabState extends State<CreateFab>
                   : const SizedBox.shrink(),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            FloatingActionButton(
-              heroTag: 'createFab',
-              onPressed: () {
-                setState(() {
-                  expanded = !expanded;
-                });
-              },
-              child: AnimatedRotation(
-                duration: const Duration(milliseconds: 250),
-                turns: expanded ? 0.375 : 0,
-                child: const Icon(Icons.add),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: widget.locationEnabled
+                      ? Colors.redAccent
+                      : Colors.pinkAccent,
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.redAccent.withValues(alpha: 0.20),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: FloatingActionButton.small(
+                heroTag: 'locationFab',
+                  shape: const CircleBorder(),
+
+                elevation: 0,
+                backgroundColor: Colors.grey.shade900,
+                foregroundColor: Colors.white,
+                tooltip: 'Minha localização',
+                onPressed: widget.onMyLocation,
+                child: Icon(
+                  widget.locationEnabled
+                      ? Icons.location_on
+                      : Icons.location_searching,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.redAccent, width: 3),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black54,
+                    blurRadius: 12,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: FloatingActionButton(
+               shape: const CircleBorder(),
+
+                heroTag: 'createFab',
+                onPressed: () {
+                  setState(() {
+                    expanded = !expanded;
+                  });
+                },
+
+                child: AnimatedRotation(
+                  duration: const Duration(milliseconds: 250),
+                  turns: expanded ? 0.375 : 0,
+                  child: const Icon(Icons.add),
+                ),
               ),
             ),
           ],

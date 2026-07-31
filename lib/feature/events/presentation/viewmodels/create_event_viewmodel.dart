@@ -1,5 +1,6 @@
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
+import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_attraction_entit.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_status_enum.dart';
@@ -12,7 +13,7 @@ import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
-
+import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 part 'create_event_viewmodel.g.dart';
 
 class CreateEventViewModel = CreateEventViewModelBase
@@ -23,10 +24,12 @@ abstract class CreateEventViewModelBase with Store {
     this._eventRepository,
     this._placeRepository,
     this._locationRepository,
+    this._authRepository,
   );
   final ILocationRepository _locationRepository;
   final IEventRepository _eventRepository;
   final IPlaceRepository _placeRepository;
+  final IAuthRepository _authRepository;
 
   //==========================================================
   // Estado
@@ -59,6 +62,18 @@ abstract class CreateEventViewModelBase with Store {
 
   @observable
   DateTime? endDate;
+  @observable
+  XFile? coverPhoto;
+
+  @action
+  void setCoverPhoto(XFile file) {
+    coverPhoto = file;
+  }
+
+  @action
+  void removeCoverPhoto() {
+    coverPhoto = null;
+  }
 
   @observable
   ObservableList<MusicGenre> musicGenres = ObservableList();
@@ -159,11 +174,14 @@ abstract class CreateEventViewModelBase with Store {
   //==========================================================
   // Save
   //==========================================================
-
+  String? coverImage;
   @action
   Future<bool> save() async {
     error = null;
 
+    if (coverPhoto != null) {
+      coverImage = await ImageHelper.fileToBase64(coverPhoto!);
+    }
     final validation = _validate();
 
     if (validation != null) {
@@ -171,24 +189,33 @@ abstract class CreateEventViewModelBase with Store {
       return false;
     }
 
+    final currentUser = await _authRepository.getCurrentUser();
+
+    if (currentUser == null) {
+      error = 'Faça login para criar um evento.';
+      return false;
+    }
+
     loading = true;
 
-    final event = await _buildEvent();
+    try {
+      final event = await _buildEvent(currentUser);
 
-    final result = await _eventRepository.createEvent(event);
+      final result = await _eventRepository.createEvent(event);
 
-    loading = false;
-
-    return result.fold((failure) {
-      error = failure.message;
-      return false;
-    }, (_) => true);
+      return result.fold((failure) {
+        error = failure.message;
+        return false;
+      }, (_) => true);
+    } finally {
+      loading = false;
+    }
   }
 
   //==========================================================
   // Helpers
   //==========================================================
-  Future<EventEntity> _buildEvent() async {
+  Future<EventEntity> _buildEvent(UserSummaryEntity currentUser) async {
     final now = DateTime.now();
 
     final gallery = <String>[];
@@ -203,7 +230,6 @@ abstract class CreateEventViewModelBase with Store {
     if (selectedPlace == null && selectedAddress == null) {
       throw Exception('Selecione um local para o evento.');
     }
-
     return EventEntity(
       id: '',
       title: title.trim(),
@@ -219,7 +245,8 @@ abstract class CreateEventViewModelBase with Store {
       endDate: endDate!,
 
       // Imagens
-      coverImage: gallery.isNotEmpty ? gallery.first : '',
+      coverImage: coverImage!,
+
       gallery: gallery,
 
       // Música
@@ -245,7 +272,9 @@ abstract class CreateEventViewModelBase with Store {
       hasCheckedIn: false,
 
       // Auditoria
-      createdBy: '',
+      createdBy: currentUser.id,
+      createdByName: currentUser.name,
+      createdByPhoto: currentUser.photoUrl,
       createdAt: now,
       updatedAt: now,
 

@@ -9,18 +9,18 @@ import 'package:entao_bora/feature/auth/data/datasource/auth_datasource.dart';
 import 'package:entao_bora/feature/auth/data/datasource/auth_datasource_impl.dart';
 import 'package:entao_bora/feature/auth/data/repositories/auth_repositor_impl.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
+import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/login_viewmodel.dart';
+import 'package:entao_bora/feature/auth/presentation/stores/session_store.dart';
 import 'package:entao_bora/feature/events/data/data_source/events_data_source.dart';
 import 'package:entao_bora/feature/events/data/data_source/events_datasource_impl.dart';
 import 'package:entao_bora/feature/events/data/repositories/event_repository_impl.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/events/presentation/pages/create_event_page.dart';
 import 'package:entao_bora/feature/events/presentation/pages/event_details_page.dart';
-import 'package:entao_bora/feature/events/presentation/pages/place_events_page.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
-import 'package:entao_bora/feature/home/modeula/home_module.dart';
 import 'package:entao_bora/feature/home/presentation/pages/home.dart';
 import 'package:entao_bora/feature/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:entao_bora/feature/places/data/datasource/place_datasource.dart';
@@ -30,8 +30,10 @@ import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_page.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.dart';
+import 'package:entao_bora/feature/places/presentation/place_details_page.dart';
 import 'package:entao_bora/feature/splash/presentation/splash_page.dart';
-import 'package:entao_bora/feature/splash/presentation/splash_viewmodel.dart';
+import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
+import 'package:entao_bora/feature/user/domain/datasource/user_datasource_impl.dart';
 import 'package:entao_bora/shared/errors/log_events.dart';
 import 'package:entao_bora/shared/errors/log_events_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,11 +58,13 @@ class AppModule extends Module {
     i.addSingleton<ILocationRepository>(
       () => LocationRepositoryImpl(datasource: i()),
     );
-    i.add(SplashViewModel.new);
     i.add(CreatePlaceViewModel.new);
     i.add(PlaceEventsViewModel.new);
     i.add(CreateEventViewModel.new);
     i.add(EventDetailsViewModel.new);
+    i.addSingleton(SessionStore.new);
+    i.addSingleton<UserDatasource>(() => UserDatasourceImpl(i()));
+
     //==========================================================
     // PLACES
     //==========================================================
@@ -82,11 +86,12 @@ class AppModule extends Module {
     // AUTH
     //==========================================================
 
+    i.addSingleton<AuthDatasource>(
+      () => AuthDatasourceImpl(i<FirebaseAuth>(), i<UserDatasource>()),
+    );
+    i.addSingleton<IAuthRepository>(() => AuthRepositoryImpl(i(), i()));
+    i.addSingleton<AuthViewModel>(AuthViewModel.new);
     i.addSingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-
-    i.addSingleton<AuthDatasource>(() => AuthDatasourceImpl(i()));
-
-    i.addSingleton<AuthRepository>(() => AuthRepositoryImpl(i()));
   }
 
   @override
@@ -105,7 +110,7 @@ class AppModule extends Module {
     r.child('/events/create', child: (_) => const CreateEventPage());
     r.child(
       '/places/events',
-      child: (_) => PlaceEventsPage(place: r.args.data as PlaceEntity),
+      child: (_) => PlaceDetailsPage(place: r.args.data as PlaceEntity),
     );
 
     r.child(

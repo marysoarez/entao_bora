@@ -4,34 +4,25 @@ import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/errors/event_errors.dart';
 
 abstract class IEventRepository {
-  Future<Either<FailureGetEvents, List<EventEntity>>> getEvents();
+  Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
+    String? userId,
+  });
+  Future<Either<FailureGetEventById, EventEntity?>> getEventById({
+    required String eventId,
+    String? userId,
+  });
+  Future<Either<FailureCreateEvent, bool>> createEvent(EventEntity event);
 
-  Future<Either<FailureGetEventById, EventEntity?>> getEventById(String id);
+  Future<Either<FailureUpdateEvent, bool>> updateEvent(EventEntity event);
 
-  Future<Either<FailureCreateEvent, bool>> createEvent(
-    EventEntity event,
-  );
+  Future<Either<FailureDeleteEvent, bool>> deleteEvent(String id);
 
-  Future<Either<FailureUpdateEvent, bool>> updateEvent(
-    EventEntity event,
-  );
+  Future<Either<FailureIncrementEventViews, bool>> incrementViews(String id);
 
-  Future<Either<FailureDeleteEvent, bool>> deleteEvent(
-    String id,
-  );
-
-  Future<Either<FailureIncrementEventViews, bool>> incrementViews(
-    String id,
-  );
-
-  Future<Either<FailureIncrementEventShares, bool>> incrementShares(
-    String id,
-  );
+  Future<Either<FailureIncrementEventShares, bool>> incrementShares(String id);
 
   Future<Either<FailureGetUpcomingEventsByPlace, List<EventEntity>>>
-      getUpcomingEventsByPlace(
-    String placeId,
-  );
+  getUpcomingEventsByPlace(String placeId);
 
   Future<Either<FailureIsUserGoing, bool>> isUserGoing({
     required String eventId,

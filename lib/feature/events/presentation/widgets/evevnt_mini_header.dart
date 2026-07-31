@@ -2,10 +2,9 @@ import 'dart:convert';
 
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 
-class EventHeader extends StatelessWidget {
-  const EventHeader({super.key, required this.event, this.onShare});
+class EventMiniHeader extends StatelessWidget {
+  const EventMiniHeader({super.key, required this.event, this.onShare});
 
   final EventEntity event;
   final VoidCallback? onShare;
@@ -13,7 +12,7 @@ class EventHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 360,
+      height: 150,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -75,27 +74,6 @@ class EventHeader extends StatelessWidget {
             ),
           ),
 
-          // Badge
-          Positioned(
-            top: 16,
-            left: 16,
-            child: Material(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(30),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: () {
-                  Modular.to.navigate('/');
-                  debugPrint("popopopp");
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Icon(Icons.arrow_back, color: Colors.white, size: 22),
-                ),
-              ),
-            ),
-          ),
-
           // Título
           Positioned(
             left: 20,
@@ -110,7 +88,7 @@ class EventHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 30,
+                    fontSize: 15,
                     height: 1,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.5,

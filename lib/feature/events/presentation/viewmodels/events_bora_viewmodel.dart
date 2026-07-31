@@ -23,11 +23,11 @@ abstract class EventActionsViewModelBase with Store {
 
   final IEventRepository _eventRepository;
   final ILocationRepository _locationRepository;
+  final IAuthRepository _authRepository;
 
   @observable
   PlaceEntity? place;
 
-  final AuthRepository _authRepository;
   UserSummaryEntity? get currentUser => _authRepository.currentUser;
 
   @computed

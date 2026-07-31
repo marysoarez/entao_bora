@@ -3,10 +3,8 @@ import 'package:entao_bora/feature/events/domain/repositories/event_repositor.da
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:mobx/mobx.dart';
-
-import '../../../../core/location/domain/entities/location_entity.dart';
-import '../../../../core/location/domain/repositories/location_repository.dart';
-
+import 'package:entao_bora/core/location/domain/entities/location_entity.dart';
+import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 part 'home_viewmodel.g.dart';
 
 class HomeViewModel = HomeViewModelBase with _$HomeViewModel;
@@ -18,15 +16,16 @@ abstract class HomeViewModelBase with Store {
     this._eventRepository,
   );
 
-  final IEventRepository _eventRepository;
   final ILocationRepository _locationRepository;
   final IPlaceRepository _placeRepository;
-
+  final IEventRepository _eventRepository;
   @readonly
   bool _loading = false;
-
   @readonly
   LocationEntity? _currentLocation;
+
+  bool get locationEnabled => _currentLocation != null;
+
 
   @readonly
   List<PlaceEntity> _places = [];
@@ -39,17 +38,6 @@ abstract class HomeViewModelBase with Store {
   Future<void> load() async {
     _loading = true;
     _error = null;
-
-    final locationResult = await _locationRepository.getCurrentLocation();
-
-    locationResult.fold(
-      (failure) {
-        _error = failure.message;
-      },
-      (location) {
-        _currentLocation = location;
-      },
-    );
 
     if (_error != null) {
       _loading = false;
@@ -103,5 +91,27 @@ abstract class HomeViewModelBase with Store {
         _events = events;
       },
     );
+  }
+
+  @action
+  Future<bool> enableLocation() async {
+    final result = await _locationRepository.getCurrentLocation();
+
+    return result.fold(
+      (failure) {
+        _error = failure.message;
+        return false;
+      },
+      (location) {
+        _currentLocation = location;
+        _error = null;
+        return true;
+      },
+    );
+  }
+
+  @action
+  void disableLocation() {
+    _currentLocation = null;
   }
 }

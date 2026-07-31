@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/core/location/domain/errors/location_errors.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
+import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
@@ -19,11 +20,15 @@ class CreatePlaceViewModel = CreatePlaceViewModelBase
     with _$CreatePlaceViewModel;
 
 abstract class CreatePlaceViewModelBase with Store {
-  CreatePlaceViewModelBase(this._locationRepository, this._placeRepository);
+  CreatePlaceViewModelBase(
+    this._locationRepository,
+    this._placeRepository,
+    this._authRepository,
+  );
 
   final ILocationRepository _locationRepository;
   final IPlaceRepository _placeRepository;
-
+  final IAuthRepository _authRepository;
   //==========================================================
   // Estado
   //==========================================================
@@ -146,18 +151,24 @@ abstract class CreatePlaceViewModelBase with Store {
     print('SAVE 1');
 
     loading = true;
+    final user = await _authRepository.getCurrentUser();
 
+    if (user == null) {
+      error = 'Usuário não autenticado.';
+      loading = false;
+      return false;
+    }
     try {
       print('SAVE 2');
 
       final photosBase64 = <String>[];
-  debugPrint('address == null: ${address == null}');
-  debugPrint('photos: ${photos.length}');
+      debugPrint('address == null: ${address == null}');
+      debugPrint('photos: ${photos.length}');
 
       for (final photo in photos) {
         photosBase64.add(await ImageHelper.fileToBase64(photo));
       }
-debugPrint('CHEGOU ANTES DO PLACE');
+      debugPrint('CHEGOU ANTES DO PLACE');
       final place = PlaceEntity(
         id: '',
         name: name.trim(),
@@ -165,6 +176,8 @@ debugPrint('CHEGOU ANTES DO PLACE');
         address: address!,
         musicGenres: musicGenres.toList(),
         type: type,
+        ownerId: user.id,
+        ownerName: user.name,
         phone: phone.trim(),
         instagram: instagram.trim(),
         website: website.trim(),

@@ -1,3 +1,4 @@
+import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
@@ -12,8 +13,13 @@ class EventDetailsViewModel = _EventDetailsViewModelBase
 abstract class _EventDetailsViewModelBase with Store {
   final IEventRepository eventRepository;
   final IPlaceRepository placeRepository;
+  final IAuthRepository _authRepository;
 
-  _EventDetailsViewModelBase(this.eventRepository, this.placeRepository);
+  _EventDetailsViewModelBase(
+    this.eventRepository,
+    this.placeRepository,
+    this._authRepository,
+  );
 
   @observable
   bool loading = false;
@@ -32,7 +38,12 @@ abstract class _EventDetailsViewModelBase with Store {
     loading = true;
     error = null;
 
-    final result = await eventRepository.getEventById(id);
+    final userId = _authRepository.currentUser?.id;
+
+    final result = await eventRepository.getEventById(
+      eventId: id,
+      userId: userId,
+    );
 
     await result.fold(
       (failure) async {

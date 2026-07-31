@@ -25,4 +25,19 @@ class EventTicketEntity {
       ticketUrl: ticketUrl ?? this.ticketUrl,
     );
   }
+  
+}
+extension TicketTypeExtension on TicketType {
+  String get label {
+    switch (this) {
+      case TicketType.free:
+        return "Gratuito";
+
+      // case TicketType.paid:
+      //   return "Pago";
+
+      case TicketType.external:
+        return "Ingresso externo";
+    }
+  }
 }

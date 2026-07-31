@@ -1,112 +1,153 @@
+import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
+import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
 
   @override
+  State<AppDrawer> createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer> {
+  final auth = Modular.get<AuthViewModel>();
+  @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
+    return Observer(
+      builder: (context) {
+        return Drawer(
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(auth),
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      _drawerItem(
+                        context,
+                        icon: Icons.home_outlined,
+                        title: 'Início',
+                        onTap: () => Modular.to.navigate('/home/'),
+                      ),
 
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  _drawerItem(
-                    context,
-                    icon: Icons.home_outlined,
-                    title: 'Início',
-                    onTap: () => Modular.to.navigate('/home/'),
+                      _drawerItem(
+                        context,
+                        icon: Icons.event_outlined,
+                        title: 'Eventos',
+                        onTap: () => Modular.to.navigate('/home/'),
+                      ),
+
+                      _drawerItem(
+                        context,
+                        icon: Icons.place_outlined,
+                        title: 'Locais',
+                        onTap: () => Modular.to.navigate('/home/'),
+                      ),
+
+                      const Divider(),
+
+                      _drawerItem(
+                        context,
+                        icon: Icons.add_circle_outline,
+                        title: 'Novo Evento',
+                        onTap: () => Modular.to.pushNamed('/events/create'),
+                      ),
+
+                      _drawerItem(
+                        context,
+                        icon: Icons.add_location_alt_outlined,
+                        title: 'Novo Local',
+                        onTap: () => Modular.to.pushNamed('/places/create'),
+                      ),
+
+                      const Divider(),
+
+                      _drawerItem(
+                        context,
+                        icon: Icons.settings_outlined,
+                        title: 'Configurações',
+                        onTap: () {},
+                      ),
+
+                      _drawerItem(
+                        context,
+                        icon: Icons.help_outline,
+                        title: 'Ajuda',
+                        onTap: () {},
+                      ),
+                    ],
                   ),
+                ),
 
-                  _drawerItem(
-                    context,
-                    icon: Icons.event_outlined,
-                    title: 'Eventos',
-                    onTap: () => Modular.to.navigate('/home/'),
-                  ),
+                const Divider(height: 1),
 
-                  _drawerItem(
-                    context,
-                    icon: Icons.place_outlined,
-                    title: 'Locais',
-                    onTap: () => Modular.to.navigate('/home/'),
-                  ),
+                auth.isLogged
+                    ? ListTile(
+                        leading: const Icon(Icons.logout, color: Colors.red),
+                        title: const Text(
+                          'Sair',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await auth.logout();
+                        },
+                      )
+                    : ListTile(
+                        leading: const Icon(Icons.login, color: Colors.green),
+                        title: const Text(
+                          'Entrar',
+                          style: TextStyle(color: Colors.green),
+                        ),
+                        onTap: () async {
+                          Navigator.pop(context);
 
-                  const Divider(),
+                          await LoginDialog.show(context);
 
-                  _drawerItem(
-                    context,
-                    icon: Icons.add_circle_outline,
-                    title: 'Novo Evento',
-                    onTap: () => Modular.to.pushNamed('/events/create'),
-                  ),
-
-                  _drawerItem(
-                    context,
-                    icon: Icons.add_location_alt_outlined,
-                    title: 'Novo Local',
-                    onTap: () => Modular.to.pushNamed('/places/create'),
-                  ),
-
-                  const Divider(),
-
-                  _drawerItem(
-                    context,
-                    icon: Icons.settings_outlined,
-                    title: 'Configurações',
-                    onTap: () {},
-                  ),
-
-                  _drawerItem(
-                    context,
-                    icon: Icons.help_outline,
-                    title: 'Ajuda',
-                    onTap: () {},
-                  ),
-                ],
-              ),
+                          await auth.refresh();
+                        },
+                      ),
+              ],
             ),
-
-            const Divider(height: 1),
-
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Sair', style: TextStyle(color: Colors.red)),
-              onTap: () {},
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AuthViewModel auth) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(color: Color(0xFF1E1E1E)),
       child: Column(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 34,
             backgroundColor: Colors.white24,
-            child: Icon(Icons.person, size: 38, color: Colors.white),
+            backgroundImage: auth.user?.photoUrl != null
+                ? NetworkImage(auth.user!.photoUrl!)
+                : null,
+            child: auth.user?.photoUrl == null
+                ? const Icon(Icons.person, size: 38, color: Colors.white)
+                : null,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Mary Soarez',
-            style: TextStyle(
+          Text(
+            auth.user?.name ?? 'Visitante',
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text('mary@email.com', style: TextStyle(color: Colors.grey.shade400)),
+          Text(
+            auth.user?.email ?? 'Faça login para continuar',
+            style: TextStyle(color: Colors.grey.shade400),
+          ),
         ],
       ),
     );

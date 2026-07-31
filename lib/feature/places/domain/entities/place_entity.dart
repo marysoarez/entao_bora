@@ -12,7 +12,8 @@ class PlaceEntity {
 
   final List<MusicGenre> musicGenres;
   final PlaceType type;
-
+  final String ownerId;
+  final String ownerName;
   final String phone;
   final String instagram;
   final String website;
@@ -33,5 +34,7 @@ class PlaceEntity {
     required this.website,
     required this.openingHours,
     required this.photos,
+    required this.ownerId,
+    required this.ownerName,
   });
 }

@@ -8,7 +8,7 @@ class LoginViewModel = LoginViewModelBase with _$LoginViewModel;
 abstract class LoginViewModelBase with Store {
   LoginViewModelBase(this._authRepository);
 
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
 
   @observable
   bool loading = false;

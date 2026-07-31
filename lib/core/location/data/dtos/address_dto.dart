@@ -7,6 +7,7 @@ class AddressDto extends AddressEntity {
     required super.location,
     super.street,
     super.number,
+    super.complement,
     super.neighborhood,
     super.city,
     super.state,
@@ -19,6 +20,7 @@ class AddressDto extends AddressEntity {
       displayName: entity.displayName,
       street: entity.street,
       number: entity.number,
+      complement: entity.complement,
       neighborhood: entity.neighborhood,
       city: entity.city,
       state: entity.state,
@@ -33,6 +35,7 @@ class AddressDto extends AddressEntity {
       displayName: map['displayName'] ?? '',
       street: map['street'],
       number: map['number'],
+      complement: map['complement'],
       neighborhood: map['neighborhood'],
       city: map['city'],
       state: map['state'],
@@ -50,6 +53,7 @@ class AddressDto extends AddressEntity {
       'displayName': displayName,
       'street': street,
       'number': number,
+      'complement': complement,
       'neighborhood': neighborhood,
       'city': city,
       'state': state,
@@ -67,8 +71,11 @@ class AddressDto extends AddressEntity {
       displayName: json['display_name'] ?? '',
       street: address['road'] ?? address['pedestrian'] ?? address['street'],
       number: address['house_number'],
+      complement: null, // O Nominatim normalmente não fornece complemento
       neighborhood:
-          address['suburb'] ?? address['neighbourhood'] ?? address['quarter'],
+          address['suburb'] ??
+          address['neighbourhood'] ??
+          address['quarter'],
       city:
           address['city'] ??
           address['town'] ??

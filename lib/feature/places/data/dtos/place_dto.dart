@@ -18,6 +18,8 @@ class PlaceDto extends PlaceEntity {
     required super.website,
     required super.openingHours,
     required super.photos,
+    required super.ownerId,
+    required super.ownerName,
   });
 
   factory PlaceDto.fromMap(Map<String, dynamic> map) {
@@ -26,16 +28,24 @@ class PlaceDto extends PlaceEntity {
       name: map['name'],
       description: map['description'],
       address: AddressDto.fromMap(map['address']),
-      musicGenres: [], // converter
+      ownerId: map['ownerId'] ?? '',
+      ownerName: map['ownerName'] ?? '',
+      musicGenres: (map['musicGenres'] as List<dynamic>? ?? [])
+          .map((e) => MusicGenre.fromSlug(e.toString()))
+          .toList(),
+
       type: PlaceType.values.byName(map['type']),
       phone: map['phone'],
       instagram: map['instagram'],
       website: map['website'],
-      openingHours: [], // converter
-      photos: List<String>.from(map['photos']),
+
+      openingHours: (map['openingHours'] as List<dynamic>? ?? [])
+          .map((e) => OpeningHours.fromMap(Map<String, dynamic>.from(e)))
+          .toList(),
+
+      photos: List<String>.from(map['photos'] ?? []),
     );
   }
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -47,6 +57,8 @@ class PlaceDto extends PlaceEntity {
       'instagram': instagram,
       'website': website,
       'photos': photos,
+      'ownerId': ownerId,
+      'ownerName': ownerName,
       'musicGenres': musicGenres.map((e) => e.name).toList(),
       'openingHours': openingHours.map((e) => e.toMap()).toList(),
     };
@@ -58,6 +70,8 @@ class PlaceDto extends PlaceEntity {
       name: entity.name,
       description: entity.description,
       address: entity.address,
+      ownerId: entity.ownerId,
+      ownerName: entity.ownerName,
       musicGenres: entity.musicGenres,
       type: entity.type,
       phone: entity.phone,
@@ -68,30 +82,34 @@ class PlaceDto extends PlaceEntity {
     );
   }
   PlaceDto copyWith({
-  String? id,
-  String? name,
-  String? description,
-  AddressDto? address,
-  List<MusicGenre>? musicGenres,
-  PlaceType? type,
-  String? phone,
-  String? instagram,
-  String? website,
-  List<OpeningHours>? openingHours,
-  List<String>? photos,
-}) {
-  return PlaceDto(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    description: description ?? this.description,
-    address: address ?? this.address,
-    musicGenres: musicGenres ?? this.musicGenres,
-    type: type ?? this.type,
-    phone: phone ?? this.phone,
-    instagram: instagram ?? this.instagram,
-    website: website ?? this.website,
-    openingHours: openingHours ?? this.openingHours,
-    photos: photos ?? this.photos,
-  );
-}
+    String? id,
+    String? name,
+    String? description,
+    AddressDto? address,
+    List<MusicGenre>? musicGenres,
+    PlaceType? type,
+    String? phone,
+    String? instagram,
+    String? website,
+    List<OpeningHours>? openingHours,
+    List<String>? photos,
+    String? ownerId,
+    String? ownerName,
+  }) {
+    return PlaceDto(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      address: address ?? this.address,
+      musicGenres: musicGenres ?? this.musicGenres,
+      type: type ?? this.type,
+      phone: phone ?? this.phone,
+      ownerId: ownerId ?? this.ownerId,
+      ownerName: ownerName ?? this.ownerName,
+      instagram: instagram ?? this.instagram,
+      website: website ?? this.website,
+      openingHours: openingHours ?? this.openingHours,
+      photos: photos ?? this.photos,
+    );
+  }
 }

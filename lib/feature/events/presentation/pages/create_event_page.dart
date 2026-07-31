@@ -1,7 +1,9 @@
 import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/adress_autocomplete_field.dart';
+import 'package:entao_bora/feature/events/presentation/widgets/event_cover_step.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
+import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -44,7 +46,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Novo Evento')),
+      appBar:AppAppBar(title: "Criar Evento"),
       body: loadingPlaces
           ? const Center(child: CircularProgressIndicator())
           : Observer(
@@ -99,8 +101,11 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           onChanged: vm.setInstagram,
                         ),
 
-                        const SizedBox(height: 24),
+const SizedBox(height: 24),
 
+EventCoverStep(vm: vm),
+
+const SizedBox(height: 32),
                         const Text(
                           'Local do evento',
                           style: TextStyle(
@@ -159,6 +164,51 @@ class _CreateEventPageState extends State<CreateEventPage> {
                             search: vm.searchAddress,
                             onSelected: vm.setAddress,
                           ),
+                          if (vm.address != null) ...[
+  const SizedBox(height: 16),
+
+  Row(
+    children: [
+      Expanded(
+        flex: 2,
+        child: TextFormField(
+          initialValue: vm.address?.number,
+          keyboardType: TextInputType.streetAddress,
+          decoration: const InputDecoration(
+            labelText: 'Número',
+            hintText: 'Ex.: 123',
+          ),
+          onChanged: (value) {
+            vm.setAddress(
+              vm.address!.copyWith(
+                number: value.trim(),
+              ),
+            );
+          },
+        ),
+      ),
+
+      const SizedBox(width: 12),
+
+      Expanded(
+        flex: 3,
+        child: TextFormField(
+          decoration: const InputDecoration(
+            labelText: 'Complemento',
+            hintText: 'Apto, bloco, referência...',
+          ),
+          onChanged: (value) {
+            vm.setAddress(
+              vm.address!.copyWith(
+                complement: value.trim(),
+              ),
+            );
+          },
+        ),
+      ),
+    ],
+  ),
+],
 
                         const SizedBox(height: 24),
                         const Text(

@@ -48,6 +48,8 @@ class EventEntity {
 
   /// Auditoria
   final String createdBy;
+  final String createdByName;
+  final String? createdByPhoto;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -75,6 +77,8 @@ class EventEntity {
     this.isBora = false,
     this.hasCheckedIn = false,
     required this.createdBy,
+    required this.createdByName,
+    this.createdByPhoto,
     required this.createdAt,
     required this.updatedAt,
     required this.status,
@@ -111,6 +115,8 @@ class EventEntity {
     bool? isBora,
     bool? hasCheckedIn,
     String? createdBy,
+    String? createdByName,
+    String? createdByPhoto,
     DateTime? createdAt,
     DateTime? updatedAt,
     EventStatus? status,
@@ -137,6 +143,8 @@ class EventEntity {
       isBora: isBora ?? this.isBora,
       hasCheckedIn: hasCheckedIn ?? this.hasCheckedIn,
       createdBy: createdBy ?? this.createdBy,
+      createdByName: createdByName ?? this.createdByName,
+      createdByPhoto: createdByPhoto ?? this.createdByPhoto,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,

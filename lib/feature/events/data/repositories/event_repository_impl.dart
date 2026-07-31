@@ -1,4 +1,3 @@
-
 import 'package:dartz/dartz.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/events/data/data_source/events_data_source.dart';
@@ -8,45 +7,40 @@ import 'package:entao_bora/feature/events/domain/errors/event_errors.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/shared/errors/handle_log_error.dart';
 
-class EventRepositoryImpl
-    extends HandleLogError
-    implements IEventRepository {
-
+class EventRepositoryImpl extends HandleLogError implements IEventRepository {
   final EventDatasource datasource;
 
-  EventRepositoryImpl({
-    required this.datasource,
-  });
+  EventRepositoryImpl({required this.datasource});
 
   @override
-  Future<Either<FailureGetEvents, List<EventEntity>>> getEvents() async {
+  Future<Either<FailureGetEventById, EventEntity?>> getEventById({
+    required String eventId,
+    String? userId,
+  }) async {
     try {
-      final events = await datasource.getEvents();
+      final dto = await datasource.getEvent(eventId);
 
-      return Right(
-        events.map((e) => e.toEntity()).toList(),
-      );
-    } catch (e) {
-      logError(
-        error: e as Exception,
-        failure: FailureGetEvents(),
-        stackTrace: StackTrace.current,
-      );
+      if (dto == null) {
+        return const Right(null);
+      }
 
-      return Left(
-        FailureGetEvents(),
-      );
-    }
-  }
+      var entity = dto.toEntity();
 
-  @override
-  Future<Either<FailureGetEventById, EventEntity?>> getEventById(
-    String id,
-  ) async {
-    try {
-      final event = await datasource.getEvent(id);
+      if (userId != null) {
+        final isBora = await datasource.isUserGoing(
+          eventId: eventId,
+          userId: userId,
+        );
 
-      return Right(event?.toEntity());
+        final hasCheckedIn = await datasource.hasCheckedIn(
+          eventId: eventId,
+          userId: userId,
+        );
+
+        entity = entity.copyWith(isBora: isBora, hasCheckedIn: hasCheckedIn);
+      }
+
+      return Right(entity);
     } catch (e) {
       logError(
         error: e as Exception,
@@ -54,9 +48,48 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureGetEventById(),
+      return Left(FailureGetEventById());
+    }
+  }
+
+  @override
+  Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
+    String? userId,
+  }) async {
+    try {
+      final events = await datasource.getEvents();
+
+      final entities = <EventEntity>[];
+
+      for (final dto in events) {
+        var entity = dto.toEntity();
+
+        if (userId != null) {
+          final isBora = await datasource.isUserGoing(
+            eventId: entity.id,
+            userId: userId,
+          );
+
+          final hasCheckedIn = await datasource.hasCheckedIn(
+            eventId: entity.id,
+            userId: userId,
+          );
+
+          entity = entity.copyWith(isBora: isBora, hasCheckedIn: hasCheckedIn);
+        }
+
+        entities.add(entity);
+      }
+
+      return Right(entities);
+    } catch (e) {
+      logError(
+        error: e as Exception,
+        failure: FailureGetEvents(),
+        stackTrace: StackTrace.current,
       );
+
+      return Left(FailureGetEvents());
     }
   }
 
@@ -65,9 +98,7 @@ class EventRepositoryImpl
     EventEntity event,
   ) async {
     try {
-      await datasource.createEvent(
-        EventDto.fromEntity(event),
-      );
+      await datasource.createEvent(EventDto.fromEntity(event));
 
       return const Right(true);
     } catch (e) {
@@ -77,9 +108,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureCreateEvent(),
-      );
+      return Left(FailureCreateEvent());
     }
   }
 
@@ -88,9 +117,7 @@ class EventRepositoryImpl
     EventEntity event,
   ) async {
     try {
-      await datasource.updateEvent(
-        EventDto.fromEntity(event),
-      );
+      await datasource.updateEvent(EventDto.fromEntity(event));
 
       return const Right(true);
     } catch (e) {
@@ -100,16 +127,12 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureUpdateEvent(),
-      );
+      return Left(FailureUpdateEvent());
     }
   }
 
   @override
-  Future<Either<FailureDeleteEvent, bool>> deleteEvent(
-    String id,
-  ) async {
+  Future<Either<FailureDeleteEvent, bool>> deleteEvent(String id) async {
     try {
       await datasource.deleteEvent(id);
 
@@ -121,9 +144,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureDeleteEvent(),
-      );
+      return Left(FailureDeleteEvent());
     }
   }
 
@@ -142,9 +163,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureIncrementEventViews(),
-      );
+      return Left(FailureIncrementEventViews());
     }
   }
 
@@ -163,24 +182,17 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureIncrementEventShares(),
-      );
+      return Left(FailureIncrementEventShares());
     }
   }
 
   @override
   Future<Either<FailureGetUpcomingEventsByPlace, List<EventEntity>>>
-      getUpcomingEventsByPlace(
-    String placeId,
-  ) async {
+  getUpcomingEventsByPlace(String placeId) async {
     try {
-      final events =
-          await datasource.getUpcomingEventsByPlace(placeId);
+      final events = await datasource.getUpcomingEventsByPlace(placeId);
 
-      return Right(
-        events.map((e) => e.toEntity()).toList(),
-      );
+      return Right(events.map((e) => e.toEntity()).toList());
     } catch (e) {
       logError(
         error: e as Exception,
@@ -188,9 +200,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureGetUpcomingEventsByPlace(),
-      );
+      return Left(FailureGetUpcomingEventsByPlace());
     }
   }
 
@@ -201,10 +211,7 @@ class EventRepositoryImpl
   }) async {
     try {
       return Right(
-        await datasource.isUserGoing(
-          eventId: eventId,
-          userId: userId,
-        ),
+        await datasource.isUserGoing(eventId: eventId, userId: userId),
       );
     } catch (e) {
       logError(
@@ -213,9 +220,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureIsUserGoing(),
-      );
+      return Left(FailureIsUserGoing());
     }
   }
 
@@ -226,11 +231,7 @@ class EventRepositoryImpl
     required bool isBora,
   }) async {
     try {
-      await datasource.toggleBora(
-        eventId: eventId,
-        user: user,
-        isBora: isBora,
-      );
+      await datasource.toggleBora(eventId: eventId, user: user, isBora: isBora);
 
       return const Right(true);
     } catch (e) {
@@ -240,9 +241,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureToggleBora(),
-      );
+      return Left(FailureToggleBora());
     }
   }
 
@@ -269,9 +268,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureCheckIn(),
-      );
+      return Left(FailureCheckIn());
     }
   }
 
@@ -282,10 +279,7 @@ class EventRepositoryImpl
   }) async {
     try {
       return Right(
-        await datasource.hasCheckedIn(
-          eventId: eventId,
-          userId: userId,
-        ),
+        await datasource.hasCheckedIn(eventId: eventId, userId: userId),
       );
     } catch (e) {
       logError(
@@ -294,9 +288,7 @@ class EventRepositoryImpl
         stackTrace: StackTrace.current,
       );
 
-      return Left(
-        FailureHasCheckedIn(),
-      );
+      return Left(FailureHasCheckedIn());
     }
   }
 }

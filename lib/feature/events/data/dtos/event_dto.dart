@@ -46,9 +46,10 @@ class EventDto {
 
   /// Auditoria
   final String createdBy;
+  final String createdByName;
+  final String? createdByPhoto;
   final Timestamp createdAt;
   final Timestamp updatedAt;
-
   final String status;
 
   const EventDto({
@@ -71,21 +72,18 @@ class EventDto {
     required this.views,
     required this.shares,
     required this.createdBy,
+    required this.createdByName,
+    this.createdByPhoto,
     required this.createdAt,
     required this.updatedAt,
     required this.status,
   });
 
-  factory EventDto.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
+  factory EventDto.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     return EventDto.fromMap(doc.id, doc.data()!);
   }
 
-  factory EventDto.fromMap(
-    String id,
-    Map<String, dynamic> map,
-  ) {
+  factory EventDto.fromMap(String id, Map<String, dynamic> map) {
     return EventDto(
       id: id,
       title: map['title'] ?? '',
@@ -101,11 +99,7 @@ class EventDto {
       gallery: List<String>.from(map['gallery'] ?? []),
       musicGenres: List<String>.from(map['musicGenres'] ?? []),
       attractions: (map['attractions'] as List? ?? [])
-          .map(
-            (e) => EventAttractionDto.fromMap(
-              Map<String, dynamic>.from(e),
-            ),
-          )
+          .map((e) => EventAttractionDto.fromMap(Map<String, dynamic>.from(e)))
           .toList(),
       ticket: EventTicketDto.fromMap(
         Map<String, dynamic>.from(map['ticket'] ?? {}),
@@ -116,6 +110,8 @@ class EventDto {
       views: map['views'] ?? 0,
       shares: map['shares'] ?? 0,
       createdBy: map['createdBy'] ?? '',
+      createdByName: map['createdByName'] ?? '',
+      createdByPhoto: map['createdByPhoto'],
       createdAt: map['createdAt'] ?? Timestamp.now(),
       updatedAt: map['updatedAt'] ?? Timestamp.now(),
       status: map['status'] ?? EventStatus.draft.slug,
@@ -134,9 +130,7 @@ class EventDto {
       endDate: Timestamp.fromDate(entity.endDate),
       coverImage: entity.coverImage,
       gallery: entity.gallery,
-      musicGenres: entity.musicGenres
-          .map((e) => e.slug)
-          .toList(),
+      musicGenres: entity.musicGenres.map((e) => e.slug).toList(),
       attractions: entity.attractions
           .map(EventAttractionDto.fromEntity)
           .toList(),
@@ -147,6 +141,8 @@ class EventDto {
       views: entity.views,
       shares: entity.shares,
       createdBy: entity.createdBy,
+      createdByName: entity.createdByName,
+      createdByPhoto: entity.createdByPhoto,
       createdAt: Timestamp.fromDate(entity.createdAt),
       updatedAt: Timestamp.fromDate(entity.updatedAt),
       status: entity.status.slug,
@@ -165,9 +161,7 @@ class EventDto {
       'coverImage': coverImage,
       'gallery': gallery,
       'musicGenres': musicGenres,
-      'attractions': attractions
-          .map((e) => e.toMap())
-          .toList(),
+      'attractions': attractions.map((e) => e.toMap()).toList(),
       'ticket': ticket.toMap(),
       'instagram': instagram,
       'boraCount': boraCount,
@@ -175,16 +169,15 @@ class EventDto {
       'views': views,
       'shares': shares,
       'createdBy': createdBy,
+      'createdByName': createdByName,
+      'createdByPhoto': createdByPhoto,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'status': status,
     };
   }
 
-  EventEntity toEntity({
-    bool isBora = false,
-    bool hasCheckedIn = false,
-  }) {
+  EventEntity toEntity({bool isBora = false, bool hasCheckedIn = false}) {
     return EventEntity(
       id: id,
       title: title,
@@ -196,12 +189,8 @@ class EventDto {
       endDate: endDate.toDate(),
       coverImage: coverImage,
       gallery: gallery,
-      musicGenres: musicGenres
-          .map(MusicGenre.fromSlug)
-          .toList(),
-      attractions: attractions
-          .map((e) => e.toEntity())
-          .toList(),
+      musicGenres: musicGenres.map(MusicGenre.fromSlug).toList(),
+      attractions: attractions.map((e) => e.toEntity()).toList(),
       ticket: ticket.toEntity(),
       instagram: instagram,
       boraCount: boraCount,
@@ -211,6 +200,8 @@ class EventDto {
       isBora: isBora,
       hasCheckedIn: hasCheckedIn,
       createdBy: createdBy,
+      createdByName: createdByName,
+      createdByPhoto: createdByPhoto,
       createdAt: createdAt.toDate(),
       updatedAt: updatedAt.toDate(),
       status: EventStatus.fromSlug(status),
@@ -237,6 +228,8 @@ class EventDto {
     int? views,
     int? shares,
     String? createdBy,
+    String? createdByName,
+    String? createdByPhoto,
     Timestamp? createdAt,
     Timestamp? updatedAt,
     String? status,
@@ -261,6 +254,8 @@ class EventDto {
       views: views ?? this.views,
       shares: shares ?? this.shares,
       createdBy: createdBy ?? this.createdBy,
+      createdByName: createdByName ?? this.createdByName,
+      createdByPhoto: createdByPhoto ?? this.createdByPhoto,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,

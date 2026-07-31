@@ -71,13 +71,11 @@ class LoginDialog extends StatelessWidget {
                         ? null
                         : () async {
                             try {
-                              final success = await vm.loginWithGoogle();
+                              await vm.loginWithGoogle();
 
                               if (!context.mounted) return;
 
-                              if (success) {
-                                Navigator.of(context).pop(true);
-                              }
+                              Navigator.of(context).pop(true);
                             } catch (e) {
                               if (!context.mounted) return;
 
