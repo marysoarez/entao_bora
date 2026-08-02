@@ -81,35 +81,4 @@ class PlaceDto extends PlaceEntity {
       photos: entity.photos,
     );
   }
-  PlaceDto copyWith({
-    String? id,
-    String? name,
-    String? description,
-    AddressDto? address,
-    List<MusicGenre>? musicGenres,
-    PlaceType? type,
-    String? phone,
-    String? instagram,
-    String? website,
-    List<OpeningHours>? openingHours,
-    List<String>? photos,
-    String? ownerId,
-    String? ownerName,
-  }) {
-    return PlaceDto(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      address: address ?? this.address,
-      musicGenres: musicGenres ?? this.musicGenres,
-      type: type ?? this.type,
-      phone: phone ?? this.phone,
-      ownerId: ownerId ?? this.ownerId,
-      ownerName: ownerName ?? this.ownerName,
-      instagram: instagram ?? this.instagram,
-      website: website ?? this.website,
-      openingHours: openingHours ?? this.openingHours,
-      photos: photos ?? this.photos,
-    );
-  }
 }

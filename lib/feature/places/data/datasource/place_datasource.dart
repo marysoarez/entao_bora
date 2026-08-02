@@ -3,7 +3,7 @@ import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 
 abstract class IPlaceDatasource {
   Future<List<PlaceDto>> getPlaces();
-
+Future<void> updatePlace(PlaceDto place);
 
   Future<void> createPlace(
     PlaceDto place,

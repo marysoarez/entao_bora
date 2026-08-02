@@ -10,7 +10,6 @@ import 'package:entao_bora/feature/auth/data/datasource/auth_datasource_impl.dar
 import 'package:entao_bora/feature/auth/data/repositories/auth_repositor_impl.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
-import 'package:entao_bora/feature/auth/presentation/login_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/stores/session_store.dart';
 import 'package:entao_bora/feature/events/data/data_source/events_data_source.dart';
 import 'package:entao_bora/feature/events/data/data_source/events_datasource_impl.dart';
@@ -79,7 +78,6 @@ class AppModule extends Module {
     //==========================================================
 
     i.addSingleton<EventDatasource>(EventDatasourceImpl.new);
-    i.add(LoginViewModel.new);
     i.addSingleton<IEventRepository>(
       EventRepositoryImpl.new,
     ); //==========================================================

@@ -1,6 +1,8 @@
+import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_mini_card.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -17,16 +19,20 @@ class PlaceDetailsPage extends StatefulWidget {
 }
 
 class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
+  late PlaceEntity place;
+  final placeRepository = Modular.get<IPlaceRepository>();
   final vm = Modular.get<PlaceEventsViewModel>();
-
+  final authRepository = Modular.get<IAuthRepository>();
   @override
   void initState() {
     super.initState();
-    vm.load(widget.place.id);
+    place = widget.place;
+    vm.load(place.id);
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = authRepository.currentUser;
     return Scaffold(
       backgroundColor: Colors.black,
 
@@ -41,10 +47,12 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    if (widget.place.photos.isNotEmpty)
+                    if (place.photos.isNotEmpty)
                       Image.memory(
-                        ImageHelper.base64ToBytes(widget.place.photos.first),
+                        ImageHelper.base64ToBytes(place.photos.first),
                         fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
                       )
                     else
                       Container(
@@ -103,7 +111,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.place.name,
+                            place.name,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 28,
@@ -124,20 +132,19 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                               Expanded(
                                 child: Text(
                                   [
-                                    if (widget.place.address.street != null)
-                                      widget.place.address.street!,
+                                    if (place.address.street != null)
+                                      place.address.street!,
                                     if (widget
                                             .place
                                             .address
                                             .number
                                             ?.isNotEmpty ??
                                         false)
-                                      widget.place.address.number!,
-                                    if (widget.place.address.neighborhood !=
-                                        null)
-                                      widget.place.address.neighborhood!,
-                                    if (widget.place.address.city != null)
-                                      widget.place.address.city!,
+                                      place.address.number!,
+                                    if (place.address.neighborhood != null)
+                                      place.address.neighborhood!,
+                                    if (place.address.city != null)
+                                      place.address.city!,
                                   ].join(', '),
                                   style: const TextStyle(color: Colors.white70),
                                 ),
@@ -169,7 +176,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                 const SizedBox(height: 12),
 
                 Text(
-                  widget.place.description,
+                  place.description,
                   style: const TextStyle(color: Colors.white70, height: 1.5),
                 ),
 
@@ -184,25 +191,22 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
               spacing: 12,
               runSpacing: 12,
               children: [
-                if (widget.place.phone.isNotEmpty)
+                if (place.phone.isNotEmpty)
                   _InfoChip(
                     icon: Icons.call_outlined,
                     label: "Telefone",
                     onTap: () async {
-                      await launchUrl(Uri.parse("tel:${widget.place.phone}"));
+                      await launchUrl(Uri.parse("tel:${place.phone}"));
                     },
                   ),
 
-                if (widget.place.instagram.isNotEmpty)
+                if (place.instagram.isNotEmpty)
                   _InfoChip(
                     icon: Icons.camera_alt_outlined,
                     label: "Instagram",
                     color: Colors.pinkAccent,
                     onTap: () async {
-                      final username = widget.place.instagram.replaceAll(
-                        "@",
-                        "",
-                      );
+                      final username = place.instagram.replaceAll("@", "");
 
                       await launchUrl(
                         Uri.parse("https://instagram.com/$username"),
@@ -211,13 +215,13 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                     },
                   ),
 
-                if (widget.place.website.isNotEmpty)
+                if (place.website.isNotEmpty)
                   _InfoChip(
                     icon: Icons.language,
                     label: "Site",
                     onTap: () async {
                       await launchUrl(
-                        Uri.parse(widget.place.website),
+                        Uri.parse(place.website),
                         mode: LaunchMode.externalApplication,
                       );
                     },
@@ -231,7 +235,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: widget.place.musicGenres
+              children: place.musicGenres
                   .map(
                     (genre) => Container(
                       padding: const EdgeInsets.symmetric(
@@ -314,7 +318,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                     onTap: () {
                       Modular.to.pushNamed('/events/${event.id}');
                     },
-                    child: EventMiniCard(event: event, place: widget.place),
+                    child: EventMiniCard(event: event, place: place),
                   );
                 },
               );
@@ -328,7 +332,37 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
-              Text(widget.place.ownerName),
+              Text(place.ownerName),
+              if (currentUser?.id == place.ownerId)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.edit),
+                    label: const Text("Editar estabelecimento"),
+                    onPressed: () async {
+                      final updated = await Modular.to.pushNamed(
+                        '/places/create',
+                        arguments: place,
+                      );
+
+                      if (updated == true) {
+                        final result = await placeRepository.getPlaceById(
+                          place.id,
+                        );
+
+                        result.fold((_) {}, (newPlace) {
+                          if (newPlace == null) return;
+
+                          setState(() {
+                            place = newPlace;
+                          });
+
+                          vm.load(place.id);
+                        });
+                      }
+                    },
+                  ),
+                ),
             ],
           ),
         ],

@@ -1,10 +1,10 @@
-import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
-import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
+import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
-class AppAppBar extends StatefulWidget implements PreferredSizeWidget {
+class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
   final Widget? leading;
@@ -21,73 +21,28 @@ class AppAppBar extends StatefulWidget implements PreferredSizeWidget {
   });
 
   @override
-  State<AppAppBar> createState() => _AppAppBarState();
-
-  @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
-
-class _AppAppBarState extends State<AppAppBar> {
-  final IAuthRepository _authRepository = Modular.get<IAuthRepository>();
-
-  bool _logged = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUser();
-  }
-
-  Future<void> _loadUser() async {
-    final user = await _authRepository.getCurrentUser();
-
-    if (!mounted) return;
-
-    setState(() {
-      _logged = user != null;
-    });
-  }
-
-  Future<void> _handleAuth(BuildContext context) async {
-    if (_logged) {
-      await _authRepository.signOut();
-
-      if (!mounted) return;
-
-      setState(() {
-        _logged = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Logout realizado com sucesso.'),
-        ),
-      );
-    } else {
-      await LoginDialog.show(context);
-      await _loadUser();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final auth = Modular.get<AuthViewModel>();
     final canPop = Modular.to.canPop();
 
     return AppBar(
       elevation: 0,
       backgroundColor: Colors.black,
       surfaceTintColor: Colors.transparent,
-      centerTitle: widget.centerTitle,
+      centerTitle: centerTitle,
       automaticallyImplyLeading: false,
       systemOverlayStyle: SystemUiOverlayStyle.light,
 
-      leading: widget.leading ??
+      leading: leading ??
           (canPop
               ? IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                   onPressed: () => Modular.to.pop(),
                 )
-              : widget.showDrawer
+              : showDrawer
                   ? Builder(
                       builder: (context) => IconButton(
                         icon: const Icon(Icons.menu, color: Colors.white),
@@ -112,7 +67,7 @@ class _AppAppBarState extends State<AppAppBar> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              widget.title,
+              title,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: Colors.white,
@@ -126,14 +81,33 @@ class _AppAppBarState extends State<AppAppBar> {
       ),
 
       actions: [
-        ...?widget.actions,
-        IconButton(
-          tooltip: _logged ? 'Sair' : 'Entrar',
-          icon: Icon(
-            _logged ? Icons.logout : Icons.login,
-            color: _logged ? Colors.red : Colors.green,
-          ),
-          onPressed: () => _handleAuth(context),
+        ...?actions,
+
+        Observer(
+          builder: (_) {
+            return IconButton(
+              tooltip: auth.isLogged ? 'Sair' : 'Entrar',
+              icon: Icon(
+                auth.isLogged ? Icons.logout : Icons.login,
+                color: auth.isLogged ? Colors.red : Colors.green,
+              ),
+              onPressed: () async {
+                if (auth.isLogged) {
+                  await auth.logout();
+
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Logout realizado com sucesso.'),
+                    ),
+                  );
+                } else {
+                  await auth.ensureLogged(context);
+                }
+              },
+            );
+          },
         ),
       ],
     );

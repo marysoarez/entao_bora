@@ -1,6 +1,4 @@
-import 'package:dartz/dartz.dart';
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
-import 'package:entao_bora/core/location/domain/errors/location_errors.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
@@ -29,12 +27,15 @@ abstract class CreatePlaceViewModelBase with Store {
   final ILocationRepository _locationRepository;
   final IPlaceRepository _placeRepository;
   final IAuthRepository _authRepository;
-  //==========================================================
-  // Estado
-  //==========================================================
 
   @observable
   bool loading = false;
+
+  @observable
+  PlaceEntity? editingPlace;
+
+  @computed
+  bool get isEditing => editingPlace != null;
 
   @observable
   String? error;
@@ -54,10 +55,6 @@ abstract class CreatePlaceViewModelBase with Store {
   @observable
   ObservableList<XFile> photos = ObservableList();
 
-  //==========================================================
-  // Campos
-  //==========================================================
-
   @observable
   String name = '';
 
@@ -72,10 +69,6 @@ abstract class CreatePlaceViewModelBase with Store {
 
   @observable
   String website = '';
-
-  //==========================================================
-  // Actions
-  //==========================================================
 
   @action
   void setName(String value) => name = value;
@@ -148,8 +141,6 @@ abstract class CreatePlaceViewModelBase with Store {
 
   @action
   Future<bool> save() async {
-    print('SAVE 1');
-
     loading = true;
     final user = await _authRepository.getCurrentUser();
 
@@ -159,8 +150,6 @@ abstract class CreatePlaceViewModelBase with Store {
       return false;
     }
     try {
-      print('SAVE 2');
-
       final photosBase64 = <String>[];
       debugPrint('address == null: ${address == null}');
       debugPrint('photos: ${photos.length}');
@@ -185,28 +174,46 @@ abstract class CreatePlaceViewModelBase with Store {
         photos: photosBase64,
       );
 
-      print('SAVE 3');
-
-      await _placeRepository.createPlace(place);
-
-      print('SAVE 4');
-
+if (isEditing) {
+  await _placeRepository.updatePlace(
+    place.copyWith(id: editingPlace!.id),
+  );
+} else {
+  await _placeRepository.createPlace(place);
+}
       return true;
     } catch (e, s) {
-      print(e);
-      print(s);
-
       error = e.toString();
+      error = s.toString();
       return false;
     } finally {
-      print('SAVE 5');
-
       loading = false;
     }
   }
-  //==========================================================
-  // Validators
-  //==========================================================
+
+  @action
+  Future<void> load(PlaceEntity place) async {
+    editingPlace = place;
+
+    name = place.name;
+    description = place.description;
+    phone = place.phone;
+    instagram = place.instagram;
+    website = place.website;
+
+    type = place.type;
+    address = place.address;
+
+    musicGenres
+      ..clear()
+      ..addAll(place.musicGenres);
+
+    openingHours
+      ..clear()
+      ..addAll(place.openingHours);
+
+    photos.clear();
+  }
 
   String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {

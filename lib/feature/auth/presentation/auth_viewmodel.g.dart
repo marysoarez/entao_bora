@@ -28,12 +28,7 @@ mixin _$AuthViewModel on _AuthViewModelBase, Store {
     return super.user;
   }
 
-  @override
-  set user(UserSummaryEntity? value) {
-    _$userAtom.reportWrite(value, super.user, () {
-      super.user = value;
-    });
-  }
+ 
 
   late final _$loadingAtom = Atom(
     name: '_AuthViewModelBase.loading',

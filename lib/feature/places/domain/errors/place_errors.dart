@@ -7,6 +7,13 @@ class FailureGetPlaces extends BaseError {
     super.message = 'Não foi possível carregar os locais.',
   });
 }
+class FailureUpdatePlace extends BaseError {
+  FailureUpdatePlace({
+    super.stackTrace,
+    super.exception,
+    super.message = 'Não foi possível carregar os locais.',
+  });
+}
 
 class FailureCreatePlace extends BaseError {
   FailureCreatePlace({

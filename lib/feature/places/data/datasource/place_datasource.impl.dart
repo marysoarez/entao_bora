@@ -18,6 +18,11 @@ class PlaceDatasourceImpl implements IPlaceDatasource {
   }
 
   @override
+  Future<void> updatePlace(PlaceDto place) async {
+    await firestore.collection('places').doc(place.id).update(place.toMap());
+  }
+
+  @override
   Future<void> createPlace(PlaceDto place) async {
     final doc = collection.doc();
 
@@ -36,9 +41,6 @@ class PlaceDatasourceImpl implements IPlaceDatasource {
   }
 
   PlaceDto _mapDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
-    return PlaceDto.fromMap({
-      'id': doc.id,
-      ...?doc.data(),
-    });
+    return PlaceDto.fromMap({'id': doc.id, ...?doc.data()});
   }
 }

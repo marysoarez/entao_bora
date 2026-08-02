@@ -27,7 +27,34 @@ class PlaceRepositoryImpl extends HandleLogError implements IPlaceRepository {
       return Left(FailureGetPlaces(exception: e, stackTrace: s));
     }
   }
+@override
+Future<Either<FailureUpdatePlace, Unit>> updatePlace(
+  PlaceEntity place,
+) async {
+  try {
+    await datasource.updatePlace(
+      PlaceDto.fromEntity(place),
+    );
 
+    return const Right(unit);
+  } catch (e, s) {
+    logError(
+      error: e,
+      failure: FailureUpdatePlace(
+        exception: e,
+        stackTrace: s,
+      ),
+      stackTrace: s,
+    );
+
+    return Left(
+      FailureUpdatePlace(
+        exception: e,
+        stackTrace: s,
+      ),
+    );
+  }
+}
   @override
   Future<Either<FailureCreatePlace, bool>> createPlace(
     PlaceEntity place,

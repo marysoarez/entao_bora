@@ -10,6 +10,7 @@ import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
+import 'package:entao_bora/shared/errors/image_exception.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
@@ -180,7 +181,14 @@ abstract class CreateEventViewModelBase with Store {
     error = null;
 
     if (coverPhoto != null) {
-      coverImage = await ImageHelper.fileToBase64(coverPhoto!);
+      try {
+        if (coverPhoto != null) {
+          coverImage = await ImageHelper.fileToBase64(coverPhoto!);
+        }
+      } on ImageTooLargeException catch (e) {
+        error = e.message;
+        return false;
+      }
     }
     final validation = _validate();
 
@@ -221,7 +229,12 @@ abstract class CreateEventViewModelBase with Store {
     final gallery = <String>[];
 
     for (final photo in photos) {
-      gallery.add(await ImageHelper.fileToBase64(photo));
+      try {
+        gallery.add(await ImageHelper.fileToBase64(photo));
+      } on ImageTooLargeException catch (e) {
+        error = e.message;
+        rethrow;
+      }
     }
 
     final selectedPlace = place;

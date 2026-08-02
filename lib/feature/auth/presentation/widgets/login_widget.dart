@@ -1,3 +1,4 @@
+import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/login_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -17,8 +18,7 @@ class LoginDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = Modular.get<LoginViewModel>();
-
+final vm = Modular.get<AuthViewModel>();
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(

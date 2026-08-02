@@ -1,49 +1,61 @@
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
+import 'package:entao_bora/feature/auth/presentation/stores/session_store.dart';
 import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
+
 part 'auth_viewmodel.g.dart';
 
 class AuthViewModel = _AuthViewModelBase with _$AuthViewModel;
 
 abstract class _AuthViewModelBase with Store {
-  _AuthViewModelBase(this._repository);
+  _AuthViewModelBase(
+    this._repository,
+    this._session,
+  );
 
   final IAuthRepository _repository;
-
-  @observable
-  UserSummaryEntity? user;
+  final SessionStore _session;
 
   @observable
   bool loading = false;
 
+  UserSummaryEntity? get user => _session.currentUser;
+
   @computed
-  bool get isLogged => user != null;
+  bool get isLogged => _session.isLogged;
 
   @action
   Future<void> loadUser() async {
-    user = await _repository.getCurrentUser();
+    await _repository.getCurrentUser();
   }
 
   @action
   Future<void> logout() async {
     await _repository.signOut();
-    user = null;
   }
-Future<bool> ensureLogged(BuildContext context) async {
-  if (isLogged) return true;
 
-  final success = await LoginDialog.show(context);
+  Future<bool> ensureLogged(BuildContext context) async {
+    if (isLogged) return true;
 
-  if (!success) return false;
+    return await LoginDialog.show(context);
+  }
 
-  await loadUser();
-
-  return isLogged;
-}
   @action
   Future<void> refresh() async {
     await loadUser();
+  }
+
+  @action
+  Future<bool> loginWithGoogle() async {
+    loading = true;
+
+    try {
+      await _repository.signInWithGoogle();
+      return isLogged;
+    } finally {
+      loading = false;
+    }
   }
 }

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:entao_bora/shared/errors/image_exception.dart';
+import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +9,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PhotoStep extends StatefulWidget {
-  const PhotoStep({super.key, required this.vm,
-  });
+  const PhotoStep({super.key, required this.vm});
 
   final CreatePlaceViewModel vm;
 
@@ -17,7 +18,6 @@ class PhotoStep extends StatefulWidget {
 }
 
 class _PhotoStepState extends State<PhotoStep> {
-
   final picker = ImagePicker();
 
   Future<void> pickImage() async {
@@ -28,7 +28,17 @@ class _PhotoStepState extends State<PhotoStep> {
 
     if (image == null) return;
 
-    widget.vm.addPhoto(image);
+    try {
+      await ImageHelper.fileToBase64(image);
+
+      widget.vm.addPhoto(image);
+    } on ImageTooLargeException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
   }
 
   @override

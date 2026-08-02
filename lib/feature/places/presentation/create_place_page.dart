@@ -1,9 +1,11 @@
+import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/address_step_widget.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/genre_step_widget.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/oppening_hours_widget.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/photo_step_widget.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/place_info.dart';
+import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -31,6 +33,11 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
     super.initState();
 
     vm = Modular.get<CreatePlaceViewModel>();
+    final place = Modular.args.data;
+
+    if (place is PlaceEntity) {
+      vm.load(place);
+    }
   }
 
   Future<void> next() async {
@@ -42,11 +49,9 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
       if (success) {
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(vm.error ?? 'Erro ao salvar.'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(vm.error ?? 'Erro ao salvar.')));
       }
 
       return;
@@ -78,18 +83,17 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Novo estabelecimento'),
-      ),
-      body: Observer(
-        builder: (_) {
-          return Column(
+    return Observer(
+      builder: (context) {
+        return Scaffold(
+          appBar: AppAppBar(
+            title: vm.isEditing ? 'Editar estabelecimento' : 'Novo estabelecimento',
+          ),
+        
+          body: Column(
             children: [
-              LinearProgressIndicator(
-                value: (page + 1) / totalPages,
-              ),
-
+              LinearProgressIndicator(value: (page + 1) / totalPages),
+          
               Expanded(
                 child: PageView(
                   controller: controller,
@@ -108,7 +112,7 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
                   ],
                 ),
               ),
-
+          
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -117,9 +121,7 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: previous,
-                          child: Text(
-                            page == 0 ? 'Cancelar' : 'Voltar',
-                          ),
+                          child: Text(page == 0 ? 'Cancelar' : 'Voltar'),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -135,7 +137,9 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
                                   ),
                                 )
                               : Text(
-                                  isLastPage ? 'Salvar' : 'Próximo',
+                                  isLastPage
+                                      ? (vm.isEditing ? 'Atualizar' : 'Salvar')
+                                      : 'Próximo',
                                 ),
                         ),
                       ),
@@ -144,9 +148,9 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
                 ),
               ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      }
     );
   }
 }
