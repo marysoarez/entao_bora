@@ -1,6 +1,5 @@
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
-import 'package:entao_bora/feature/events/presentation/widgets/event_info_widget.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/evevnt_mini_header.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:flutter/material.dart';

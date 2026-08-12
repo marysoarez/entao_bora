@@ -142,7 +142,7 @@ const SizedBox(height: 32),
 
                         if (useRegisteredPlace)
                           DropdownButtonFormField<PlaceEntity>(
-                            value: vm.place,
+                            initialValue: vm.place,
                             decoration: const InputDecoration(
                               labelText: 'Estabelecimento',
                             ),

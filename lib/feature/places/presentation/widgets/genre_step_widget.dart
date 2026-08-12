@@ -1,7 +1,6 @@
 import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class GenreStep extends StatelessWidget {

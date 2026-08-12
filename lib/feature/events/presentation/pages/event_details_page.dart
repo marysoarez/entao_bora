@@ -1,7 +1,5 @@
 import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_card_widget.dart';
-import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
-import 'package:entao_bora/shared/widgets/drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';

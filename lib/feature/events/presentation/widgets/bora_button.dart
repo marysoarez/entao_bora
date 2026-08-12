@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BoraButton extends StatelessWidget {
-  const BoraButton({
+  const BoraButton({super.key, 
     required this.active,
     required this.count,
     required this.loading,

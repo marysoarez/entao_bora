@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:entao_bora/shared/errors/image_exception.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_picker/image_picker.dart';
 
 class ImageHelper {
   static const maxFirestoreField = 1048487;

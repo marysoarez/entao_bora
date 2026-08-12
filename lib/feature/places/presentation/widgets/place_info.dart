@@ -45,7 +45,7 @@ class PlaceInfoStep extends StatelessWidget {
             const SizedBox(height: 20),
 
             DropdownButtonFormField<PlaceType>(
-              value: vm.type,
+              initialValue: vm.type,
               decoration: const InputDecoration(
                 labelText: "Tipo",
                 prefixIcon: Icon(Icons.category),

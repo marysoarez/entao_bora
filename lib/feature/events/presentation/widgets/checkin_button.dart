@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 class CheckinButton extends StatelessWidget {
-  const CheckinButton({
+  const CheckinButton({super.key, 
     required this.checked,
     required this.count,
     required this.loading,

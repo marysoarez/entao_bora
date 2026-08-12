@@ -1,5 +1,4 @@
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
-import 'package:entao_bora/feature/home/presentation/widgets/pulse_marker.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/shared/config/map_config.dart';
 import 'package:flutter/material.dart';

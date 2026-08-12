@@ -8,7 +8,6 @@ import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
 import 'package:entao_bora/shared/enum/week_day_enum.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
-import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
 
@@ -141,23 +140,24 @@ abstract class CreatePlaceViewModelBase with Store {
 
   @action
   Future<bool> save() async {
-    loading = true;
-    final user = await _authRepository.getCurrentUser();
+    if (loading) return false;
 
-    if (user == null) {
-      error = 'Usuário não autenticado.';
-      loading = false;
-      return false;
-    }
+    loading = true;
+
     try {
+      final user = await _authRepository.getCurrentUser();
+
+      if (user == null) {
+        error = 'Usuário não autenticado.';
+        return false;
+      }
+
       final photosBase64 = <String>[];
-      debugPrint('address == null: ${address == null}');
-      debugPrint('photos: ${photos.length}');
 
       for (final photo in photos) {
         photosBase64.add(await ImageHelper.fileToBase64(photo));
       }
-      debugPrint('CHEGOU ANTES DO PLACE');
+
       final place = PlaceEntity(
         id: '',
         name: name.trim(),
@@ -174,17 +174,17 @@ abstract class CreatePlaceViewModelBase with Store {
         photos: photosBase64,
       );
 
-if (isEditing) {
-  await _placeRepository.updatePlace(
-    place.copyWith(id: editingPlace!.id),
-  );
-} else {
-  await _placeRepository.createPlace(place);
-}
+      if (isEditing) {
+        await _placeRepository.updatePlace(
+          place.copyWith(id: editingPlace!.id),
+        );
+      } else {
+        await _placeRepository.createPlace(place);
+      }
+
       return true;
-    } catch (e, s) {
+    } catch (e) {
       error = e.toString();
-      error = s.toString();
       return false;
     } finally {
       loading = false;

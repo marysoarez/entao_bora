@@ -2,7 +2,6 @@ import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.da
 import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/week_day_enum.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class OpeningHoursStep extends StatelessWidget {

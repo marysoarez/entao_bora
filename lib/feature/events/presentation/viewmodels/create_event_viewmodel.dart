@@ -176,37 +176,38 @@ abstract class CreateEventViewModelBase with Store {
   // Save
   //==========================================================
   String? coverImage;
+
   @action
   Future<bool> save() async {
-    error = null;
-
-    if (coverPhoto != null) {
-      try {
-        if (coverPhoto != null) {
-          coverImage = await ImageHelper.fileToBase64(coverPhoto!);
-        }
-      } on ImageTooLargeException catch (e) {
-        error = e.message;
-        return false;
-      }
-    }
-    final validation = _validate();
-
-    if (validation != null) {
-      error = validation;
-      return false;
-    }
-
-    final currentUser = await _authRepository.getCurrentUser();
-
-    if (currentUser == null) {
-      error = 'Faça login para criar um evento.';
-      return false;
-    }
+    if (loading) return false;
 
     loading = true;
+    error = null;
 
     try {
+      if (coverPhoto != null) {
+        try {
+          coverImage = await ImageHelper.fileToBase64(coverPhoto!);
+        } on ImageTooLargeException catch (e) {
+          error = e.message;
+          return false;
+        }
+      }
+
+      final validation = _validate();
+
+      if (validation != null) {
+        error = validation;
+        return false;
+      }
+
+      final currentUser = await _authRepository.getCurrentUser();
+
+      if (currentUser == null) {
+        error = 'Faça login para criar um evento.';
+        return false;
+      }
+
       final event = await _buildEvent(currentUser);
 
       final result = await _eventRepository.createEvent(event);

@@ -4,14 +4,11 @@ import 'package:entao_bora/feature/events/presentation/widgets/event_actions_wid
 import 'package:entao_bora/feature/events/presentation/widgets/event_genres_widget.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_header_widget.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_info_widget.dart';
-import 'package:entao_bora/feature/events/presentation/widgets/event_stats_widget.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
