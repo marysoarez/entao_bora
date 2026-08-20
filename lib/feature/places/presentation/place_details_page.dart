@@ -73,7 +73,6 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                           borderRadius: BorderRadius.circular(30),
                           onTap: () {
                             Modular.to.navigate('/');
-                            debugPrint("popopopp");
                           },
                           child: const Padding(
                             padding: EdgeInsets.all(10),
@@ -332,8 +331,8 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                   context,
                 ).textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
-              Text(place.ownerName),
-              if (currentUser?.id == place.ownerId)
+              Text(place.ownerId.name),
+              if (currentUser?.id == place.ownerId.id)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: FilledButton.icon(

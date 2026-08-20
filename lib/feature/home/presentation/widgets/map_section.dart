@@ -1,17 +1,14 @@
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
+import 'package:entao_bora/feature/home/presentation/widgets/map_heat.dart';
+import 'package:entao_bora/feature/home/presentation/widgets/map_markers.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/shared/config/map_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 
 class MapSection extends StatefulWidget {
-  const MapSection({
-    super.key,
-    required this.places,
-    required this.events,
-  });
+  const MapSection({super.key, required this.places, required this.events});
 
   final List<PlaceEntity> places;
   final List<EventEntity> events;
@@ -23,30 +20,57 @@ class MapSection extends StatefulWidget {
 class _MapSectionState extends State<MapSection> {
   final MapController _mapController = MapController();
 
-  static const LatLng _initialCenter = LatLng(
-    -22.9068,
-    -43.1729,
-  ); // Rio de Janeiro
+  static const LatLng _initialCenter = LatLng(-22.9068, -43.1729);
 
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fitAllMarkers();
-    });
-  }
+  bool _mapReady = false;
+  bool _initialFitDone = false;
 
   @override
   void didUpdateWidget(covariant MapSection oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final placesChanged = oldWidget.places != widget.places;
+    final eventsChanged = oldWidget.events != widget.events;
+
+    if (!placesChanged && !eventsChanged) {
+      return;
+    }
+
+    _initialFitDone = false;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_mapReady) return;
+
       _fitAllMarkers();
+      _initialFitDone = true;
     });
   }
 
+  void _onMapReady() {
+    _mapReady = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      _fitAllMarkers();
+      _initialFitDone = true;
+    });
+  }
+
+  void _onMapEvent(MapEvent event) {
+    if (event is MapEventNonRotatedSizeChange && !_initialFitDone) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_mapReady) return;
+
+        _fitAllMarkers();
+        _initialFitDone = true;
+      });
+    }
+  }
+
   void _fitAllMarkers() {
+    if (!_mapReady) return;
+
     final points = <LatLng>[];
 
     for (final place in widget.places) {
@@ -72,10 +96,7 @@ class _MapSectionState extends State<MapSection> {
     final bounds = LatLngBounds.fromPoints(points);
 
     _mapController.fitCamera(
-      CameraFit.bounds(
-        bounds: bounds,
-        padding: const EdgeInsets.all(60),
-      ),
+      CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(60)),
     );
   }
 
@@ -86,6 +107,8 @@ class _MapSectionState extends State<MapSection> {
       options: MapOptions(
         initialCenter: _initialCenter,
         initialZoom: 11,
+        onMapReady: _onMapReady,
+        onMapEvent: _onMapEvent,
         interactionOptions: const InteractionOptions(
           flags: InteractiveFlag.all,
         ),
@@ -97,123 +120,22 @@ class _MapSectionState extends State<MapSection> {
           userAgentPackageName: 'com.entaobora',
         ),
 
-        CircleLayer(
-          circles: _buildHeatCircles(),
-        ),
+        CircleLayer(circles: MapHeatLayer.build(widget.events)),
 
         MarkerLayer(
-          markers: _buildMapMarkers(context),
+          markers: MapMarkers.build(
+            places: widget.places,
+            events: widget.events,
+            owners: const {},
+          ),
         ),
       ],
     );
   }
 
-  List<CircleMarker> _buildHeatCircles() {
-    final circles = <CircleMarker>[];
-
-    for (final event in widget.events) {
-      final pulse = event.boraCount + (event.checkinCount * 3);
-
-      if (pulse <= 0) continue;
-
-      circles.add(
-        CircleMarker(
-          point: LatLng(
-            event.address.location.latitude,
-            event.address.location.longitude,
-          ),
-          radius: _heatRadius(pulse),
-          useRadiusInMeter: true,
-          color: _heatColor(pulse),
-          borderStrokeWidth: 0,
-        ),
-      );
-    }
-
-    return circles;
-  }
-
-  Color _heatColor(int pulse) {
-    if (pulse > 100) return Colors.red.withOpacity(.45);
-    if (pulse > 50) return Colors.deepOrange.withOpacity(.38);
-    if (pulse > 10) return Colors.orange.withOpacity(.32);
-    if (pulse > 3) return Colors.green.withOpacity(.28);
-
-    return Colors.greenAccent.withOpacity(.22);
-  }
-
-  double _heatRadius(int pulse) {
-    if (pulse > 100) return 350;
-    if (pulse > 50) return 250;
-    if (pulse > 10) return 180;
-    if (pulse > 3) return 120;
-
-    return 80;
-  }
-
-  List<Marker> _buildMapMarkers(BuildContext context) {
-    final markers = <Marker>[];
-
-    final pulses = <String, int>{};
-
-    for (final event in widget.events) {
-      final placeId = event.placeId;
-
-      if (placeId == null) continue;
-
-      pulses.update(
-        placeId,
-        (value) => value + event.boraCount + (event.checkinCount * 3),
-        ifAbsent: () => event.boraCount + (event.checkinCount * 3),
-      );
-    }
-
-    for (final place in widget.places) {
-      markers.add(
-        Marker(
-          width: 40,
-          height: 40,
-          point: LatLng(
-            place.address.location.latitude,
-            place.address.location.longitude,
-          ),
-          child: GestureDetector(
-            onTap: () {
-              Modular.to.pushNamed('/places/events', arguments: place);
-            },
-            child: const Icon(
-              Icons.store,
-              color: Colors.red,
-              size: 18,
-            ),
-          ),
-        ),
-      );
-    }
-
-    for (final event in widget.events.where((e) => e.placeId == null)) {
-      markers.add(
-        Marker(
-          width: 40,
-          height: 40,
-          point: LatLng(
-            event.address.location.latitude,
-            event.address.location.longitude,
-          ),
-          child: GestureDetector(
-            onTap: () {
-              Modular.to.pushNamed('/events/${event.id}');
-            },
-            child: const Icon(
-              Icons.celebration,
-              color: Colors.red,
-              size: 18,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return markers;
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
   }
 }

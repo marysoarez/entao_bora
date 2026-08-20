@@ -165,8 +165,10 @@ abstract class CreatePlaceViewModelBase with Store {
         address: address!,
         musicGenres: musicGenres.toList(),
         type: type,
-        ownerId: user.id,
-        ownerName: user.name,
+
+        // Proprietário
+        ownerId: user,
+
         phone: phone.trim(),
         instagram: instagram.trim(),
         website: website.trim(),

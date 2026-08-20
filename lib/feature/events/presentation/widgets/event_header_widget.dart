@@ -86,7 +86,6 @@ class EventHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(30),
                 onTap: () {
                   Modular.to.navigate('/');
-                  debugPrint("popopopp");
                 },
                 child: const Padding(
                   padding: EdgeInsets.all(10),

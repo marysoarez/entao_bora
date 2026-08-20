@@ -6,6 +6,7 @@ abstract class UserDatasource {
   Future<void> createUser(UserSummaryDto user);
 
   Future<void> updateUser(UserSummaryDto user);
-Future<void> saveUser(UserSummaryDto user);
+  Future<void> saveUser(UserSummaryDto user);
   Future<bool> exists(String id);
+  Future<List<UserSummaryDto>> getUsersByIds(List<String> ids);
 }

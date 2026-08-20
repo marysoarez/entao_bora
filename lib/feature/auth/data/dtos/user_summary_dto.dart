@@ -50,7 +50,8 @@ class UserSummaryDto extends UserSummaryEntity {
       photoUrl: user.photoURL,
       isAnonymous: user.isAnonymous,
 
-      // Valores padrão até sincronizar com o Firestore.
+      // Apenas para novos usuários.
+      // Usuários existentes preservam os dados do Firestore.
       role: UserRole.user,
       partnerId: null,
       active: true,

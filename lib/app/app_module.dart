@@ -71,7 +71,7 @@ class AppModule extends Module {
     i.addSingleton<IPlaceDatasource>(() => PlaceDatasourceImpl(i()));
 
     i.addSingleton<IPlaceRepository>(
-      () => PlaceRepositoryImpl(datasource: i()),
+      () => PlaceRepositoryImpl(datasource: i(), userDatasource: i()),
     );
     //==========================================================
     // EVENTS

@@ -304,7 +304,9 @@ abstract class CreateEventViewModelBase with Store {
     if (description.trim().isEmpty) {
       return 'Informe uma descrição.';
     }
-
+    if (coverPhoto == null) {
+      return 'Adicione uma imagem de capa para o evento.';
+    }
     if (place == null && address == null) {
       return 'Selecione um local.';
     }

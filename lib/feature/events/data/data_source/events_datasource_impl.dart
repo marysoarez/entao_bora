@@ -58,7 +58,7 @@ Future<List<EventDto>> getEvents() async {
 
   for (final doc in snapshot.docs) {
     print(doc.id);
-    print(doc.data());
+    // print(doc.data());
   }
 
   return snapshot.docs.map(EventDto.fromFirestore).toList();
@@ -224,7 +224,7 @@ Future<List<EventDto>> getEvents() async {
 
     for (final doc in snapshot.docs) {
       print(doc.id);
-      print(doc.data());
+      // print(doc.data());
       print('----------------');
     }
 

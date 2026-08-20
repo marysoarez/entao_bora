@@ -46,7 +46,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:AppAppBar(title: "Criar Evento"),
+      appBar: AppAppBar(title: "Criar Evento"),
       body: loadingPlaces
           ? const Center(child: CircularProgressIndicator())
           : Observer(
@@ -101,11 +101,11 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           onChanged: vm.setInstagram,
                         ),
 
-const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-EventCoverStep(vm: vm),
+                        EventCoverStep(vm: vm),
 
-const SizedBox(height: 32),
+                        const SizedBox(height: 32),
                         const Text(
                           'Local do evento',
                           style: TextStyle(
@@ -164,51 +164,51 @@ const SizedBox(height: 32),
                             search: vm.searchAddress,
                             onSelected: vm.setAddress,
                           ),
-                          if (vm.address != null) ...[
-  const SizedBox(height: 16),
+                        if (vm.address != null) ...[
+                          const SizedBox(height: 16),
 
-  Row(
-    children: [
-      Expanded(
-        flex: 2,
-        child: TextFormField(
-          initialValue: vm.address?.number,
-          keyboardType: TextInputType.streetAddress,
-          decoration: const InputDecoration(
-            labelText: 'Número',
-            hintText: 'Ex.: 123',
-          ),
-          onChanged: (value) {
-            vm.setAddress(
-              vm.address!.copyWith(
-                number: value.trim(),
-              ),
-            );
-          },
-        ),
-      ),
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  initialValue: vm.address?.number,
+                                  keyboardType: TextInputType.streetAddress,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Número',
+                                    hintText: 'Ex.: 123',
+                                  ),
+                                  onChanged: (value) {
+                                    vm.setAddress(
+                                      vm.address!.copyWith(
+                                        number: value.trim(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
 
-      const SizedBox(width: 12),
+                              const SizedBox(width: 12),
 
-      Expanded(
-        flex: 3,
-        child: TextFormField(
-          decoration: const InputDecoration(
-            labelText: 'Complemento',
-            hintText: 'Apto, bloco, referência...',
-          ),
-          onChanged: (value) {
-            vm.setAddress(
-              vm.address!.copyWith(
-                complement: value.trim(),
-              ),
-            );
-          },
-        ),
-      ),
-    ],
-  ),
-],
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  decoration: const InputDecoration(
+                                    labelText: 'Complemento',
+                                    hintText: 'Apto, bloco, referência...',
+                                  ),
+                                  onChanged: (value) {
+                                    vm.setAddress(
+                                      vm.address!.copyWith(
+                                        complement: value.trim(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
 
                         const SizedBox(height: 24),
                         const Text(
@@ -404,7 +404,28 @@ const SizedBox(height: 32),
                                           return;
                                         }
 
-                                        final success = await vm.save();
+                                        bool success;
+
+                                        try {
+                                          success = await vm.save();
+                                        } catch (e, stack) {
+                                          debugPrint(
+                                            'ERRO AO CRIAR EVENTO: $e',
+                                          );
+                                          debugPrintStack(stackTrace: stack);
+
+                                          if (mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Erro: $e'),
+                                              ),
+                                            );
+                                          }
+
+                                          return;
+                                        }
 
                                         if (!mounted) {
                                           return;

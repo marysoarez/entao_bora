@@ -48,12 +48,19 @@ class AuthDatasourceImpl implements AuthDatasource {
 
     final dto = UserSummaryDto.fromUser(user);
 
-    final exists = await _users.exists(dto.id);
+    final existingUser = await _users.getUser(dto.id);
 
-    if (!exists) {
+    if (existingUser == null) {
       await _users.createUser(dto);
     } else {
-      await _users.updateUser(dto);
+      final updatedUser = existingUser.copyWith(
+        name: dto.name,
+        email: dto.email,
+        photoUrl: dto.photoUrl,
+        isAnonymous: dto.isAnonymous,
+      );
+
+      await _users.updateUser(UserSummaryDto.fromEntity(updatedUser));
     }
 
     final savedUser = await _users.getUser(dto.id);
@@ -83,16 +90,16 @@ class AuthDatasourceImpl implements AuthDatasource {
     await _auth.signOut();
   }
 
-@override
-Future<UserSummaryDto?> getCurrentUser() async {
-  final firebaseUser = _auth.currentUser;
+  @override
+  Future<UserSummaryDto?> getCurrentUser() async {
+    final firebaseUser = _auth.currentUser;
 
-  if (firebaseUser == null) {
-    return null;
+    if (firebaseUser == null) {
+      return null;
+    }
+
+    return await _users.getUser(firebaseUser.uid);
   }
-
-  return await _users.getUser(firebaseUser.uid);
-}
 
   @override
   Future<bool> isLogged() async {

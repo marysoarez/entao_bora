@@ -1,9 +1,10 @@
 import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
+import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
-
-import '../../domain/entities/place_entity.dart';
+import 'package:entao_bora/shared/enum/user_role.dart';
+import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 
 class PlaceDto extends PlaceEntity {
   const PlaceDto({
@@ -19,7 +20,6 @@ class PlaceDto extends PlaceEntity {
     required super.openingHours,
     required super.photos,
     required super.ownerId,
-    required super.ownerName,
   });
 
   factory PlaceDto.fromMap(Map<String, dynamic> map) {
@@ -28,24 +28,22 @@ class PlaceDto extends PlaceEntity {
       name: map['name'],
       description: map['description'],
       address: AddressDto.fromMap(map['address']),
-      ownerId: map['ownerId'] ?? '',
-      ownerName: map['ownerName'] ?? '',
+      ownerId: UserSummaryEntity(id: map['ownerId'] ?? '', name: '', email: ''),
       musicGenres: (map['musicGenres'] as List<dynamic>? ?? [])
           .map((e) => MusicGenre.fromSlug(e.toString()))
           .toList(),
-
       type: PlaceType.values.byName(map['type']),
       phone: map['phone'],
       instagram: map['instagram'],
       website: map['website'],
-
       openingHours: (map['openingHours'] as List<dynamic>? ?? [])
           .map((e) => OpeningHours.fromMap(Map<String, dynamic>.from(e)))
           .toList(),
-
       photos: List<String>.from(map['photos'] ?? []),
     );
   }
+
+  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -57,8 +55,7 @@ class PlaceDto extends PlaceEntity {
       'instagram': instagram,
       'website': website,
       'photos': photos,
-      'ownerId': ownerId,
-      'ownerName': ownerName,
+      'ownerId': ownerId.id,
       'musicGenres': musicGenres.map((e) => e.name).toList(),
       'openingHours': openingHours.map((e) => e.toMap()).toList(),
     };
@@ -71,7 +68,7 @@ class PlaceDto extends PlaceEntity {
       description: entity.description,
       address: entity.address,
       ownerId: entity.ownerId,
-      ownerName: entity.ownerName,
+
       musicGenres: entity.musicGenres,
       type: entity.type,
       phone: entity.phone,

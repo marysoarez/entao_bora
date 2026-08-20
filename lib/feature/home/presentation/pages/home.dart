@@ -54,7 +54,10 @@ class _HomePageState extends State<HomePage> {
               : Stack(
                   children: [
                     Positioned.fill(
-                      child: MapSection(places: vm.places, events: vm.events),
+                      child: MapSection(
+                        places: vm.places,
+                        events: vm.events,
+                      ),
                     ),
 
                     Positioned(
