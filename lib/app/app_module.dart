@@ -94,10 +94,10 @@ class AppModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    r.child('/', child: (_) => const SplashPage());
+  //  r.child('/', child: (_) => const SplashPage());
 
     r.child(
-      '/home',
+      '/',
       child: (_) => HomePage(
         showLogin:
             (r.args.data as Map<String, dynamic>?)?['showLogin'] ?? false,

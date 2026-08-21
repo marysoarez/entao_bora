@@ -46,7 +46,7 @@ class _EventCardState extends State<EventCard> {
       child: Observer(
         builder: (_) {
           final event = vm.event;
-      
+
           return Card(
             elevation: 0,
             color: const Color(0xff161616),
@@ -63,9 +63,9 @@ class _EventCardState extends State<EventCard> {
                   event: event,
                   onShare: () {
                     final baseUrl = 'https://entaobora.com.br';
-      
+
                     final url = '$baseUrl/#/events/${event.id}';
-      
+
                     showShareEventDialog(
                       context: context,
                       title: event.title,
@@ -73,37 +73,37 @@ class _EventCardState extends State<EventCard> {
                     );
                   },
                 ),
-      
+
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       EventInfo(event: event),
-      
+
                       const SizedBox(height: 14),
-      
+
                       EventGenres(genres: event.musicGenres),
-      
+
                       const SizedBox(height: 14),
-      
+
                       Text(
                         event.description,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: Colors.white),
                       ),
-      
+
                       const SizedBox(height: 20),
                       Column(
                         children: [
                           const Text("Organizador:"),
-      
-                          if (event.createdByPhoto?.isNotEmpty ?? false)
+
+                          if (event.createdBy.photoUrl?.isNotEmpty ?? false)
                             CircleAvatar(
                               radius: 28,
                               backgroundImage: NetworkImage(
-                                event.createdByPhoto!,
+                                event.createdBy.photoUrl!,
                               ),
                             )
                           else
@@ -111,26 +111,25 @@ class _EventCardState extends State<EventCard> {
                               radius: 28,
                               child: Icon(Icons.person),
                             ),
-      
+
                           const SizedBox(height: 8),
-      
+
                           Text(
-                            event.createdByName.isNotEmpty
-                                ? event.createdByName
+                            event.createdBy.name.isNotEmpty
+                                ? event.createdBy.name
                                 : "Organizador:",
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
-      
-                     
+
                       EventActions(
                         vm: vm,
                         onLogin: () async {
                           final logged = await _ensureLogged(context);
-      
+
                           if (!logged) return;
-      
+
                           await vm.toggleBora();
                         },
                       ),

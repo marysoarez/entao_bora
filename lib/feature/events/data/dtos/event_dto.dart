@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
+import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_attraction_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_ticket_dto.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
@@ -45,9 +46,8 @@ class EventDto {
   final int shares;
 
   /// Auditoria
-  final String createdBy;
-  final String createdByName;
-  final String? createdByPhoto;
+  final UserSummaryEntity createdBy;
+
   final Timestamp createdAt;
   final Timestamp updatedAt;
   final String status;
@@ -72,8 +72,7 @@ class EventDto {
     required this.views,
     required this.shares,
     required this.createdBy,
-    required this.createdByName,
-    this.createdByPhoto,
+
     required this.createdAt,
     required this.updatedAt,
     required this.status,
@@ -110,8 +109,7 @@ class EventDto {
       views: map['views'] ?? 0,
       shares: map['shares'] ?? 0,
       createdBy: map['createdBy'] ?? '',
-      createdByName: map['createdByName'] ?? '',
-      createdByPhoto: map['createdByPhoto'],
+
       createdAt: map['createdAt'] ?? Timestamp.now(),
       updatedAt: map['updatedAt'] ?? Timestamp.now(),
       status: map['status'] ?? EventStatus.draft.slug,
@@ -141,8 +139,6 @@ class EventDto {
       views: entity.views,
       shares: entity.shares,
       createdBy: entity.createdBy,
-      createdByName: entity.createdByName,
-      createdByPhoto: entity.createdByPhoto,
       createdAt: Timestamp.fromDate(entity.createdAt),
       updatedAt: Timestamp.fromDate(entity.updatedAt),
       status: entity.status.slug,
@@ -169,8 +165,7 @@ class EventDto {
       'views': views,
       'shares': shares,
       'createdBy': createdBy,
-      'createdByName': createdByName,
-      'createdByPhoto': createdByPhoto,
+
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'status': status,
@@ -200,8 +195,7 @@ class EventDto {
       isBora: isBora,
       hasCheckedIn: hasCheckedIn,
       createdBy: createdBy,
-      createdByName: createdByName,
-      createdByPhoto: createdByPhoto,
+
       createdAt: createdAt.toDate(),
       updatedAt: updatedAt.toDate(),
       status: EventStatus.fromSlug(status),
@@ -227,9 +221,8 @@ class EventDto {
     int? checkinCount,
     int? views,
     int? shares,
-    String? createdBy,
-    String? createdByName,
-    String? createdByPhoto,
+    UserSummaryEntity? createdBy,
+
     Timestamp? createdAt,
     Timestamp? updatedAt,
     String? status,
@@ -254,8 +247,7 @@ class EventDto {
       views: views ?? this.views,
       shares: shares ?? this.shares,
       createdBy: createdBy ?? this.createdBy,
-      createdByName: createdByName ?? this.createdByName,
-      createdByPhoto: createdByPhoto ?? this.createdByPhoto,
+
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,

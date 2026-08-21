@@ -1,4 +1,5 @@
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
+import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_attraction_entit.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_status_enum.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_ticket_entity.dart';
@@ -47,9 +48,8 @@ class EventEntity {
   final bool hasCheckedIn;
 
   /// Auditoria
-  final String createdBy;
-  final String createdByName;
-  final String? createdByPhoto;
+  final UserSummaryEntity createdBy;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -77,8 +77,6 @@ class EventEntity {
     this.isBora = false,
     this.hasCheckedIn = false,
     required this.createdBy,
-    required this.createdByName,
-    this.createdByPhoto,
     required this.createdAt,
     required this.updatedAt,
     required this.status,
@@ -114,9 +112,8 @@ class EventEntity {
     int? shares,
     bool? isBora,
     bool? hasCheckedIn,
-    String? createdBy,
-    String? createdByName,
-    String? createdByPhoto,
+    UserSummaryEntity? createdBy,
+
     DateTime? createdAt,
     DateTime? updatedAt,
     EventStatus? status,
@@ -143,8 +140,6 @@ class EventEntity {
       isBora: isBora ?? this.isBora,
       hasCheckedIn: hasCheckedIn ?? this.hasCheckedIn,
       createdBy: createdBy ?? this.createdBy,
-      createdByName: createdByName ?? this.createdByName,
-      createdByPhoto: createdByPhoto ?? this.createdByPhoto,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,

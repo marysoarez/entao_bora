@@ -3,6 +3,7 @@ import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_v
 import 'package:entao_bora/feature/events/presentation/widgets/event_mini_card.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
+import 'package:entao_bora/feature/places/presentation/widgets/user_avatar_widget.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -325,13 +326,30 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
           ),
           Column(
             children: [
-              Text(
-                "Responsável:",
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              Row(
+                children: [
+                  UserAvatar(photoUrl: place.ownerId.photoUrl, radius: 22),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Responsável',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      ),
+                      Text(
+                        place.ownerId.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              Text(place.ownerId.name),
+
               if (currentUser?.id == place.ownerId.id)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
@@ -366,44 +384,6 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color? color;
-  final VoidCallback? onTap;
-
-  const _InfoRow({
-    required this.icon,
-    required this.text,
-    this.color,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final row = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: color ?? Colors.redAccent, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(text, style: TextStyle(color: color ?? Colors.white70)),
-          ),
-        ],
-      ),
-    );
-
-    if (onTap == null) return row;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: row,
     );
   }
 }

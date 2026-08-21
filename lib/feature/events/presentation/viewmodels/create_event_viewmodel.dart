@@ -286,9 +286,7 @@ abstract class CreateEventViewModelBase with Store {
       hasCheckedIn: false,
 
       // Auditoria
-      createdBy: currentUser.id,
-      createdByName: currentUser.name,
-      createdByPhoto: currentUser.photoUrl,
+      createdBy: currentUser,
       createdAt: now,
       updatedAt: now,
 

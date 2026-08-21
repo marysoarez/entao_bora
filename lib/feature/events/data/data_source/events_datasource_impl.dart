@@ -6,12 +6,13 @@ import 'package:entao_bora/feature/events/data/dtos/event_bora_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/event_checkin_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/event_dto.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
+import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
 
 class EventDatasourceImpl implements EventDatasource {
   final FirestoreClient firestore;
+  final UserDatasource userDatasource;
 
-  EventDatasourceImpl(this.firestore);
-
+  EventDatasourceImpl(this.firestore, this.userDatasource);
   Future<QuerySnapshot<Map<String, dynamic>>> _runQuery(
     Query<Map<String, dynamic>> query,
   ) async {
@@ -43,26 +44,26 @@ class EventDatasourceImpl implements EventDatasource {
     }
   }
 
-@override
-Future<List<EventDto>> getEvents() async {
-  final snapshot = await _runQuery(
-    firestore
-        .collection(FirestorePaths.events)
-        .where('status', isEqualTo: 'published')
-        .where('endDate', isGreaterThanOrEqualTo: Timestamp.now())
-        .orderBy('endDate'),
-  );
+  @override
+  Future<List<EventDto>> getEvents() async {
+    final snapshot = await _runQuery(
+      firestore
+          .collection(FirestorePaths.events)
+          .where('status', isEqualTo: 'published')
+          .where('endDate', isGreaterThanOrEqualTo: Timestamp.now())
+          .orderBy('endDate'),
+    );
 
-  print('====================');
-  print('EVENTOS: ${snapshot.docs.length}');
+    print('====================');
+    print('EVENTOS: ${snapshot.docs.length}');
 
-  for (final doc in snapshot.docs) {
-    print(doc.id);
-    // print(doc.data());
+    for (final doc in snapshot.docs) {
+      print(doc.id);
+      // print(doc.data());
+    }
+
+    return snapshot.docs.map(EventDto.fromFirestore).toList();
   }
-
-  return snapshot.docs.map(EventDto.fromFirestore).toList();
-}
 
   @override
   Future<EventDto?> getEvent(String id) async {
@@ -72,7 +73,22 @@ Future<List<EventDto>> getEvents() async {
       return null;
     }
 
-    return EventDto.fromFirestore(snapshot);
+    final data = snapshot.data()!;
+
+    final createdById = data['createdBy'] as String;
+
+    print('==============================');
+    print('EVENTO: ${snapshot.id}');
+    print('CREATED BY ID: $createdById');
+
+    final users = await userDatasource.getUsersByIds([createdById]);
+
+    final creator = users.first;
+
+    print('CRIADOR: ${creator.name}');
+    print('==============================');
+
+    return EventDto.fromMap(snapshot.id, {...data, 'createdBy': creator});
   }
 
   @override
@@ -195,19 +211,6 @@ Future<List<EventDto>> getEvents() async {
     });
   }
 
-  // @override
-  // Future<List<EventDto>> getUpcomingEventsByPlace(String placeId) async {
-  //   final snapshot = await _runQuery(
-  //     firestore
-  //         .collection(FirestorePaths.events)
-  //         .where('placeId', isEqualTo: placeId)
-  //         .where('status', isEqualTo: 'published')
-  //         .where('endDate', isGreaterThanOrEqualTo: Timestamp.now())
-  //         .orderBy('startDate'),
-  //   );
-
-  //   return snapshot.docs.map(EventDto.fromFirestore).toList();
-  // }
   @override
   Future<List<EventDto>> getUpcomingEventsByPlace(String placeId) async {
     final query = firestore
@@ -222,12 +225,26 @@ Future<List<EventDto>> getEvents() async {
     print('==============================');
     print('Docs encontrados: ${snapshot.docs.length}');
 
+    final events = <EventDto>[];
+
     for (final doc in snapshot.docs) {
-      print(doc.id);
-      // print(doc.data());
+      final data = doc.data();
+
+      final createdById = data['createdBy'] as String;
+
+      print('EVENTO: ${doc.id}');
+      print('CREATED BY ID: $createdById');
+
+      final users = await userDatasource.getUsersByIds([createdById]);
+
+      final creator = users.first;
+
+      events.add(EventDto.fromMap(doc.id, {...data, 'createdBy': creator}));
+
+      print('CRIADOR: ${creator.name}');
       print('----------------');
     }
 
-    return snapshot.docs.map(EventDto.fromFirestore).toList();
+    return events;
   }
 }

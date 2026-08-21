@@ -5,12 +5,14 @@ import 'package:entao_bora/feature/events/data/dtos/event_dto.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/errors/event_errors.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
+import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
 import 'package:entao_bora/shared/errors/handle_log_error.dart';
 
 class EventRepositoryImpl extends HandleLogError implements IEventRepository {
   final EventDatasource datasource;
+  final UserDatasource userDatasource;
 
-  EventRepositoryImpl({required this.datasource});
+  EventRepositoryImpl({required this.datasource, required this.userDatasource});
 
   @override
   Future<Either<FailureGetEventById, EventEntity?>> getEventById({
@@ -41,11 +43,20 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       }
 
       return Right(entity);
-    } catch (e) {
+    } catch (e, s) {
+      print('');
+      print('══════════════════════════════════════════════');
+      print('🔥 ERRO REAL - getEventById');
+      print('TIPO: ${e.runtimeType}');
+      print('ERRO: $e');
+      print('STACKTRACE:');
+      print(s);
+      print('══════════════════════════════════════════════');
+
       logError(
-        error: e as Exception,
+        error: e is Exception ? e : Exception(e.toString()),
         failure: FailureGetEventById(),
-        stackTrace: StackTrace.current,
+        stackTrace: s,
       );
 
       return Left(FailureGetEventById());
@@ -193,12 +204,15 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       final events = await datasource.getUpcomingEventsByPlace(placeId);
 
       return Right(events.map((e) => e.toEntity()).toList());
-    } catch (e) {
-      logError(
-        error: e as Exception,
-        failure: FailureGetUpcomingEventsByPlace(),
-        stackTrace: StackTrace.current,
-      );
+    } catch (e, s) {
+      print('');
+      print('══════════════════════════════════════════════');
+      print('🔥 ERRO REAL - getUpcomingEventsByPlace');
+      print('TIPO: ${e.runtimeType}');
+      print('ERRO: $e');
+      print('STACKTRACE:');
+      print(s);
+      print('══════════════════════════════════════════════');
 
       return Left(FailureGetUpcomingEventsByPlace());
     }
