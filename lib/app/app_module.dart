@@ -17,6 +17,7 @@ import 'package:entao_bora/feature/events/data/repositories/event_repository_imp
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/events/presentation/pages/create_event_page.dart';
 import 'package:entao_bora/feature/events/presentation/pages/event_details_page.dart';
+import 'package:entao_bora/feature/events/presentation/pages/place_botton_sheet.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
@@ -106,10 +107,15 @@ class AppModule extends Module {
     r.child('/places/create', child: (_) => const CreatePlacePage());
 
     r.child('/events/create', child: (_) => const CreateEventPage());
+    
     r.child(
-      '/places/events',
+      '/place',
       child: (_) => PlaceDetailsPage(place: r.args.data as PlaceEntity),
     );
+    // r.child(
+    //   '/place',
+    //   child: (_) => PlaceDetailsSheet(place: r.args.data as PlaceEntity),
+    // );
 
     r.child(
       '/events/:id',

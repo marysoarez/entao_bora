@@ -1,5 +1,6 @@
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
+import 'package:entao_bora/feature/events/presentation/pages/place_botton_sheet.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -10,23 +11,26 @@ class MapMarkers {
   const MapMarkers._();
 
   static List<Marker> build({
+    required BuildContext context,
+
     required List<PlaceEntity> places,
     required List<EventEntity> events,
     required Map<String, UserSummaryEntity> owners,
   }) {
     return [
-      ..._buildPlaceMarkers(places: places, owners: owners),
+      ..._buildPlaceMarkers(places: places, owners: owners, context: context),
       ..._buildEventMarkers(events),
     ];
   }
 
   static List<Marker> _buildPlaceMarkers({
+    required BuildContext context,
     required List<PlaceEntity> places,
     required Map<String, UserSummaryEntity> owners,
   }) {
     return places.map((place) {
       final owner = owners[place.ownerId];
-      final isPartner = owner?.isPartner == true;
+      final isPartner = place.ownerId.isPartner;
 
       debugPrint(
         'PLACE: ${place.name}\n'
@@ -34,6 +38,8 @@ class MapMarkers {
         '  owner: ${place.ownerId.name}\n'
         '  role: ${place.ownerId.role}\n'
         '  isPartner: $isPartner\n'
+        '  owner: $owner\n'
+        '  owner: ${place.ownerId.photoUrl}\n'
         '  photoUrl: ${place.ownerId.photoUrl}',
       );
 
@@ -46,10 +52,15 @@ class MapMarkers {
         ),
         child: GestureDetector(
           onTap: () {
-            Modular.to.pushNamed('/places/events', arguments: place);
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => PlaceDetailsSheet(place: place),
+            );
           },
           child: isPartner
-              ? _buildPartnerMarker(owner?.photoUrl)
+              ? _buildPartnerMarker(place.ownerId.photoUrl)
               : const Icon(Icons.store, color: Colors.red, size: 18),
         ),
       );
@@ -57,10 +68,12 @@ class MapMarkers {
   }
 
   static Widget _buildPartnerMarker(String? photoUrl) {
+    debugPrint('PARTNER PHOTO URL: $photoUrl');
+
     if (photoUrl == null || photoUrl.isEmpty) {
       return Container(
-        width: 42,
-        height: 42,
+        width: 18,
+        height: 18,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(color: Colors.red, width: 3),
@@ -70,20 +83,19 @@ class MapMarkers {
     }
 
     return Container(
-      width: 42,
-      height: 42,
+      width: 18,
+      height: 18,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: Colors.red, width: 3),
-        boxShadow: const [
-          BoxShadow(blurRadius: 4, offset: Offset(0, 2), color: Colors.black26),
-        ],
       ),
       child: ClipOval(
         child: Image.network(
           photoUrl,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) {
+          errorBuilder: (_, error, stackTrace) {
+            debugPrint('ERRO AO CARREGAR FOTO: $error');
+
             return const Icon(Icons.store, color: Colors.red, size: 18);
           },
         ),

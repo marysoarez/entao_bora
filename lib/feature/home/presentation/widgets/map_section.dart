@@ -127,6 +127,7 @@ class _MapSectionState extends State<MapSection> {
             places: widget.places,
             events: widget.events,
             owners: const {},
+            context: context,
           ),
         ),
       ],

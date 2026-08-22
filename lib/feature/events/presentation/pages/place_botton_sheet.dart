@@ -1,12 +1,10 @@
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class PlaceDetailsSheet extends StatelessWidget {
-  const PlaceDetailsSheet({
-    super.key,
-    required this.place,
-  });
+  const PlaceDetailsSheet({super.key, required this.place});
 
   final PlaceEntity place;
 
@@ -23,9 +21,7 @@ class PlaceDetailsSheet extends StatelessWidget {
         return Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(28),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: ListView(
             controller: scrollController,
@@ -50,8 +46,8 @@ class PlaceDetailsSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Image.network(
-                      place.photos.first,
+                    child: Image.memory(
+                      ImageHelper.base64ToBytes(place.photos.first),
                       height: 220,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -87,10 +83,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      place.name,
-                      style: theme.textTheme.headlineMedium,
-                    ),
+                    Text(place.name, style: theme.textTheme.headlineMedium),
 
                     const SizedBox(height: 12),
 
@@ -98,10 +91,7 @@ class PlaceDetailsSheet extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    Text(
-                      "📍 Endereço",
-                      style: theme.textTheme.titleMedium,
-                    ),
+                    Text("📍 Endereço", style: theme.textTheme.titleMedium),
 
                     const SizedBox(height: 8),
 
@@ -110,10 +100,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                     if (place.instagram.isNotEmpty) ...[
                       const SizedBox(height: 24),
 
-                      Text(
-                        "📸 Instagram",
-                        style: theme.textTheme.titleMedium,
-                      ),
+                      Text("📸 Instagram", style: theme.textTheme.titleMedium),
 
                       const SizedBox(height: 8),
 
@@ -123,10 +110,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                     if (place.phone.isNotEmpty) ...[
                       const SizedBox(height: 24),
 
-                      Text(
-                        "📞 Telefone",
-                        style: theme.textTheme.titleMedium,
-                      ),
+                      Text("📞 Telefone", style: theme.textTheme.titleMedium),
 
                       const SizedBox(height: 8),
 
@@ -136,10 +120,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                     if (place.website.isNotEmpty) ...[
                       const SizedBox(height: 24),
 
-                      Text(
-                        "🌐 Website",
-                        style: theme.textTheme.titleMedium,
-                      ),
+                      Text("🌐 Website", style: theme.textTheme.titleMedium),
 
                       const SizedBox(height: 8),
 
@@ -149,10 +130,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                     if (place.musicGenres.isNotEmpty) ...[
                       const SizedBox(height: 24),
 
-                      Text(
-                        "🎵 Gêneros",
-                        style: theme.textTheme.titleMedium,
-                      ),
+                      Text("🎵 Gêneros", style: theme.textTheme.titleMedium),
 
                       const SizedBox(height: 12),
 
@@ -160,11 +138,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 8,
                         children: place.musicGenres
-                            .map(
-                              (genre) => Chip(
-                                label: Text(genre.name),
-                              ),
-                            )
+                            .map((genre) => Chip(label: Text(genre.name)))
                             .toList(),
                       ),
                     ],
@@ -178,7 +152,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                           Navigator.pop(context);
 
                           Modular.to.pushNamed(
-                            '/places/events',
+                            '/place',
                             arguments: place,
                           );
                         },
