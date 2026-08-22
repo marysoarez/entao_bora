@@ -6,4 +6,5 @@ abstract class IPlaceDatasource {
   Future<void> updatePlace(PlaceDto place);
   Future<void> createPlace(PlaceDto place);
   Future<PlaceEntity?> getPlaceById(String id);
+  Future<List<PlaceDto>> getPlacesByOwnerId(String ownerId);
 }

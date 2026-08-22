@@ -23,6 +23,7 @@ import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
 import 'package:entao_bora/feature/home/presentation/pages/home.dart';
 import 'package:entao_bora/feature/home/presentation/viewmodels/home_viewmodel.dart';
+import 'package:entao_bora/feature/partner_dashboard/partner_dashboard_page.dart';
 import 'package:entao_bora/feature/places/data/datasource/place_datasource.dart';
 import 'package:entao_bora/feature/places/data/datasource/place_datasource.impl.dart';
 import 'package:entao_bora/feature/places/data/repositories/place_repositor_impl.dart';
@@ -111,6 +112,10 @@ class AppModule extends Module {
     r.child(
       '/place',
       child: (_) => PlaceDetailsPage(place: r.args.data as PlaceEntity),
+    );
+    r.child(
+      '/partner-dashboard',
+      child: (_) => PartnerDashboardPage(place: r.args.data as PlaceEntity),
     );
     // r.child(
     //   '/place',

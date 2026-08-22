@@ -29,3 +29,10 @@ class FailureGetPlaceById extends BaseError {
     super.message = 'Não foi possível cadastrar o local.',
   });
 }
+class FailureGetPlaceByOwner extends BaseError {
+  FailureGetPlaceByOwner({
+    super.stackTrace,
+    super.exception,
+    super.message = 'Não foi possível encontrar os locais desse usuário.',
+  });
+}

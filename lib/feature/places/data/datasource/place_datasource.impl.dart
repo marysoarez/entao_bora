@@ -43,4 +43,16 @@ class PlaceDatasourceImpl implements IPlaceDatasource {
   PlaceDto _mapDocument(DocumentSnapshot<Map<String, dynamic>> doc) {
     return PlaceDto.fromMap({'id': doc.id, ...?doc.data()});
   }
+
+  @override
+  Future<List<PlaceDto>> getPlacesByOwnerId(String ownerId) async {
+    final snapshot = await firestore
+        .collection('places')
+        .where('ownerId', isEqualTo: ownerId)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => PlaceDto.fromMap({...doc.data(), 'id': doc.id}))
+        .toList();
+  }
 }

@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
+import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -13,6 +18,129 @@ class AppDrawer extends StatefulWidget {
 
 class _AppDrawerState extends State<AppDrawer> {
   final auth = Modular.get<AuthViewModel>();
+  final placeRepository = Modular.get<IPlaceRepository>();
+
+  Future<void> _openPartnerDashboard(BuildContext context) async {
+    print('>>> CLIQUEI EM GERAL');
+
+    final user = auth.user;
+
+    print('>>> USER: $user');
+    print('>>> USER ID: ${user?.id}');
+
+    if (user == null) {
+      print('>>> USUARIO NAO LOGADO');
+
+      await LoginDialog.show(context);
+      await auth.refresh();
+
+      return;
+    }
+
+    print('>>> BUSCANDO PLACES DO USUARIO');
+
+    final result = await placeRepository.getPlacesByOwnerId(user.id);
+
+    print('>>> RESULTADO: $result');
+
+    result.fold(
+      (failure) {
+        print('>>> ERRO AO BUSCAR PLACES: $failure');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível carregar seus estabelecimentos.'),
+          ),
+        );
+      },
+      (places) async {
+        print('>>> PLACES ENCONTRADOS: ${places.length}');
+
+        for (final place in places) {
+          print('>>> PLACE: ${place.name} - ${place.id}');
+        }
+
+        if (places.isEmpty) {
+          print('>>> NENHUM PLACE ENCONTRADO');
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Você ainda não possui nenhum estabelecimento cadastrado.',
+              ),
+            ),
+          );
+
+          return;
+        }
+
+        PlaceEntity? place;
+
+        if (places.length == 1) {
+          print('>>> APENAS UM PLACE');
+
+          place = places.first;
+        } else {
+          print('>>> MAIS DE UM PLACE - ABRINDO SELECAO');
+
+          place = await _selectPlace(context, places);
+        }
+
+        if (place == null) {
+          print('>>> NENHUM PLACE SELECIONADO');
+          return;
+        }
+
+        print('>>> NAVEGANDO PARA DASHBOARD: ${place.name}');
+
+        Modular.to.pushNamed('/partner-dashboard', arguments: place);
+      },
+    );
+  }
+
+  Future<PlaceEntity?> _selectPlace(
+    BuildContext context,
+    List<PlaceEntity> places,
+  ) {
+    return showDialog<PlaceEntity>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Selecione o estabelecimento'),
+          content: SizedBox(
+            width: 400,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: places.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (context, index) {
+                final place = places[index];
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: place.photos.isNotEmpty
+                        ? MemoryImage(
+                            ImageHelper.base64ToBytes(place.photos.first),
+                          )
+                        : null,
+                    child: place.photos.isEmpty
+                        ? const Icon(Icons.store)
+                        : null,
+                  ),
+                  title: Text(place.name),
+                  subtitle: Text(place.address.displayName),
+                  onTap: () {
+                    Navigator.pop(context, place);
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Observer(
@@ -35,9 +163,9 @@ class _AppDrawerState extends State<AppDrawer> {
 
                       _drawerItem(
                         context,
-                        icon: Icons.event_outlined,
-                        title: 'Eventos',
-                        onTap: () => Modular.to.navigate('/home/'),
+                        icon: Icons.dashboard_outlined,
+                        title: 'Geral',
+                        onTap: () => _openPartnerDashboard(context),
                       ),
 
                       _drawerItem(

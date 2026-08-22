@@ -124,4 +124,25 @@ class PlaceRepositoryImpl extends HandleLogError implements IPlaceRepository {
       return place.copyWith(ownerId: owner.toEntity());
     }).toList();
   }
+
+  @override
+  Future<Either<FailureGetPlaceByOwner, List<PlaceEntity>>> getPlacesByOwnerId(
+    String ownerId,
+  ) async {
+    try {
+      final places = await datasource.getPlacesByOwnerId(ownerId);
+
+      final placesWithOwners = await _withOwners(places);
+
+      return Right(placesWithOwners);
+    } catch (e, s) {
+      logError(
+        error: e,
+        failure: FailureGetPlaceByOwner(exception: e, stackTrace: s),
+        stackTrace: s,
+      );
+
+      return Left(FailureGetPlaceByOwner(exception: e, stackTrace: s));
+    }
+  }
 }

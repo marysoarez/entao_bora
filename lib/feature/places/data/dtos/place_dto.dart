@@ -3,7 +3,6 @@ import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
-import 'package:entao_bora/shared/enum/user_role.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 
 class PlaceDto extends PlaceEntity {

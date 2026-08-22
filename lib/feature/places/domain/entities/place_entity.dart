@@ -4,7 +4,6 @@ import 'package:entao_bora/feature/places/data/dtos/place_dto.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
-import 'package:entao_bora/shared/enum/user_role.dart';
 
 class PlaceEntity {
   final String id;
