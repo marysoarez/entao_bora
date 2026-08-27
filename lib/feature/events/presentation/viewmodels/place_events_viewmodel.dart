@@ -12,10 +12,6 @@ abstract class PlaceEventsViewModelBase with Store {
 
   final IEventRepository _repository;
 
-  //==========================================================
-  // Estado
-  //==========================================================
-
   @observable
   bool loading = false;
 
@@ -25,9 +21,6 @@ abstract class PlaceEventsViewModelBase with Store {
   @observable
   ObservableList<EventEntity> events = ObservableList<EventEntity>();
 
-  //==========================================================
-  // Actions
-  //==========================================================
 
   @action
   Future<void> load(String placeId) async {
@@ -44,10 +37,8 @@ abstract class PlaceEventsViewModelBase with Store {
         events
           ..clear()
           ..addAll(data);
-           print(events.length);
 
     for (final e in events) {
-      print(e.title);
     }
       },
     );
@@ -60,10 +51,7 @@ abstract class PlaceEventsViewModelBase with Store {
     return load(placeId);
   }
 
-  //==========================================================
-  // Getters
-  //==========================================================
-
+  
   bool get hasEvents => events.isNotEmpty;
 
   bool get isEmpty => events.isEmpty;

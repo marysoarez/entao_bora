@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
+import 'package:entao_bora/feature/auth/data/dtos/user_summary_dto.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_attraction_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_ticket_dto.dart';
@@ -46,8 +47,7 @@ class EventDto {
   final int shares;
 
   /// Auditoria
-  final UserSummaryEntity createdBy;
-
+  final UserSummaryDto createdBy;
   final Timestamp createdAt;
   final Timestamp updatedAt;
   final String status;
@@ -78,11 +78,17 @@ class EventDto {
     required this.status,
   });
 
-  factory EventDto.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    return EventDto.fromMap(doc.id, doc.data()!);
+  factory EventDto.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+    UserSummaryDto createdBy,
+  ) {
+    return EventDto.fromMap(doc.id, doc.data()!, createdBy: createdBy);
   }
-
-  factory EventDto.fromMap(String id, Map<String, dynamic> map) {
+  factory EventDto.fromMap(
+    String id,
+    Map<String, dynamic> map, {
+    required UserSummaryDto createdBy,
+  }) {
     return EventDto(
       id: id,
       title: map['title'] ?? '',
@@ -108,14 +114,14 @@ class EventDto {
       checkinCount: map['checkinCount'] ?? 0,
       views: map['views'] ?? 0,
       shares: map['shares'] ?? 0,
-      createdBy: map['createdBy'] ?? '',
+
+      createdBy: createdBy,
 
       createdAt: map['createdAt'] ?? Timestamp.now(),
       updatedAt: map['updatedAt'] ?? Timestamp.now(),
       status: map['status'] ?? EventStatus.draft.slug,
     );
   }
-
   factory EventDto.fromEntity(EventEntity entity) {
     return EventDto(
       id: entity.id,
@@ -138,7 +144,7 @@ class EventDto {
       checkinCount: entity.checkinCount,
       views: entity.views,
       shares: entity.shares,
-      createdBy: entity.createdBy,
+      createdBy: UserSummaryDto.fromEntity(entity.createdBy),
       createdAt: Timestamp.fromDate(entity.createdAt),
       updatedAt: Timestamp.fromDate(entity.updatedAt),
       status: entity.status.slug,
@@ -164,8 +170,7 @@ class EventDto {
       'checkinCount': checkinCount,
       'views': views,
       'shares': shares,
-      'createdBy': createdBy,
-
+      'createdBy': createdBy.id,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'status': status,
@@ -221,8 +226,7 @@ class EventDto {
     int? checkinCount,
     int? views,
     int? shares,
-    UserSummaryEntity? createdBy,
-
+    UserSummaryDto? createdBy,
     Timestamp? createdAt,
     Timestamp? updatedAt,
     String? status,
@@ -247,7 +251,6 @@ class EventDto {
       views: views ?? this.views,
       shares: shares ?? this.shares,
       createdBy: createdBy ?? this.createdBy,
-
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,

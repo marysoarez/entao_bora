@@ -20,6 +20,87 @@ class _AppDrawerState extends State<AppDrawer> {
   final auth = Modular.get<AuthViewModel>();
   final placeRepository = Modular.get<IPlaceRepository>();
 
+  Future<void> _openPartnerArea(BuildContext context) async {
+    final user = auth.user;
+
+    if (user == null) {
+      return;
+    }
+
+    // Contexto do Navigator que está por trás do Drawer.
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
+
+    print('>>> BUSCANDO PLACES DO USUARIO');
+
+    final result = await placeRepository.getPlacesByOwnerId(user.id);
+
+    print('>>> RESULTADO: $result');
+
+    result.fold(
+      (failure) {
+        print('>>> ERRO: $failure');
+      },
+      (places) async {
+        print('>>> PLACES ENCONTRADOS: ${places.length}');
+
+        if (places.isEmpty) {
+          ScaffoldMessenger.of(rootContext).showSnackBar(
+            const SnackBar(content: Text('Você não possui estabelecimentos.')),
+          );
+          return;
+        }
+
+        print('>>> ABRINDO SELECAO');
+
+        final place = await _selectPlace(rootContext, places);
+
+        if (place == null) {
+          print('>>> NENHUM PLACE SELECIONADO');
+          return;
+        }
+
+        print('>>> PLACE SELECIONADO: ${place.name}');
+
+        Modular.to.pushNamed('/partner-dashboard', arguments: place);
+      },
+    );
+  }
+
+  Future<PlaceEntity?> _selectPlace(
+    BuildContext context,
+    List<PlaceEntity> places,
+  ) {
+    return showDialog<PlaceEntity>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Meus estabelecimentos'),
+          content: SizedBox(
+            width: 450,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: places.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (_, index) {
+                final place = places[index];
+
+                return ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.store)),
+                  title: Text(place.name),
+                  subtitle: Text(place.address.displayName),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(dialogContext).pop(place);
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _openPartnerDashboard(BuildContext context) async {
     print('>>> CLIQUEI EM GERAL');
 
@@ -98,49 +179,6 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  Future<PlaceEntity?> _selectPlace(
-    BuildContext context,
-    List<PlaceEntity> places,
-  ) {
-    return showDialog<PlaceEntity>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Selecione o estabelecimento'),
-          content: SizedBox(
-            width: 400,
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemCount: places.length,
-              separatorBuilder: (_, __) => const Divider(),
-              itemBuilder: (context, index) {
-                final place = places[index];
-
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: place.photos.isNotEmpty
-                        ? MemoryImage(
-                            ImageHelper.base64ToBytes(place.photos.first),
-                          )
-                        : null,
-                    child: place.photos.isEmpty
-                        ? const Icon(Icons.store)
-                        : null,
-                  ),
-                  title: Text(place.name),
-                  subtitle: Text(place.address.displayName),
-                  onTap: () {
-                    Navigator.pop(context, place);
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Observer(
@@ -164,8 +202,8 @@ class _AppDrawerState extends State<AppDrawer> {
                       _drawerItem(
                         context,
                         icon: Icons.dashboard_outlined,
-                        title: 'Geral',
-                        onTap: () => _openPartnerDashboard(context),
+                        title: 'Estabelecimentos',
+                        onTap: () => _openPartnerArea(context),
                       ),
 
                       _drawerItem(
@@ -291,7 +329,6 @@ class _AppDrawerState extends State<AppDrawer> {
       leading: Icon(icon),
       title: Text(title),
       onTap: () {
-        Navigator.pop(context);
         onTap();
       },
     );

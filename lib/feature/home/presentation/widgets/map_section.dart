@@ -102,6 +102,33 @@ class _MapSectionState extends State<MapSection> {
 
   @override
   Widget build(BuildContext context) {
+    print('');
+    print('================ MAP SECTION ================');
+    print('PLACES: ${widget.places.length}');
+    print('EVENTS: ${widget.events.length}');
+
+    for (final event in widget.events) {
+      print(
+        'EVENT MAP -> '
+        'id=${event.id} | '
+        'title=${event.title} | '
+        'placeId=${event.placeId} | '
+        'lat=${event.address.location.latitude} | '
+        'lng=${event.address.location.longitude}',
+      );
+    }
+
+    final markers = MapMarkers.build(
+      places: widget.places,
+      events: widget.events,
+      owners: const {},
+      context: context,
+    );
+
+    print('MARKERS GERADOS: ${markers.length}');
+
+    print('============================================');
+
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
@@ -122,14 +149,7 @@ class _MapSectionState extends State<MapSection> {
 
         CircleLayer(circles: MapHeatLayer.build(widget.events)),
 
-        MarkerLayer(
-          markers: MapMarkers.build(
-            places: widget.places,
-            events: widget.events,
-            owners: const {},
-            context: context,
-          ),
-        ),
+        MarkerLayer(markers: markers),
       ],
     );
   }

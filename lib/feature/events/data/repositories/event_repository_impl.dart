@@ -44,15 +44,7 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
 
       return Right(entity);
     } catch (e, s) {
-      print('');
-      print('══════════════════════════════════════════════');
-      print('🔥 ERRO REAL - getEventById');
-      print('TIPO: ${e.runtimeType}');
-      print('ERRO: $e');
-      print('STACKTRACE:');
-      print(s);
-      print('══════════════════════════════════════════════');
-
+      
       logError(
         error: e is Exception ? e : Exception(e.toString()),
         failure: FailureGetEventById(),
@@ -64,45 +56,48 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
   }
 
   @override
-  Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
-    String? userId,
-  }) async {
-    try {
-      final events = await datasource.getEvents();
+Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
+  String? userId,
+}) async {
+  try {
 
-      final entities = <EventEntity>[];
+    final events = await datasource.getEvents();
 
-      for (final dto in events) {
-        var entity = dto.toEntity();
 
-        if (userId != null) {
-          final isBora = await datasource.isUserGoing(
-            eventId: entity.id,
-            userId: userId,
-          );
+    final entities = <EventEntity>[];
 
-          final hasCheckedIn = await datasource.hasCheckedIn(
-            eventId: entity.id,
-            userId: userId,
-          );
+    for (final dto in events) {
+      
+      var entity = dto.toEntity();
 
-          entity = entity.copyWith(isBora: isBora, hasCheckedIn: hasCheckedIn);
-        }
 
-        entities.add(entity);
+      if (userId != null) {
+        final isBora = await datasource.isUserGoing(
+          eventId: entity.id,
+          userId: userId,
+        );
+
+        final hasCheckedIn = await datasource.hasCheckedIn(
+          eventId: entity.id,
+          userId: userId,
+        );
+
+        entity = entity.copyWith(
+          isBora: isBora,
+          hasCheckedIn: hasCheckedIn,
+        );
       }
 
-      return Right(entities);
-    } catch (e) {
-      logError(
-        error: e as Exception,
-        failure: FailureGetEvents(),
-        stackTrace: StackTrace.current,
-      );
-
-      return Left(FailureGetEvents());
+      entities.add(entity);
     }
+
+    
+    return Right(entities);
+  } catch (e, s) {
+    
+    return Left(FailureGetEvents());
   }
+}
 
   @override
   Future<Either<FailureCreateEvent, bool>> createEvent(
@@ -205,15 +200,7 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
 
       return Right(events.map((e) => e.toEntity()).toList());
     } catch (e, s) {
-      print('');
-      print('══════════════════════════════════════════════');
-      print('🔥 ERRO REAL - getUpcomingEventsByPlace');
-      print('TIPO: ${e.runtimeType}');
-      print('ERRO: $e');
-      print('STACKTRACE:');
-      print(s);
-      print('══════════════════════════════════════════════');
-
+      
       return Left(FailureGetUpcomingEventsByPlace());
     }
   }

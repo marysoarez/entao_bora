@@ -19,26 +19,17 @@ class EventDatasourceImpl implements EventDatasource {
     try {
       return await query.get();
     } on FirebaseException catch (e, s) {
-      print('');
-      print('══════════════════════════════════════════════');
-      print('🔥 FIRESTORE');
-      print(e.code);
+     
 
       if (e.message != null) {
-        print(e.message);
 
         final match = RegExp(r'https://\S+').firstMatch(e.message!);
 
         if (match != null) {
-          print('');
-          print('🔗 LINK PARA CRIAR O ÍNDICE');
-          print(match.group(0));
+         
         }
       }
 
-      print('');
-      print(s);
-      print('══════════════════════════════════════════════');
 
       rethrow;
     }
@@ -54,15 +45,44 @@ class EventDatasourceImpl implements EventDatasource {
           .orderBy('endDate'),
     );
 
-    print('====================');
-    print('EVENTOS: ${snapshot.docs.length}');
+  
+    final events = <EventDto>[];
 
     for (final doc in snapshot.docs) {
-      print(doc.id);
-      // print(doc.data());
+      final data = doc.data();
+
+   
+      final rawCreatedBy = data['createdBy'];
+
+      String? createdById;
+
+      if (rawCreatedBy is String) {
+        createdById = rawCreatedBy;
+      } else if (rawCreatedBy is Map) {
+        createdById = rawCreatedBy['id'] as String?;
+      }
+
+      if (createdById == null || createdById.isEmpty) {
+        continue;
+      }
+
+
+      final users = await userDatasource.getUsersByIds([createdById]);
+
+      if (users.isEmpty) {
+        continue;
+      }
+
+      final creator = users.first;
+
+      final event = EventDto.fromMap(doc.id, data, createdBy: creator);
+
+      events.add(event);
+
     }
 
-    return snapshot.docs.map(EventDto.fromFirestore).toList();
+  
+    return events;
   }
 
   @override
@@ -77,18 +97,13 @@ class EventDatasourceImpl implements EventDatasource {
 
     final createdById = data['createdBy'] as String;
 
-    print('==============================');
-    print('EVENTO: ${snapshot.id}');
-    print('CREATED BY ID: $createdById');
-
+   
     final users = await userDatasource.getUsersByIds([createdById]);
 
     final creator = users.first;
 
-    print('CRIADOR: ${creator.name}');
-    print('==============================');
-
-    return EventDto.fromMap(snapshot.id, {...data, 'createdBy': creator});
+  
+    return EventDto.fromMap(snapshot.id, data, createdBy: creator);
   }
 
   @override
@@ -222,9 +237,6 @@ class EventDatasourceImpl implements EventDatasource {
 
     final snapshot = await _runQuery(query);
 
-    print('==============================');
-    print('Docs encontrados: ${snapshot.docs.length}');
-
     final events = <EventDto>[];
 
     for (final doc in snapshot.docs) {
@@ -232,17 +244,12 @@ class EventDatasourceImpl implements EventDatasource {
 
       final createdById = data['createdBy'] as String;
 
-      print('EVENTO: ${doc.id}');
-      print('CREATED BY ID: $createdById');
-
       final users = await userDatasource.getUsersByIds([createdById]);
 
       final creator = users.first;
 
-      events.add(EventDto.fromMap(doc.id, {...data, 'createdBy': creator}));
-
-      print('CRIADOR: ${creator.name}');
-      print('----------------');
+      events.add(EventDto.fromMap(doc.id, data, createdBy: creator));
+  
     }
 
     return events;
