@@ -22,12 +22,17 @@ class PlaceDto extends PlaceEntity {
   });
 
   factory PlaceDto.fromMap(Map<String, dynamic> map) {
+    final rawOwnerId = map['ownerId'] ?? map['ownderId'];
+    final ownerId = rawOwnerId is Map
+        ? rawOwnerId['id']?.toString() ?? ''
+        : rawOwnerId?.toString() ?? '';
+
     return PlaceDto(
       id: map['id'],
       name: map['name'],
       description: map['description'],
       address: AddressDto.fromMap(map['address']),
-      ownerId: UserSummaryEntity(id: map['ownerId'] ?? '', name: '', email: ''),
+      ownerId: UserSummaryEntity(id: ownerId, name: '', email: ''),
       musicGenres: (map['musicGenres'] as List<dynamic>? ?? [])
           .map((e) => MusicGenre.fromSlug(e.toString()))
           .toList(),

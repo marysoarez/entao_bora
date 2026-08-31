@@ -44,7 +44,6 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
 
       return Right(entity);
     } catch (e, s) {
-      
       logError(
         error: e is Exception ? e : Exception(e.toString()),
         failure: FailureGetEventById(),
@@ -56,48 +55,39 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
   }
 
   @override
-Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
-  String? userId,
-}) async {
-  try {
+  Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
+    String? userId,
+  }) async {
+    try {
+      final events = await datasource.getEvents();
 
-    final events = await datasource.getEvents();
+      final entities = <EventEntity>[];
 
+      for (final dto in events) {
+        var entity = dto.toEntity();
 
-    final entities = <EventEntity>[];
+        if (userId != null) {
+          final isBora = await datasource.isUserGoing(
+            eventId: entity.id,
+            userId: userId,
+          );
 
-    for (final dto in events) {
-      
-      var entity = dto.toEntity();
+          final hasCheckedIn = await datasource.hasCheckedIn(
+            eventId: entity.id,
+            userId: userId,
+          );
 
+          entity = entity.copyWith(isBora: isBora, hasCheckedIn: hasCheckedIn);
+        }
 
-      if (userId != null) {
-        final isBora = await datasource.isUserGoing(
-          eventId: entity.id,
-          userId: userId,
-        );
-
-        final hasCheckedIn = await datasource.hasCheckedIn(
-          eventId: entity.id,
-          userId: userId,
-        );
-
-        entity = entity.copyWith(
-          isBora: isBora,
-          hasCheckedIn: hasCheckedIn,
-        );
+        entities.add(entity);
       }
 
-      entities.add(entity);
+      return Right(entities);
+    } catch (e, s) {
+      return Left(FailureGetEvents());
     }
-
-    
-    return Right(entities);
-  } catch (e, s) {
-    
-    return Left(FailureGetEvents());
   }
-}
 
   @override
   Future<Either<FailureCreateEvent, bool>> createEvent(
@@ -200,8 +190,26 @@ Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
 
       return Right(events.map((e) => e.toEntity()).toList());
     } catch (e, s) {
-      
       return Left(FailureGetUpcomingEventsByPlace());
+    }
+  }
+
+  @override
+  Future<Either<FailureGetEvents, List<EventEntity>>> getEventsByCreatorId(
+    String creatorId,
+  ) async {
+    try {
+      final events = await datasource.getEventsByCreatorId(creatorId);
+
+      return Right(events.map((event) => event.toEntity()).toList());
+    } catch (e, s) {
+      logError(
+        error: e is Exception ? e : Exception(e.toString()),
+        failure: FailureGetEvents(),
+        stackTrace: s,
+      );
+
+      return Left(FailureGetEvents());
     }
   }
 

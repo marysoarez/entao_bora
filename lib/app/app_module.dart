@@ -17,7 +17,6 @@ import 'package:entao_bora/feature/events/data/repositories/event_repository_imp
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/events/presentation/pages/create_event_page.dart';
 import 'package:entao_bora/feature/events/presentation/pages/event_details_page.dart';
-import 'package:entao_bora/feature/events/presentation/pages/place_botton_sheet.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
@@ -32,7 +31,6 @@ import 'package:entao_bora/feature/places/domain/repositories/place_repository.d
 import 'package:entao_bora/feature/places/presentation/create_place_page.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.dart';
 import 'package:entao_bora/feature/places/presentation/place_details_page.dart';
-import 'package:entao_bora/feature/splash/presentation/splash_page.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource_impl.dart';
 import 'package:entao_bora/shared/errors/log_events.dart';
@@ -96,7 +94,7 @@ class AppModule extends Module {
 
   @override
   void routes(RouteManager r) {
-  //  r.child('/', child: (_) => const SplashPage());
+    //  r.child('/', child: (_) => const SplashPage());
 
     r.child(
       '/',
@@ -108,14 +106,14 @@ class AppModule extends Module {
     r.child('/places/create', child: (_) => const CreatePlacePage());
 
     r.child('/events/create', child: (_) => const CreateEventPage());
-    
+
     r.child(
       '/place',
       child: (_) => PlaceDetailsPage(place: r.args.data as PlaceEntity),
     );
     r.child(
       '/partner-dashboard',
-      child: (_) => PartnerDashboardPage(place: r.args.data as PlaceEntity),
+      child: (_) => PartnerDashboardPage(place: r.args.data as PlaceEntity?),
     );
     // r.child(
     //   '/place',

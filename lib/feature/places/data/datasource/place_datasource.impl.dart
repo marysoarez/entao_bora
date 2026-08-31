@@ -46,13 +46,21 @@ class PlaceDatasourceImpl implements IPlaceDatasource {
 
   @override
   Future<List<PlaceDto>> getPlacesByOwnerId(String ownerId) async {
-    final snapshot = await firestore
-        .collection('places')
-        .where('ownerId', isEqualTo: ownerId)
-        .get();
+    final placesById = <String, PlaceDto>{};
 
-    return snapshot.docs
-        .map((doc) => PlaceDto.fromMap({...doc.data(), 'id': doc.id}))
-        .toList();
+    final snapshots = await Future.wait([
+      collection.where('ownerId', isEqualTo: ownerId).get(),
+      collection.where('ownerId.id', isEqualTo: ownerId).get(),
+      collection.where('ownderId', isEqualTo: ownerId).get(),
+      collection.where('ownderId.id', isEqualTo: ownerId).get(),
+    ]);
+
+    for (final snapshot in snapshots) {
+      for (final doc in snapshot.docs) {
+        placesById[doc.id] = _mapDocument(doc);
+      }
+    }
+
+    return placesById.values.toList();
   }
 }

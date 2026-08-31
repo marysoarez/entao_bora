@@ -19,17 +19,11 @@ class EventDatasourceImpl implements EventDatasource {
     try {
       return await query.get();
     } on FirebaseException catch (e, s) {
-     
-
       if (e.message != null) {
-
         final match = RegExp(r'https://\S+').firstMatch(e.message!);
 
-        if (match != null) {
-         
-        }
+        if (match != null) {}
       }
-
 
       rethrow;
     }
@@ -45,13 +39,11 @@ class EventDatasourceImpl implements EventDatasource {
           .orderBy('endDate'),
     );
 
-  
     final events = <EventDto>[];
 
     for (final doc in snapshot.docs) {
       final data = doc.data();
 
-   
       final rawCreatedBy = data['createdBy'];
 
       String? createdById;
@@ -66,7 +58,6 @@ class EventDatasourceImpl implements EventDatasource {
         continue;
       }
 
-
       final users = await userDatasource.getUsersByIds([createdById]);
 
       if (users.isEmpty) {
@@ -78,10 +69,8 @@ class EventDatasourceImpl implements EventDatasource {
       final event = EventDto.fromMap(doc.id, data, createdBy: creator);
 
       events.add(event);
-
     }
 
-  
     return events;
   }
 
@@ -97,12 +86,10 @@ class EventDatasourceImpl implements EventDatasource {
 
     final createdById = data['createdBy'] as String;
 
-   
     final users = await userDatasource.getUsersByIds([createdById]);
 
     final creator = users.first;
 
-  
     return EventDto.fromMap(snapshot.id, data, createdBy: creator);
   }
 
@@ -249,8 +236,46 @@ class EventDatasourceImpl implements EventDatasource {
       final creator = users.first;
 
       events.add(EventDto.fromMap(doc.id, data, createdBy: creator));
-  
     }
+
+    return events;
+  }
+
+  @override
+  Future<List<EventDto>> getEventsByCreatorId(String creatorId) async {
+    final events = <EventDto>[];
+    final docsById = <String, QueryDocumentSnapshot<Map<String, dynamic>>>{};
+
+    final byString = await _runQuery(
+      firestore
+          .collection(FirestorePaths.events)
+          .where('createdBy', isEqualTo: creatorId),
+    );
+
+    for (final doc in byString.docs) {
+      docsById[doc.id] = doc;
+    }
+
+    final byMap = await _runQuery(
+      firestore
+          .collection(FirestorePaths.events)
+          .where('createdBy.id', isEqualTo: creatorId),
+    );
+
+    for (final doc in byMap.docs) {
+      docsById[doc.id] = doc;
+    }
+
+    final users = await userDatasource.getUsersByIds([creatorId]);
+    if (users.isEmpty) return events;
+
+    final creator = users.first;
+
+    for (final doc in docsById.values) {
+      events.add(EventDto.fromMap(doc.id, doc.data(), createdBy: creator));
+    }
+
+    events.sort((a, b) => a.startDate.compareTo(b.startDate));
 
     return events;
   }

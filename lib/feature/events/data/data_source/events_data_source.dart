@@ -24,10 +24,7 @@ abstract class EventDatasource {
     required bool isBora,
   });
 
-Future<bool> hasCheckedIn({
-  required String eventId,
-  required String userId,
-});
+  Future<bool> hasCheckedIn({required String eventId, required String userId});
   Future<void> checkIn({
     required String eventId,
     required UserSummaryEntity user,
@@ -35,4 +32,6 @@ Future<bool> hasCheckedIn({
     required double longitude,
   });
   Future<List<EventDto>> getUpcomingEventsByPlace(String placeId);
+
+  Future<List<EventDto>> getEventsByCreatorId(String creatorId);
 }

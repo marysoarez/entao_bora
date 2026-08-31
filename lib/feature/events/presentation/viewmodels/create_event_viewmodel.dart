@@ -164,12 +164,40 @@ abstract class CreateEventViewModelBase with Store {
 
   @action
   Future<List<PlaceEntity>> loadPlaces() async {
-    final result = await _placeRepository.getPlaces();
+    final currentUser = await _authRepository.getCurrentUser();
 
-    return result.fold((failure) {
-      error = failure.message;
+    if (currentUser == null) {
+      error = 'Faca login para criar um evento.';
       return [];
-    }, (places) => places);
+    }
+
+    final ownerIds = {
+      currentUser.id,
+      if (currentUser.partnerId != null &&
+          currentUser.partnerId!.trim().isNotEmpty)
+        currentUser.partnerId!,
+    };
+
+    final partnerPlaces = <PlaceEntity>[];
+
+    for (final ownerId in ownerIds) {
+      final result = await _placeRepository.getPlacesByOwnerId(ownerId);
+
+      final failed = result.fold(
+        (failure) {
+          error = failure.message;
+          return true;
+        },
+        (places) {
+          partnerPlaces.addAll(places);
+          return false;
+        },
+      );
+
+      if (failed) return [];
+    }
+
+    return {for (final place in partnerPlaces) place.id: place}.values.toList();
   }
 
   //==========================================================

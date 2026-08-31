@@ -24,6 +24,10 @@ abstract class IEventRepository {
   Future<Either<FailureGetUpcomingEventsByPlace, List<EventEntity>>>
   getUpcomingEventsByPlace(String placeId);
 
+  Future<Either<FailureGetEvents, List<EventEntity>>> getEventsByCreatorId(
+    String creatorId,
+  );
+
   Future<Either<FailureIsUserGoing, bool>> isUserGoing({
     required String eventId,
     required String userId,

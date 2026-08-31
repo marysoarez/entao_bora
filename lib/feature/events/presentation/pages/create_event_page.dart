@@ -30,11 +30,32 @@ class _CreateEventPageState extends State<CreateEventPage> {
   void initState() {
     super.initState();
 
+    final place = Modular.args.data;
+    if (place is PlaceEntity) {
+      vm.setPlace(place);
+    }
+
     loadPlaces();
   }
 
   Future<void> loadPlaces() async {
     places = await vm.loadPlaces();
+
+    final selectedPlace = vm.place;
+
+    if (places.isNotEmpty) {
+      if (selectedPlace == null) {
+        vm.setPlace(places.first);
+      } else {
+        final index = places.indexWhere(
+          (place) => place.id == selectedPlace.id,
+        );
+
+        if (index >= 0) {
+          vm.setPlace(places[index]);
+        }
+      }
+    }
 
     if (mounted) {
       setState(() {
