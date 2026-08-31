@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class AddressStep extends StatefulWidget {
-  const AddressStep({
-    super.key,
-    required this.vm,
-  });
+  const AddressStep({super.key, required this.vm});
 
   final CreatePlaceViewModel vm;
 
@@ -55,15 +52,14 @@ class _AddressStepState extends State<AddressStep> {
                       child: TextFormField(
                         initialValue: widget.vm.address?.number,
                         keyboardType: TextInputType.streetAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Número',
-                        ),
+                        decoration: const InputDecoration(labelText: 'Número'),
                         onChanged: (value) {
                           widget.vm.setAddress(
-                            widget.vm.address!.copyWith(
-                              number: value,
-                            ),
+                            widget.vm.address!.copyWith(number: value),
                           );
+                        },
+                        onFieldSubmitted: (_) {
+                          widget.vm.resolveAddressLocation();
                         },
                       ),
                     ),
@@ -79,9 +75,7 @@ class _AddressStepState extends State<AddressStep> {
                         ),
                         onChanged: (value) {
                           widget.vm.setAddress(
-                            widget.vm.address!.copyWith(
-                              complement: value,
-                            ),
+                            widget.vm.address!.copyWith(complement: value),
                           );
                         },
                       ),
@@ -95,20 +89,16 @@ class _AddressStepState extends State<AddressStep> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
                       const Icon(Icons.place),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          widget.vm.address!.fullAddress,
-                        ),
-                      ),
+                      Expanded(child: Text(widget.vm.address!.fullAddress)),
                     ],
                   ),
                 ),

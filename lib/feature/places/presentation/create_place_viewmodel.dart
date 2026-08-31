@@ -1,3 +1,4 @@
+import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
@@ -8,6 +9,7 @@ import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
 import 'package:entao_bora/shared/enum/week_day_enum.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
 
@@ -139,6 +141,131 @@ abstract class CreatePlaceViewModelBase with Store {
   }
 
   @action
+  Future<void> setAddressNumber(String number) async {
+    if (address == null) return;
+
+    // Atualiza o número imediatamente para a UI
+    address = address!.copyWith(number: number);
+
+    // Não tenta buscar enquanto o campo estiver vazio
+    if (number.trim().isEmpty) return;
+
+    final fullAddress = address!.fullAddress;
+
+    final result = await _locationRepository.searchAddress(fullAddress);
+
+    result.fold(
+      (failure) {
+        error = failure.message;
+      },
+      (addresses) {
+        if (addresses.isEmpty) return;
+
+        // Preferimos um resultado que realmente tenha house_number
+        final exact = addresses.cast<AddressEntity?>().firstWhere(
+          (result) =>
+              result?.number != null && result!.number!.trim() == number.trim(),
+          orElse: () => null,
+        );
+
+        final selected = exact ?? addresses.first;
+
+        address = address!.copyWith(
+          location: selected!.location,
+          displayName: selected.displayName,
+        );
+      },
+    );
+  }
+
+  @action
+  Future<void> resolveAddressLocation() async {
+    if (address == null) return;
+
+    final currentAddress = address!;
+    final number = currentAddress.number?.trim();
+
+    debugPrint('================ RESOLVE ADDRESS ================');
+    debugPrint('Rua: ${currentAddress.street}');
+    debugPrint('Número: $number');
+    debugPrint('Endereço: ${currentAddress.fullAddress}');
+    debugPrint(
+      'Coordenada ANTES: '
+      '${currentAddress.location.latitude}, '
+      '${currentAddress.location.longitude}',
+    );
+
+    if (number == null || number.isEmpty) {
+      debugPrint('⚠️ Número vazio.');
+      return;
+    }
+
+    final query = [
+      currentAddress.street,
+      number,
+      currentAddress.neighborhood,
+      currentAddress.city,
+      currentAddress.state,
+      currentAddress.postalCode,
+    ].where((e) => e != null && e!.trim().isNotEmpty).join(', ');
+
+    debugPrint('🔎 BUSCANDO: $query');
+
+    final result = await _locationRepository.searchAddress(query);
+
+    result.fold(
+      (failure) {
+        debugPrint('❌ ERRO: ${failure.message}');
+        error = failure.message;
+      },
+      (addresses) {
+        debugPrint('🔎 RESULTADOS: ${addresses.length}');
+
+        for (final item in addresses) {
+          debugPrint(
+            'RESULTADO → '
+            '${item.street}, ${item.number} | '
+            '${item.location.latitude}, '
+            '${item.location.longitude}',
+          );
+        }
+
+        final exactMatches = addresses.where(
+          (item) =>
+              item.number != null &&
+              item.number!.trim() == number &&
+              item.street?.trim().toLowerCase() ==
+                  currentAddress.street?.trim().toLowerCase(),
+        );
+
+        if (exactMatches.isEmpty) {
+          debugPrint('⚠️ Nenhum endereço exato encontrado.');
+          return;
+        }
+
+        final selected = exactMatches.first;
+
+        debugPrint(
+          '✅ ENDEREÇO EXATO ENCONTRADO:\n'
+          '  ${selected.street}, ${selected.number}\n'
+          '  LAT: ${selected.location.latitude}\n'
+          '  LNG: ${selected.location.longitude}',
+        );
+
+        address = currentAddress.copyWith(location: selected.location);
+
+        debugPrint(
+          '📍 Coordenada DEPOIS: '
+          '${address!.location.latitude}, '
+          '${address!.location.longitude}',
+        );
+      },
+    );
+
+    debugPrint('================================================');
+  }
+
+  @action
   Future<bool> save() async {
     if (loading) return false;
 
@@ -151,7 +278,7 @@ abstract class CreatePlaceViewModelBase with Store {
         error = 'Usuário não autenticado.';
         return false;
       }
-
+      await resolveAddressLocation();
       final photosBase64 = <String>[];
 
       for (final photo in photos) {

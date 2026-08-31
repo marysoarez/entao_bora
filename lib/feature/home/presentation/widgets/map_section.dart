@@ -2,13 +2,15 @@ import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/home/presentation/widgets/map_heat.dart';
 import 'package:entao_bora/feature/home/presentation/widgets/map_markers.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
-import 'package:entao_bora/shared/config/map_config.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
 
 class MapSection extends StatefulWidget {
-  const MapSection({super.key, required this.places, required this.events});
+  const MapSection({
+    super.key,
+    required this.places,
+    required this.events,
+  });
 
   final List<PlaceEntity> places;
   final List<EventEntity> events;
@@ -18,9 +20,12 @@ class MapSection extends StatefulWidget {
 }
 
 class _MapSectionState extends State<MapSection> {
-  final MapController _mapController = MapController();
+  google.GoogleMapController? _mapController;
 
-  static const LatLng _initialCenter = LatLng(-22.9068, -43.1729);
+  static final google.LatLng _initialCenter = google.LatLng(
+    -22.9068,
+    -43.1729,
+  );
 
   bool _mapReady = false;
   bool _initialFitDone = false;
@@ -46,7 +51,8 @@ class _MapSectionState extends State<MapSection> {
     });
   }
 
-  void _onMapReady() {
+  void _onMapCreated(google.GoogleMapController controller) {
+    _mapController = controller;
     _mapReady = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -57,25 +63,18 @@ class _MapSectionState extends State<MapSection> {
     });
   }
 
-  void _onMapEvent(MapEvent event) {
-    if (event is MapEventNonRotatedSizeChange && !_initialFitDone) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !_mapReady) return;
-
-        _fitAllMarkers();
-        _initialFitDone = true;
-      });
-    }
-  }
-
   void _fitAllMarkers() {
-    if (!_mapReady) return;
+    final controller = _mapController;
 
-    final points = <LatLng>[];
+    if (controller == null || !_mapReady) {
+      return;
+    }
+
+    final points = <google.LatLng>[];
 
     for (final place in widget.places) {
       points.add(
-        LatLng(
+        google.LatLng(
           place.address.location.latitude,
           place.address.location.longitude,
         ),
@@ -84,31 +83,65 @@ class _MapSectionState extends State<MapSection> {
 
     for (final event in widget.events.where((e) => e.placeId == null)) {
       points.add(
-        LatLng(
+        google.LatLng(
           event.address.location.latitude,
           event.address.location.longitude,
         ),
       );
     }
 
-    if (points.isEmpty) return;
+    if (points.isEmpty) {
+      return;
+    }
 
-    final bounds = LatLngBounds.fromPoints(points);
+    // Apenas um ponto
+    if (points.length == 1) {
+      controller.animateCamera(
+        google.CameraUpdate.newCameraPosition(
+          google.CameraPosition(
+            target: points.first,
+            zoom: 14,
+          ),
+        ),
+      );
 
-    _mapController.fitCamera(
-      CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(60)),
+      return;
+    }
+
+    double minLat = points.first.latitude;
+    double maxLat = points.first.latitude;
+    double minLng = points.first.longitude;
+    double maxLng = points.first.longitude;
+
+    for (final point in points.skip(1)) {
+      minLat = point.latitude < minLat ? point.latitude : minLat;
+      maxLat = point.latitude > maxLat ? point.latitude : maxLat;
+      minLng = point.longitude < minLng ? point.longitude : minLng;
+      maxLng = point.longitude > maxLng ? point.longitude : maxLng;
+    }
+
+    final bounds = google.LatLngBounds(
+      southwest: google.LatLng(minLat, minLng),
+      northeast: google.LatLng(maxLat, maxLng),
+    );
+
+    controller.animateCamera(
+      google.CameraUpdate.newLatLngBounds(
+        bounds,
+        60,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    print('');
-    print('================ MAP SECTION ================');
-    print('PLACES: ${widget.places.length}');
-    print('EVENTS: ${widget.events.length}');
+    debugPrint('');
+    debugPrint('================ MAP SECTION ================');
+    debugPrint('PLACES: ${widget.places.length}');
+    debugPrint('EVENTS: ${widget.events.length}');
 
     for (final event in widget.events) {
-      print(
+      debugPrint(
         'EVENT MAP -> '
         'id=${event.id} | '
         'title=${event.title} | '
@@ -125,38 +158,49 @@ class _MapSectionState extends State<MapSection> {
       context: context,
     );
 
-    print('MARKERS GERADOS: ${markers.length}');
+    final circles = MapHeatLayer.build(widget.events);
 
-    print('============================================');
+    debugPrint('MARKERS GERADOS: ${markers.length}');
+    debugPrint('CIRCLES GERADOS: ${circles.length}');
+    debugPrint('============================================');
 
-    return FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        initialCenter: _initialCenter,
-        initialZoom: 11,
-        onMapReady: _onMapReady,
-        onMapEvent: _onMapEvent,
-        interactionOptions: const InteractionOptions(
-          flags: InteractiveFlag.all,
-        ),
+    return google.GoogleMap(
+      initialCameraPosition: google.CameraPosition(
+        target: _initialCenter,
+        zoom: 11,
       ),
-      children: [
-        TileLayer(
-          urlTemplate: MapConfig.tileUrl,
-          subdomains: MapConfig.subdomains,
-          userAgentPackageName: 'com.entaobora',
-        ),
 
-        CircleLayer(circles: MapHeatLayer.build(widget.events)),
+      onMapCreated: _onMapCreated,
 
-        MarkerLayer(markers: markers),
-      ],
+      // Google Maps exige Set
+      markers: markers.toSet(),
+      circles: circles.toSet(),
+
+      // Interações
+      rotateGesturesEnabled: true,
+      tiltGesturesEnabled: true,
+      scrollGesturesEnabled: true,
+      zoomGesturesEnabled: true,
+
+      // UI
+      zoomControlsEnabled: false,
+      mapToolbarEnabled: false,
+      compassEnabled: false,
+
+      // Localização
+      myLocationEnabled: false,
+      myLocationButtonEnabled: false,
+
+      // Extras
+      buildingsEnabled: false,
+      trafficEnabled: false,
+      indoorViewEnabled: false,
     );
   }
 
   @override
   void dispose() {
-    _mapController.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 }

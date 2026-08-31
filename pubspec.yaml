@@ -43,12 +43,13 @@ dependencies:
   flutter_modular: ^6.4.1
   mobx: ^2.5.0
   flutter_mobx: ^2.3.0
-
+  flutter_dotenv: ^5.2.1
   # Mapas
   flutter_map: ^8.2.1
   latlong2: ^0.9.1
   geolocator: ^14.0.2
   google_sign_in: ^7.1.1
+  google_maps_flutter: ^2.14.2
   # Utilidades
   intl: ^0.20.2
   uuid: ^4.5.1
@@ -70,16 +71,11 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.5.4
   mobx_codegen: ^2.7.1
-
   flutter_lints: ^6.0.0
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+dependency_overrides:
+  firebase_core_web: 3.10.0
+
 flutter_launcher_icons:
   android: true
   ios: true
@@ -88,14 +84,16 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/images/entao_bora.jpg"
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - .env
+    - assets/images/
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
-  assets:
-      - assets/images/
 
   #   - images/a_dot_ham.jpeg
 

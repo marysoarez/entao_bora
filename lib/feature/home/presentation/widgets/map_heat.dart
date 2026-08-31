@@ -1,15 +1,14 @@
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
 
 class MapHeatLayer {
   const MapHeatLayer._();
 
-  static List<CircleMarker> build(
+  static Set<google.Circle> build(
     List<EventEntity> events,
   ) {
-    final circles = <CircleMarker>[];
+    final circles = <google.Circle>{};
 
     for (final event in events) {
       final pulse =
@@ -18,15 +17,17 @@ class MapHeatLayer {
       if (pulse <= 0) continue;
 
       circles.add(
-        CircleMarker(
-          point: LatLng(
+        google.Circle(
+          circleId: google.CircleId(
+            'heat_${event.id}',
+          ),
+          center: google.LatLng(
             event.address.location.latitude,
             event.address.location.longitude,
           ),
           radius: _radius(pulse),
-          useRadiusInMeter: true,
-          color: _color(pulse),
-          borderStrokeWidth: 0,
+          fillColor: _color(pulse),
+          strokeWidth: 0,
         ),
       );
     }

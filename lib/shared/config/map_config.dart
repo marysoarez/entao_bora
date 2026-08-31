@@ -1,5 +1,10 @@
 class MapConfig {
-  static const tileUrl =
-      'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png';
-  static const subdomains = <String>[];
+  const MapConfig._();
+
+  static const double initialLatitude = -22.9068;
+  static const double initialLongitude = -43.1729;
+  static const double initialZoom = 11;
+
+  static const String mapId =
+      String.fromEnvironment('GOOGLE_MAPS_MAP_ID');
 }
