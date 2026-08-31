@@ -41,6 +41,13 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
   }
 
   Future<void> next() async {
+    if (page == 1 && vm.address == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione um endereço para continuar.')),
+      );
+      return;
+    }
+
     if (isLastPage) {
       final success = await vm.save();
 
@@ -87,13 +94,15 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
       builder: (context) {
         return Scaffold(
           appBar: AppAppBar(
-            title: vm.isEditing ? 'Editar estabelecimento' : 'Novo estabelecimento',
+            title: vm.isEditing
+                ? 'Editar estabelecimento'
+                : 'Novo estabelecimento',
           ),
-        
+
           body: Column(
             children: [
               LinearProgressIndicator(value: (page + 1) / totalPages),
-          
+
               Expanded(
                 child: PageView(
                   controller: controller,
@@ -112,7 +121,7 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
                   ],
                 ),
               ),
-          
+
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -150,7 +159,7 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
             ],
           ),
         );
-      }
+      },
     );
   }
 }

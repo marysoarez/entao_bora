@@ -27,8 +27,7 @@ class AddressAutocompleteField extends StatefulWidget {
       _AddressAutocompleteFieldState();
 }
 
-class _AddressAutocompleteFieldState
-    extends State<AddressAutocompleteField> {
+class _AddressAutocompleteFieldState extends State<AddressAutocompleteField> {
   late final TextEditingController controller;
 
   Timer? debounce;
@@ -45,9 +44,7 @@ class _AddressAutocompleteFieldState
 
     selected = widget.initialValue;
 
-    controller = TextEditingController(
-      text: selected?.fullAddress ?? '',
-    );
+    controller = TextEditingController(text: selected?.fullAddress ?? '');
   }
 
   @override
@@ -86,10 +83,7 @@ class _AddressAutocompleteFieldState
 
     debounce?.cancel();
 
-    debounce = Timer(
-      const Duration(milliseconds: 500),
-      () => _search(value),
-    );
+    debounce = Timer(const Duration(milliseconds: 500), () => _search(value));
   }
 
   @override
@@ -97,10 +91,7 @@ class _AddressAutocompleteFieldState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text(widget.label, style: Theme.of(context).textTheme.titleMedium),
 
         const SizedBox(height: 12),
 
@@ -116,50 +107,42 @@ class _AddressAutocompleteFieldState
                     child: SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                   )
                 : controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          controller.clear();
+                ? IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      controller.clear();
 
-                          setState(() {
-                            selected = null;
-                            results = [];
-                          });
-                        },
-                      )
-                    : null,
+                      setState(() {
+                        selected = null;
+                        results = [];
+                      });
+                    },
+                  )
+                : null,
           ),
         ),
 
-        if (selected != null) ...[
+        if (loading && selected == null) ...[
+          const SizedBox(height: 8),
+          const _AddressSuggestionsSkeleton(),
+        ] else if (selected != null) ...[
           const SizedBox(height: 12),
 
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                ),
+                const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    selected!.fullAddress,
-                  ),
-                ),
+                Expanded(child: Text(selected!.fullAddress)),
               ],
             ),
           ),
@@ -173,8 +156,7 @@ class _AddressAutocompleteFieldState
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: results.length,
-              separatorBuilder: (_, __) =>
-                  const Divider(height: 1),
+              separatorBuilder: (_, index) => const Divider(height: 1),
               itemBuilder: (_, index) {
                 final address = results[index];
 
@@ -198,6 +180,94 @@ class _AddressAutocompleteFieldState
           ),
         ],
       ],
+    );
+  }
+}
+
+class _AddressSuggestionsSkeleton extends StatelessWidget {
+  const _AddressSuggestionsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = colorScheme.surface;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: List.generate(3, (index) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                child: Row(
+                  children: [
+                    _SkeletonBox(
+                      width: 40,
+                      height: 40,
+                      color: baseColor,
+                      borderRadius: 20,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FractionallySizedBox(
+                            widthFactor: 0.82,
+                            child: _SkeletonBox(height: 14, color: baseColor),
+                          ),
+                          const SizedBox(height: 8),
+                          FractionallySizedBox(
+                            widthFactor: 0.58,
+                            child: _SkeletonBox(
+                              height: 12,
+                              color: highlightColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (index < 2) const Divider(height: 1),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _SkeletonBox extends StatelessWidget {
+  const _SkeletonBox({
+    required this.height,
+    required this.color,
+    this.width,
+    this.borderRadius = 6,
+  });
+
+  final double? width;
+  final double height;
+  final Color color;
+  final double borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
     );
   }
 }
