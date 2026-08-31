@@ -24,12 +24,16 @@ class FailureReverseGeocode extends BaseError {
   });
 }
 
-class FailureIsNear extends BaseError {
-  FailureIsNear({
+class FailureGeocodeAddress extends BaseError {
+  FailureGeocodeAddress({
     required super.message,
     super.exception,
     super.stackTrace,
   });
+}
+
+class FailureIsNear extends BaseError {
+  FailureIsNear({required super.message, super.exception, super.stackTrace});
 }
 
 class FailureGetCurrentLocationIfNear extends BaseError {

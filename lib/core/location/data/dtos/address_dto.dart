@@ -31,19 +31,22 @@ class AddressDto extends AddressEntity {
   }
 
   factory AddressDto.fromMap(Map<String, dynamic> map) {
+    final latitude = map['latitude'];
+    final longitude = map['longitude'];
+
     return AddressDto(
-      displayName: map['displayName'] ?? '',
-      street: map['street'],
-      number: map['number'],
-      complement: map['complement'],
-      neighborhood: map['neighborhood'],
-      city: map['city'],
-      state: map['state'],
-      country: map['country'],
-      postalCode: map['postalCode'],
+      displayName: map['displayName']?.toString() ?? '',
+      street: map['street']?.toString(),
+      number: map['number']?.toString(),
+      complement: map['complement']?.toString(),
+      neighborhood: map['neighborhood']?.toString(),
+      city: map['city']?.toString(),
+      state: map['state']?.toString(),
+      country: map['country']?.toString(),
+      postalCode: map['postalCode']?.toString(),
       location: LocationEntity(
-        latitude: (map['latitude'] as num).toDouble(),
-        longitude: (map['longitude'] as num).toDouble(),
+        latitude: (latitude as num).toDouble(),
+        longitude: (longitude as num).toDouble(),
       ),
     );
   }
@@ -65,28 +68,56 @@ class AddressDto extends AddressEntity {
   }
 
   factory AddressDto.fromNominatim(Map<String, dynamic> json) {
-    final address = json['address'] as Map<String, dynamic>? ?? {};
+    final address =
+        json['address'] as Map<String, dynamic>? ?? {};
+
+    final lat = double.tryParse(
+      json['lat']?.toString() ?? '',
+    );
+
+    final lon = double.tryParse(
+      json['lon']?.toString() ?? '',
+    );
+
+    if (lat == null || lon == null) {
+      throw const FormatException(
+        'Nominatim retornou uma coordenada inválida.',
+      );
+    }
+
+    final street =
+        address['road']?.toString() ??
+        address['pedestrian']?.toString() ??
+        address['street']?.toString();
+
+    final number =
+        address['house_number']?.toString();
+
+    final neighborhood =
+        address['suburb']?.toString() ??
+        address['neighbourhood']?.toString() ??
+        address['quarter']?.toString() ??
+        address['residential']?.toString();
+
+    final city =
+        address['city']?.toString() ??
+        address['town']?.toString() ??
+        address['village']?.toString() ??
+        address['municipality']?.toString();
 
     return AddressDto(
-      displayName: json['display_name'] ?? '',
-      street: address['road'] ?? address['pedestrian'] ?? address['street'],
-      number: address['house_number'],
-      complement: null, // O Nominatim normalmente não fornece complemento
-      neighborhood:
-          address['suburb'] ??
-          address['neighbourhood'] ??
-          address['quarter'],
-      city:
-          address['city'] ??
-          address['town'] ??
-          address['village'] ??
-          address['municipality'],
-      state: address['state'],
-      country: address['country'],
-      postalCode: address['postcode'],
+      displayName: json['display_name']?.toString() ?? '',
+      street: street,
+      number: number,
+      complement: null,
+      neighborhood: neighborhood,
+      city: city,
+      state: address['state']?.toString(),
+      country: address['country']?.toString(),
+      postalCode: address['postcode']?.toString(),
       location: LocationEntity(
-        latitude: double.parse(json['lat']),
-        longitude: double.parse(json['lon']),
+        latitude: lat,
+        longitude: lon,
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:entao_bora/core/location/data/data_source/location_data_source.dart';
+import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/core/location/domain/entities/location_entity.dart';
 import 'package:entao_bora/core/location/domain/errors/location_errors.dart';
@@ -11,13 +12,11 @@ class LocationRepositoryImpl extends HandleLogError
     implements ILocationRepository {
   final ILocationDatasource datasource;
 
-  LocationRepositoryImpl({
-    required this.datasource,
-  });
+  LocationRepositoryImpl({required this.datasource});
 
   @override
   Future<Either<FailureGetCurrentLocation, LocationEntity>>
-      getCurrentLocation() async {
+  getCurrentLocation() async {
     try {
       final result = await datasource.getCurrentLocation();
 
@@ -29,19 +28,16 @@ class LocationRepositoryImpl extends HandleLogError
         stackTrace: stackTrace,
       );
 
-      logError(
-        error: error,
-        failure: failure,
-        stackTrace: stackTrace,
-      );
+      logError(error: error, failure: failure, stackTrace: stackTrace);
 
       return Left(failure);
     }
   }
 
   @override
-  Future<Either<FailureSearchAddress, List<AddressEntity>>>
-      searchAddress(String query) async {
+  Future<Either<FailureSearchAddress, List<AddressEntity>>> searchAddress(
+    String query,
+  ) async {
     try {
       final result = await datasource.searchAddress(query);
 
@@ -53,19 +49,16 @@ class LocationRepositoryImpl extends HandleLogError
         stackTrace: stackTrace,
       );
 
-      logError(
-        error: error,
-        failure: failure,
-        stackTrace: stackTrace,
-      );
+      logError(error: error, failure: failure, stackTrace: stackTrace);
 
       return Left(failure);
     }
   }
 
   @override
-  Future<Either<FailureReverseGeocode, AddressEntity?>>
-      reverseGeocode(LocationEntity location) async {
+  Future<Either<FailureReverseGeocode, AddressEntity?>> reverseGeocode(
+    LocationEntity location,
+  ) async {
     try {
       final result = await datasource.reverseGeocode(location);
 
@@ -77,11 +70,30 @@ class LocationRepositoryImpl extends HandleLogError
         stackTrace: stackTrace,
       );
 
-      logError(
-        error: error,
-        failure: failure,
+      logError(error: error, failure: failure, stackTrace: stackTrace);
+
+      return Left(failure);
+    }
+  }
+
+  @override
+  Future<Either<FailureGeocodeAddress, AddressEntity?>> geocodeAddress(
+    AddressEntity address,
+  ) async {
+    try {
+      final result = await datasource.geocodeAddress(
+        AddressDto.fromEntity(address),
+      );
+
+      return Right(result);
+    } catch (error, stackTrace) {
+      final failure = FailureGeocodeAddress(
+        message: 'Erro ao geocodificar endereço.',
+        exception: error,
         stackTrace: stackTrace,
       );
+
+      logError(error: error, failure: failure, stackTrace: stackTrace);
 
       return Left(failure);
     }
@@ -110,11 +122,7 @@ class LocationRepositoryImpl extends HandleLogError
         stackTrace: stackTrace,
       );
 
-      logError(
-        error: error,
-        failure: failure,
-        stackTrace: stackTrace,
-      );
+      logError(error: error, failure: failure, stackTrace: stackTrace);
 
       return Left(failure);
     }
@@ -122,7 +130,7 @@ class LocationRepositoryImpl extends HandleLogError
 
   @override
   Future<Either<FailureGetCurrentLocationIfNear, LocationEntity?>>
-      getCurrentLocationIfNear(
+  getCurrentLocationIfNear(
     LocationEntity destination, {
     double radius = 100,
   }) async {
@@ -148,11 +156,7 @@ class LocationRepositoryImpl extends HandleLogError
         stackTrace: stackTrace,
       );
 
-      logError(
-        error: error,
-        failure: failure,
-        stackTrace: stackTrace,
-      );
+      logError(error: error, failure: failure, stackTrace: stackTrace);
 
       return Left(failure);
     }

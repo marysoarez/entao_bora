@@ -1,4 +1,3 @@
-import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
@@ -150,32 +149,7 @@ abstract class CreatePlaceViewModelBase with Store {
     // Não tenta buscar enquanto o campo estiver vazio
     if (number.trim().isEmpty) return;
 
-    final fullAddress = address!.fullAddress;
-
-    final result = await _locationRepository.searchAddress(fullAddress);
-
-    result.fold(
-      (failure) {
-        error = failure.message;
-      },
-      (addresses) {
-        if (addresses.isEmpty) return;
-
-        // Preferimos um resultado que realmente tenha house_number
-        final exact = addresses.cast<AddressEntity?>().firstWhere(
-          (result) =>
-              result?.number != null && result!.number!.trim() == number.trim(),
-          orElse: () => null,
-        );
-
-        final selected = exact ?? addresses.first;
-
-        address = address!.copyWith(
-          location: selected!.location,
-          displayName: selected.displayName,
-        );
-      },
-    );
+    await resolveAddressLocation();
   }
 
   @action
@@ -200,59 +174,30 @@ abstract class CreatePlaceViewModelBase with Store {
       return;
     }
 
-    final query = [
-      currentAddress.street,
-      number,
-      currentAddress.neighborhood,
-      currentAddress.city,
-      currentAddress.state,
-      currentAddress.postalCode,
-    ].where((e) => e != null && e!.trim().isNotEmpty).join(', ');
-
-    debugPrint('🔎 BUSCANDO: $query');
-
-    final result = await _locationRepository.searchAddress(query);
+    final result = await _locationRepository.geocodeAddress(currentAddress);
 
     result.fold(
       (failure) {
         debugPrint('❌ ERRO: ${failure.message}');
         error = failure.message;
       },
-      (addresses) {
-        debugPrint('🔎 RESULTADOS: ${addresses.length}');
-
-        for (final item in addresses) {
-          debugPrint(
-            'RESULTADO → '
-            '${item.street}, ${item.number} | '
-            '${item.location.latitude}, '
-            '${item.location.longitude}',
-          );
-        }
-
-        final exactMatches = addresses.where(
-          (item) =>
-              item.number != null &&
-              item.number!.trim() == number &&
-              item.street?.trim().toLowerCase() ==
-                  currentAddress.street?.trim().toLowerCase(),
-        );
-
-        if (exactMatches.isEmpty) {
-          debugPrint('⚠️ Nenhum endereço exato encontrado.');
+      (resolvedAddress) {
+        if (resolvedAddress == null) {
+          debugPrint('⚠️ Google Geocoding não encontrou o endereço.');
           return;
         }
 
-        final selected = exactMatches.first;
-
         debugPrint(
-          '✅ ENDEREÇO EXATO ENCONTRADO:\n'
-          '  ${selected.street}, ${selected.number}\n'
-          '  LAT: ${selected.location.latitude}\n'
-          '  LNG: ${selected.location.longitude}',
+          '✅ ENDEREÇO GEOCODIFICADO:\n'
+          '  ${resolvedAddress.displayName}\n'
+          '  LAT: ${resolvedAddress.location.latitude}\n'
+          '  LNG: ${resolvedAddress.location.longitude}',
         );
 
-        address = currentAddress.copyWith(location: selected.location);
+        address = currentAddress.copyWith(
+          location: resolvedAddress.location,
+          displayName: resolvedAddress.displayName,
+        );
 
         debugPrint(
           '📍 Coordenada DEPOIS: '
@@ -272,13 +217,14 @@ abstract class CreatePlaceViewModelBase with Store {
     loading = true;
 
     try {
+      await resolveAddressLocation();
+
       final user = await _authRepository.getCurrentUser();
 
       if (user == null) {
         error = 'Usuário não autenticado.';
         return false;
       }
-      await resolveAddressLocation();
       final photosBase64 = <String>[];
 
       for (final photo in photos) {

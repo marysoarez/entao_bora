@@ -5,13 +5,19 @@ import '../entities/location_entity.dart';
 
 abstract class ILocationRepository {
   Future<Either<FailureGetCurrentLocation, LocationEntity>>
-      getCurrentLocation();
+  getCurrentLocation();
 
-  Future<Either<FailureSearchAddress, List<AddressEntity>>>
-      searchAddress(String query);
+  Future<Either<FailureSearchAddress, List<AddressEntity>>> searchAddress(
+    String query,
+  );
 
-  Future<Either<FailureReverseGeocode, AddressEntity?>>
-      reverseGeocode(LocationEntity location);
+  Future<Either<FailureReverseGeocode, AddressEntity?>> reverseGeocode(
+    LocationEntity location,
+  );
+
+  Future<Either<FailureGeocodeAddress, AddressEntity?>> geocodeAddress(
+    AddressEntity address,
+  );
 
   Future<Either<FailureIsNear, bool>> isNear(
     LocationEntity destination, {
@@ -19,8 +25,5 @@ abstract class ILocationRepository {
   });
 
   Future<Either<FailureGetCurrentLocationIfNear, LocationEntity?>>
-      getCurrentLocationIfNear(
-    LocationEntity destination, {
-    double radius = 100,
-  });
+  getCurrentLocationIfNear(LocationEntity destination, {double radius = 100});
 }

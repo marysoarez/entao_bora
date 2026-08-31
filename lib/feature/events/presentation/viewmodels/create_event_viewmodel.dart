@@ -12,7 +12,6 @@ import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
 import 'package:entao_bora/shared/errors/image_exception.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
-import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
@@ -202,14 +201,14 @@ abstract class CreateEventViewModelBase with Store {
         return false;
       }
 
+      await resolveAddressLocation();
+
       final currentUser = await _authRepository.getCurrentUser();
 
       if (currentUser == null) {
         error = 'Faça login para criar um evento.';
         return false;
       }
-
-      await resolveAddressLocation();
 
       final event = await _buildEvent(currentUser);
       final result = await _eventRepository.createEvent(event);
@@ -221,101 +220,6 @@ abstract class CreateEventViewModelBase with Store {
     } finally {
       loading = false;
     }
-  }
-
-  @action
-  Future<void> resolveAddressLocation() async {
-    if (address == null) return;
-
-    final number = address!.number?.trim();
-
-    if (number == null || number.isEmpty) return;
-
-    final query = address!.fullAddress;
-
-    debugPrint('');
-    debugPrint('========== RESOLVE ADDRESS ==========');
-    debugPrint('QUERY: $query');
-    debugPrint('NÚMERO INFORMADO: $number');
-
-    debugPrint('COORDENADA ANTES:');
-    debugPrint('  lat: ${address!.location.latitude}');
-    debugPrint('  lng: ${address!.location.longitude}');
-
-    final result = await _locationRepository.searchAddress(query);
-
-    result.fold(
-      (failure) {
-        debugPrint('❌ ERRO AO BUSCAR ENDEREÇO');
-        debugPrint('  ${failure.message}');
-
-        error = failure.message;
-      },
-      (addresses) {
-        debugPrint('RESULTADOS ENCONTRADOS: ${addresses.length}');
-
-        if (addresses.isEmpty) {
-          debugPrint('⚠️ NENHUM RESULTADO');
-          debugPrint('➡️ Mantendo coordenada original.');
-
-          debugPrint('====================================');
-          return;
-        }
-
-        for (final item in addresses) {
-          debugPrint(
-            'RESULTADO: '
-            'displayName="${item.displayName}" | '
-            'street="${item.street}" | '
-            'number="${item.number}" | '
-            'lat=${item.location.latitude} | '
-            'lng=${item.location.longitude}',
-          );
-        }
-
-        final exactMatches = addresses
-            .where(
-              (item) => item.number != null && item.number!.trim() == number,
-            )
-            .toList();
-
-        debugPrint('');
-        debugPrint('MATCH EXATO: ${exactMatches.length}');
-
-        if (exactMatches.isEmpty) {
-          debugPrint('⚠️ NÚMERO $number NÃO FOI ENCONTRADO PELO NOMINATIM');
-
-          debugPrint('➡️ NÃO alterando latitude/longitude.');
-
-          debugPrint('COORDENADA MANTIDA:');
-          debugPrint('  lat: ${address!.location.latitude}');
-          debugPrint('  lng: ${address!.location.longitude}');
-
-          debugPrint('====================================');
-          return;
-        }
-
-        final selected = exactMatches.first;
-
-        debugPrint('✅ MATCH EXATO ENCONTRADO');
-
-        debugPrint('  displayName: ${selected.displayName}');
-        debugPrint('  número: ${selected.number}');
-        debugPrint('  lat: ${selected.location.latitude}');
-        debugPrint('  lng: ${selected.location.longitude}');
-
-        address = address!.copyWith(
-          location: selected.location,
-          displayName: selected.displayName,
-        );
-
-        debugPrint('COORDENADA DEPOIS:');
-        debugPrint('  lat: ${address!.location.latitude}');
-        debugPrint('  lng: ${address!.location.longitude}');
-
-        debugPrint('====================================');
-      },
-    );
   }
 
   //==========================================================
@@ -490,5 +394,30 @@ abstract class CreateEventViewModelBase with Store {
       error = failure.message;
       return [];
     }, (addresses) => addresses);
+  }
+
+  Future<void> resolveAddressLocation() async {
+    final currentAddress = address;
+    final number = currentAddress?.number?.trim();
+
+    if (currentAddress == null || number == null || number.isEmpty) {
+      return;
+    }
+
+    final result = await _locationRepository.geocodeAddress(currentAddress);
+
+    result.fold(
+      (failure) {
+        error = failure.message;
+      },
+      (resolvedAddress) {
+        if (resolvedAddress == null) return;
+
+        address = currentAddress.copyWith(
+          location: resolvedAddress.location,
+          displayName: resolvedAddress.displayName,
+        );
+      },
+    );
   }
 }
