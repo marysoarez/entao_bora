@@ -6,11 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
 
 class MapSection extends StatefulWidget {
-  const MapSection({
-    super.key,
-    required this.places,
-    required this.events,
-  });
+  const MapSection({super.key, required this.places, required this.events});
 
   final List<PlaceEntity> places;
   final List<EventEntity> events;
@@ -22,13 +18,22 @@ class MapSection extends StatefulWidget {
 class _MapSectionState extends State<MapSection> {
   google.GoogleMapController? _mapController;
 
-  static final google.LatLng _initialCenter = google.LatLng(
-    -22.9068,
-    -43.1729,
-  );
+  static final google.LatLng _initialCenter = google.LatLng(-22.9068, -43.1729);
 
   bool _mapReady = false;
-  bool _initialFitDone = false;
+  bool _markersLoaded = false;
+  int _markerBuildVersion = 0;
+  Set<google.Marker> _markers = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_markersLoaded) return;
+
+    _markersLoaded = true;
+    _refreshMarkers();
+  }
 
   @override
   void didUpdateWidget(covariant MapSection oldWidget) {
@@ -41,13 +46,31 @@ class _MapSectionState extends State<MapSection> {
       return;
     }
 
-    _initialFitDone = false;
+    _refreshMarkers();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_mapReady) return;
 
       _fitAllMarkers();
-      _initialFitDone = true;
+    });
+  }
+
+  Future<void> _refreshMarkers() async {
+    final version = ++_markerBuildVersion;
+
+    final markers = await MapMarkers.build(
+      places: widget.places,
+      events: widget.events,
+      owners: const {},
+      context: context,
+    );
+
+    if (!mounted || version != _markerBuildVersion) {
+      return;
+    }
+
+    setState(() {
+      _markers = markers.toSet();
     });
   }
 
@@ -59,7 +82,6 @@ class _MapSectionState extends State<MapSection> {
       if (!mounted) return;
 
       _fitAllMarkers();
-      _initialFitDone = true;
     });
   }
 
@@ -98,10 +120,7 @@ class _MapSectionState extends State<MapSection> {
     if (points.length == 1) {
       controller.animateCamera(
         google.CameraUpdate.newCameraPosition(
-          google.CameraPosition(
-            target: points.first,
-            zoom: 14,
-          ),
+          google.CameraPosition(target: points.first, zoom: 14),
         ),
       );
 
@@ -125,12 +144,7 @@ class _MapSectionState extends State<MapSection> {
       northeast: google.LatLng(maxLat, maxLng),
     );
 
-    controller.animateCamera(
-      google.CameraUpdate.newLatLngBounds(
-        bounds,
-        60,
-      ),
-    );
+    controller.animateCamera(google.CameraUpdate.newLatLngBounds(bounds, 60));
   }
 
   @override
@@ -151,16 +165,9 @@ class _MapSectionState extends State<MapSection> {
       );
     }
 
-    final markers = MapMarkers.build(
-      places: widget.places,
-      events: widget.events,
-      owners: const {},
-      context: context,
-    );
-
     final circles = MapHeatLayer.build(widget.events);
 
-    debugPrint('MARKERS GERADOS: ${markers.length}');
+    debugPrint('MARKERS GERADOS: ${_markers.length}');
     debugPrint('CIRCLES GERADOS: ${circles.length}');
     debugPrint('============================================');
 
@@ -173,7 +180,7 @@ class _MapSectionState extends State<MapSection> {
       onMapCreated: _onMapCreated,
 
       // Google Maps exige Set
-      markers: markers.toSet(),
+      markers: _markers,
       circles: circles.toSet(),
 
       // Interações
