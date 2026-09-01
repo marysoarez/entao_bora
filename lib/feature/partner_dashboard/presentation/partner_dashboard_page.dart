@@ -5,8 +5,10 @@ import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
+import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:entao_bora/shared/helpers/image_helper.dart';
 
 class PartnerDashboardPage extends StatefulWidget {
   final PlaceEntity? place;
@@ -21,6 +23,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
   final _authRepository = Modular.get<IAuthRepository>();
   final _placeRepository = Modular.get<IPlaceRepository>();
   final _eventRepository = Modular.get<IEventRepository>();
+  final _userDatasource = Modular.get<UserDatasource>();
 
   bool loading = true;
   String? error;
@@ -183,6 +186,85 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     if (created == true) {
       await loadDashboard();
     }
+  }
+
+  Future<void> openEditEvent(EventEntity event) async {
+    final updated = await Modular.to.pushNamed(
+      '/events/create',
+      arguments: event,
+    );
+
+    if (updated == true) {
+      await loadDashboard();
+    }
+  }
+
+  Future<void> transferEvent(EventEntity event) async {
+    final controller = TextEditingController();
+
+    final targetUserId = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Transferir evento'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'ID do usuario de destino',
+              hintText: 'Cole o ID do usuario',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(controller.text.trim()),
+              child: const Text('Transferir'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (targetUserId == null || targetUserId.isEmpty) return;
+
+    final users = await _userDatasource.getUsersByIds([targetUserId]);
+    if (!mounted) return;
+
+    if (users.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuario de destino nao encontrado.')),
+      );
+      return;
+    }
+
+    final result = await _eventRepository.updateEvent(
+      event.copyWith(createdBy: users.first, updatedAt: DateTime.now()),
+    );
+
+    if (!mounted) return;
+
+    result.fold(
+      (failure) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(failure.message)));
+      },
+      (_) async {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Evento transferido para ${users.first.name}.'),
+          ),
+        );
+        await loadDashboard();
+      },
+    );
   }
 
   @override
@@ -425,7 +507,11 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
       child: Column(
         children: [
           for (var index = 0; index < visibleEvents.length; index++) ...[
-            _EventDashboardTile(event: visibleEvents[index]),
+            _EventDashboardTile(
+              event: visibleEvents[index],
+              onEdit: () => openEditEvent(visibleEvents[index]),
+              onTransfer: () => transferEvent(visibleEvents[index]),
+            ),
             if (index != visibleEvents.length - 1) const Divider(height: 1),
           ],
         ],
@@ -479,63 +565,157 @@ class _MetricCard extends StatelessWidget {
 
 class _EventDashboardTile extends StatelessWidget {
   final EventEntity event;
+  final VoidCallback onEdit;
+  final VoidCallback onTransfer;
 
-  const _EventDashboardTile({required this.event});
+  const _EventDashboardTile({
+    required this.event,
+    required this.onEdit,
+    required this.onTransfer,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Modular.to.pushNamed('/events/${event.id}'),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: AppTheme.background,
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _EventCover(coverImage: event.coverImage),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      event.description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _InfoChip(
+                          icon: Icons.flag_outlined,
+                          label: event.status.label,
+                        ),
+                        _InfoChip(
+                          icon: Icons.person_outline,
+                          label: event.createdBy.name,
+                        ),
+                        if (event.instagram != null)
+                          _InfoChip(
+                            icon: Icons.alternate_email,
+                            label: event.instagram!,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              child: const Icon(Icons.music_note),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Wrap(
+                spacing: 8,
                 children: [
-                  Text(
-                    event.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  IconButton(
+                    tooltip: 'Ver evento',
+                    onPressed: () =>
+                        Modular.to.pushNamed('/events/${event.id}'),
+                    icon: const Icon(Icons.open_in_new),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatEventDate(event.startDate),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                  IconButton(
+                    tooltip: 'Editar evento',
+                    onPressed: onEdit,
+                    icon: const Icon(Icons.edit_outlined),
+                  ),
+                  IconButton(
+                    tooltip: 'Transferir evento',
+                    onPressed: onTransfer,
+                    icon: const Icon(Icons.swap_horiz),
                   ),
                 ],
               ),
-            ),
-            _EventMetric(icon: Icons.visibility_outlined, value: event.views),
-            const SizedBox(width: 20),
-            _EventMetric(
-              icon: Icons.local_fire_department_outlined,
-              value: event.boraCount,
-            ),
-            const SizedBox(width: 20),
-            _EventMetric(
-              icon: Icons.how_to_reg_outlined,
-              value: event.checkinCount,
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 20,
+            runSpacing: 10,
+            children: [
+              _Detail(icon: Icons.place_outlined, text: event.locationName),
+              _Detail(
+                icon: Icons.map_outlined,
+                text: event.address.fullAddress,
+              ),
+              _Detail(
+                icon: Icons.schedule,
+                text:
+                    '${_formatEventDate(event.startDate)} ate ${_formatEventDate(event.endDate)}',
+              ),
+              _Detail(icon: Icons.confirmation_number_outlined, text: _ticket),
+              _Detail(
+                icon: Icons.photo_library_outlined,
+                text: '${event.gallery.length} foto(s) na galeria',
+              ),
+            ],
+          ),
+          if (event.musicGenres.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: event.musicGenres
+                  .map((genre) => Chip(label: Text(genre.label)))
+                  .toList(),
             ),
           ],
-        ),
+          if (event.attractions.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Atracoes: ${event.attractions.map((e) => e.name).join(', ')}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 20,
+            runSpacing: 10,
+            children: [
+              _EventMetric(icon: Icons.visibility_outlined, value: event.views),
+              _EventMetric(
+                icon: Icons.local_fire_department_outlined,
+                value: event.boraCount,
+              ),
+              _EventMetric(
+                icon: Icons.how_to_reg_outlined,
+                value: event.checkinCount,
+              ),
+              _EventMetric(icon: Icons.share_outlined, value: event.shares),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  String get _ticket {
+    if (event.ticket.isFree) return 'Gratuito';
+    return event.ticket.ticketUrl?.isNotEmpty == true
+        ? event.ticket.ticketUrl!
+        : 'Ingresso externo';
   }
 
   String _formatEventDate(DateTime date) {
@@ -545,6 +725,76 @@ class _EventDashboardTile extends StatelessWidget {
     final minute = date.minute.toString().padLeft(2, '0');
 
     return '$day/$month/${date.year} - $hour:$minute';
+  }
+}
+
+class _EventCover extends StatelessWidget {
+  final String coverImage;
+
+  const _EventCover({required this.coverImage});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 112,
+        height: 112,
+        color: AppTheme.background,
+        child: coverImage.isEmpty
+            ? const Icon(Icons.music_note)
+            : Image.memory(
+                ImageHelper.base64ToBytes(coverImage),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image),
+              ),
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _InfoChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      avatar: Icon(icon, size: 16),
+      label: Text(label),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+}
+
+class _Detail extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _Detail({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 340),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: AppTheme.textSecondary),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text.isEmpty ? 'Nao informado' : text,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

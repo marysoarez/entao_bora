@@ -108,7 +108,9 @@ class _EventCoverStepState extends State<EventCoverStep> {
                           ],
                         ),
                       )
-                    : widget.vm.coverPhoto == null
+                    : widget.vm.coverPhoto == null &&
+                          (widget.vm.coverImage == null ||
+                              widget.vm.coverImage!.isEmpty)
                     ? const Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -124,7 +126,14 @@ class _EventCoverStepState extends State<EventCoverStep> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: kIsWeb
+                            child: widget.vm.coverPhoto == null
+                                ? Image.memory(
+                                    ImageHelper.base64ToBytes(
+                                      widget.vm.coverImage!,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
+                                : kIsWeb
                                 ? Image.network(
                                     widget.vm.coverPhoto!.path,
                                     fit: BoxFit.cover,

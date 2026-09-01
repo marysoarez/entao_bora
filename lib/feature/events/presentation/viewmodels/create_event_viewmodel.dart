@@ -78,6 +78,8 @@ abstract class CreateEventViewModelBase with Store {
 
   String? coverImage;
 
+  EventEntity? editingEvent;
+
   @computed
   bool get isValid =>
       title.trim().isNotEmpty &&
@@ -128,7 +130,27 @@ abstract class CreateEventViewModelBase with Store {
   @action
   void removeCoverPhoto() {
     coverPhoto = null;
-    coverImage = null;
+    if (editingEvent == null) {
+      coverImage = null;
+    }
+  }
+
+  @action
+  void editEvent(EventEntity event) {
+    editingEvent = event;
+    title = event.title;
+    description = event.description;
+    instagram = event.instagram ?? '';
+    place = null;
+    address = event.address;
+    startDate = event.startDate;
+    endDate = event.endDate;
+    coverPhoto = null;
+    coverImage = event.coverImage;
+    musicGenres = ObservableList.of(event.musicGenres);
+    attractions = ObservableList.of(event.attractions);
+    photos = ObservableList();
+    ticket = event.ticket;
   }
 
   @action
@@ -232,7 +254,6 @@ abstract class CreateEventViewModelBase with Store {
 
     loading = true;
     error = null;
-    coverImage = null;
 
     try {
       final validation = _validate();
@@ -258,7 +279,10 @@ abstract class CreateEventViewModelBase with Store {
       }
 
       final event = await _buildEvent(currentUser);
-      final result = await _eventRepository.createEvent(event);
+      final editing = editingEvent;
+      final result = editing == null
+          ? await _eventRepository.createEvent(event)
+          : await _eventRepository.updateEvent(event);
 
       return result.fold((failure) {
         error = failure.message;
@@ -276,6 +300,11 @@ abstract class CreateEventViewModelBase with Store {
     final photo = coverPhoto;
 
     if (photo == null) {
+      final currentCover = coverImage;
+      if (currentCover != null && currentCover.isNotEmpty) {
+        return currentCover;
+      }
+
       error = 'Adicione uma imagem de capa para o evento.';
       return null;
     }
@@ -294,6 +323,7 @@ abstract class CreateEventViewModelBase with Store {
   Future<EventEntity> _buildEvent(UserSummaryEntity currentUser) async {
     final now = DateTime.now();
     final gallery = await _processGalleryImages();
+    final editing = editingEvent;
     final selectedPlace = place;
     final selectedAddress = address;
 
@@ -302,7 +332,7 @@ abstract class CreateEventViewModelBase with Store {
     }
 
     return EventEntity(
-      id: '',
+      id: editing?.id ?? '',
       title: title.trim(),
       description: description.trim(),
       placeId: selectedPlace?.id,
@@ -311,21 +341,21 @@ abstract class CreateEventViewModelBase with Store {
       startDate: startDate!,
       endDate: endDate!,
       coverImage: coverImage!,
-      gallery: gallery,
+      gallery: gallery.isEmpty ? editing?.gallery ?? [] : gallery,
       musicGenres: musicGenres.toList(),
       attractions: attractions.toList(),
       ticket: ticket,
       instagram: instagram.trim().isEmpty ? null : instagram.trim(),
-      boraCount: 0,
-      checkinCount: 0,
-      views: 0,
-      shares: 0,
-      isBora: false,
-      hasCheckedIn: false,
-      createdBy: currentUser,
-      createdAt: now,
+      boraCount: editing?.boraCount ?? 0,
+      checkinCount: editing?.checkinCount ?? 0,
+      views: editing?.views ?? 0,
+      shares: editing?.shares ?? 0,
+      isBora: editing?.isBora ?? false,
+      hasCheckedIn: editing?.hasCheckedIn ?? false,
+      createdBy: editing?.createdBy ?? currentUser,
+      createdAt: editing?.createdAt ?? now,
       updatedAt: now,
-      status: EventStatus.published,
+      status: editing?.status ?? EventStatus.published,
     );
   }
 
@@ -357,7 +387,7 @@ abstract class CreateEventViewModelBase with Store {
       return 'Informe uma descricao.';
     }
 
-    if (coverPhoto == null) {
+    if (coverPhoto == null && coverImage == null) {
       return 'Adicione uma imagem de capa para o evento.';
     }
 

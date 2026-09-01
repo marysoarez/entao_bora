@@ -1,6 +1,7 @@
 import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/adress_autocomplete_field.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_cover_step.dart';
+import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
 import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
@@ -33,6 +34,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
     final place = Modular.args.data;
     if (place is PlaceEntity) {
       vm.setPlace(place);
+    } else if (place is EventEntity) {
+      vm.editEvent(place);
+      useRegisteredPlace = place.placeId != null;
     }
 
     loadPlaces();
@@ -42,9 +46,21 @@ class _CreateEventPageState extends State<CreateEventPage> {
     places = await vm.loadPlaces();
 
     final selectedPlace = vm.place;
+    final editingEvent = vm.editingEvent;
 
     if (places.isNotEmpty) {
-      if (selectedPlace == null) {
+      if (editingEvent != null) {
+        final index = places.indexWhere(
+          (place) => place.id == editingEvent.placeId,
+        );
+
+        if (index >= 0) {
+          vm.setPlace(places[index]);
+          useRegisteredPlace = true;
+        } else {
+          useRegisteredPlace = false;
+        }
+      } else if (selectedPlace == null) {
         vm.setPlace(places.first);
       } else {
         final index = places.indexWhere(
@@ -69,7 +85,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppAppBar(title: "Criar Evento"),
+      appBar: AppAppBar(
+        title: vm.editingEvent == null ? "Criar Evento" : "Editar Evento",
+      ),
       body: loadingPlaces
           ? const Center(child: CircularProgressIndicator())
           : Observer(
@@ -458,9 +476,11 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                           ScaffoldMessenger.of(
                                             context,
                                           ).showSnackBar(
-                                            const SnackBar(
+                                            SnackBar(
                                               content: Text(
-                                                'Evento criado com sucesso!',
+                                                vm.editingEvent == null
+                                                    ? 'Evento criado com sucesso!'
+                                                    : 'Evento atualizado com sucesso!',
                                               ),
                                             ),
                                           );
@@ -473,7 +493,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                             SnackBar(
                                               content: Text(
                                                 vm.error ??
-                                                    'Erro ao criar evento.',
+                                                    (vm.editingEvent == null
+                                                        ? 'Erro ao criar evento.'
+                                                        : 'Erro ao atualizar evento.'),
                                               ),
                                             ),
                                           );
@@ -487,11 +509,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Padding(
-                                        padding: EdgeInsets.symmetric(
+                                    : Padding(
+                                        padding: const EdgeInsets.symmetric(
                                           vertical: 16,
                                         ),
-                                        child: Text('PUBLICAR EVENTO'),
+                                        child: Text(
+                                          vm.editingEvent == null
+                                              ? 'PUBLICAR EVENTO'
+                                              : 'SALVAR ALTERACOES',
+                                        ),
                                       ),
                               ),
                             );

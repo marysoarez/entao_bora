@@ -13,6 +13,21 @@ class EventDatasourceImpl implements EventDatasource {
   final UserDatasource userDatasource;
 
   EventDatasourceImpl(this.firestore, this.userDatasource);
+
+  String? _createdByIdFrom(Map<String, dynamic> data) {
+    final rawCreatedBy = data['createdBy'];
+
+    if (rawCreatedBy is String) {
+      return rawCreatedBy;
+    }
+
+    if (rawCreatedBy is Map) {
+      return rawCreatedBy['id'] as String?;
+    }
+
+    return null;
+  }
+
   Future<QuerySnapshot<Map<String, dynamic>>> _runQuery(
     Query<Map<String, dynamic>> query,
   ) async {
@@ -44,15 +59,7 @@ class EventDatasourceImpl implements EventDatasource {
     for (final doc in snapshot.docs) {
       final data = doc.data();
 
-      final rawCreatedBy = data['createdBy'];
-
-      String? createdById;
-
-      if (rawCreatedBy is String) {
-        createdById = rawCreatedBy;
-      } else if (rawCreatedBy is Map) {
-        createdById = rawCreatedBy['id'] as String?;
-      }
+      final createdById = _createdByIdFrom(data);
 
       if (createdById == null || createdById.isEmpty) {
         continue;
@@ -84,7 +91,11 @@ class EventDatasourceImpl implements EventDatasource {
 
     final data = snapshot.data()!;
 
-    final createdById = data['createdBy'] as String;
+    final createdById = _createdByIdFrom(data);
+
+    if (createdById == null || createdById.isEmpty) {
+      return null;
+    }
 
     final users = await userDatasource.getUsersByIds([createdById]);
 
@@ -229,9 +240,17 @@ class EventDatasourceImpl implements EventDatasource {
     for (final doc in snapshot.docs) {
       final data = doc.data();
 
-      final createdById = data['createdBy'] as String;
+      final createdById = _createdByIdFrom(data);
+
+      if (createdById == null || createdById.isEmpty) {
+        continue;
+      }
 
       final users = await userDatasource.getUsersByIds([createdById]);
+
+      if (users.isEmpty) {
+        continue;
+      }
 
       final creator = users.first;
 
