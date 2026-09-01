@@ -22,7 +22,7 @@ class PlaceDto extends PlaceEntity {
   });
 
   factory PlaceDto.fromMap(Map<String, dynamic> map) {
-    final rawOwnerId = map['ownerId'] ?? map['ownderId'];
+    final rawOwnerId = map['ownerId'];
     final ownerId = rawOwnerId is Map
         ? rawOwnerId['id']?.toString() ?? ''
         : rawOwnerId?.toString() ?? '';
@@ -47,7 +47,6 @@ class PlaceDto extends PlaceEntity {
     );
   }
 
-  @override
   Map<String, dynamic> toMap() {
     return {
       'id': id,

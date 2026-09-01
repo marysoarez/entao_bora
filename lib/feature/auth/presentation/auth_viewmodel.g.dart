@@ -17,19 +17,6 @@ mixin _$AuthViewModel on _AuthViewModelBase, Store {
     name: '_AuthViewModelBase.isLogged',
   )).value;
 
-  late final _$userAtom = Atom(
-    name: '_AuthViewModelBase.user',
-    context: context,
-  );
-
-  @override
-  UserSummaryEntity? get user {
-    _$userAtom.reportRead();
-    return super.user;
-  }
-
- 
-
   late final _$loadingAtom = Atom(
     name: '_AuthViewModelBase.loading',
     context: context,
@@ -78,10 +65,19 @@ mixin _$AuthViewModel on _AuthViewModelBase, Store {
     return _$refreshAsyncAction.run(() => super.refresh());
   }
 
+  late final _$loginWithGoogleAsyncAction = AsyncAction(
+    '_AuthViewModelBase.loginWithGoogle',
+    context: context,
+  );
+
+  @override
+  Future<bool> loginWithGoogle() {
+    return _$loginWithGoogleAsyncAction.run(() => super.loginWithGoogle());
+  }
+
   @override
   String toString() {
     return '''
-user: ${user},
 loading: ${loading},
 isLogged: ${isLogged}
     ''';

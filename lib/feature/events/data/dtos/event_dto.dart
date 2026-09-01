@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
 import 'package:entao_bora/feature/auth/data/dtos/user_summary_dto.dart';
-import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_attraction_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/events_ticket_dto.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';

@@ -18,7 +18,7 @@ class EventDatasourceImpl implements EventDatasource {
   ) async {
     try {
       return await query.get();
-    } on FirebaseException catch (e, s) {
+    } on FirebaseException catch (e) {
       if (e.message != null) {
         final match = RegExp(r'https://\S+').firstMatch(e.message!);
 

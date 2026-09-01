@@ -1,6 +1,7 @@
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
+import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_attraction_entit.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_status_enum.dart';
@@ -14,7 +15,7 @@ import 'package:entao_bora/shared/errors/image_exception.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
-import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
+
 part 'create_event_viewmodel.g.dart';
 
 class CreateEventViewModel = CreateEventViewModelBase
@@ -27,24 +28,17 @@ abstract class CreateEventViewModelBase with Store {
     this._locationRepository,
     this._authRepository,
   );
+
   final ILocationRepository _locationRepository;
   final IEventRepository _eventRepository;
   final IPlaceRepository _placeRepository;
   final IAuthRepository _authRepository;
-
-  //==========================================================
-  // Estado
-  //==========================================================
 
   @observable
   bool loading = false;
 
   @observable
   String? error;
-
-  //==========================================================
-  // Campos
-  //==========================================================
 
   @observable
   String title = '';
@@ -63,18 +57,9 @@ abstract class CreateEventViewModelBase with Store {
 
   @observable
   DateTime? endDate;
+
   @observable
   XFile? coverPhoto;
-
-  @action
-  void setCoverPhoto(XFile file) {
-    coverPhoto = file;
-  }
-
-  @action
-  void removeCoverPhoto() {
-    coverPhoto = null;
-  }
 
   @observable
   ObservableList<MusicGenre> musicGenres = ObservableList();
@@ -90,9 +75,28 @@ abstract class CreateEventViewModelBase with Store {
 
   @observable
   AddressEntity? address;
-  //==========================================================
-  // Actions
-  //==========================================================
+
+  String? coverImage;
+
+  @computed
+  bool get isValid =>
+      title.trim().isNotEmpty &&
+      description.trim().isNotEmpty &&
+      (place != null || address != null) &&
+      startDate != null &&
+      endDate != null;
+
+  @computed
+  bool get hasExternalTicket => ticket.type == TicketType.external;
+
+  @computed
+  bool get hasPhotos => photos.isNotEmpty;
+
+  @computed
+  bool get hasGenres => musicGenres.isNotEmpty;
+
+  @computed
+  bool get hasAttractions => attractions.isNotEmpty;
 
   @action
   void setTitle(String value) => title = value;
@@ -102,6 +106,7 @@ abstract class CreateEventViewModelBase with Store {
 
   @action
   void setInstagram(String value) => instagram = value;
+
   @action
   void setPlace(PlaceEntity value) {
     place = value;
@@ -113,6 +118,18 @@ abstract class CreateEventViewModelBase with Store {
 
   @action
   void setEndDate(DateTime value) => endDate = value;
+
+  @action
+  void setCoverPhoto(XFile file) {
+    coverPhoto = file;
+    coverImage = null;
+  }
+
+  @action
+  void removeCoverPhoto() {
+    coverPhoto = null;
+    coverImage = null;
+  }
 
   @action
   void setTicketType(TicketType type) {
@@ -164,46 +181,50 @@ abstract class CreateEventViewModelBase with Store {
 
   @action
   Future<List<PlaceEntity>> loadPlaces() async {
-    final currentUser = await _authRepository.getCurrentUser();
+    error = null;
 
-    if (currentUser == null) {
-      error = 'Faca login para criar um evento.';
+    try {
+      final currentUser = await _authRepository.getCurrentUser();
+
+      if (currentUser == null) {
+        error = 'Faca login para criar um evento.';
+        return [];
+      }
+
+      final ownerIds = {
+        currentUser.id,
+        if (currentUser.partnerId != null &&
+            currentUser.partnerId!.trim().isNotEmpty)
+          currentUser.partnerId!,
+      };
+
+      final partnerPlaces = <PlaceEntity>[];
+
+      for (final ownerId in ownerIds) {
+        final result = await _placeRepository.getPlacesByOwnerId(ownerId);
+
+        final failed = result.fold(
+          (failure) {
+            error = failure.message;
+            return true;
+          },
+          (places) {
+            partnerPlaces.addAll(places);
+            return false;
+          },
+        );
+
+        if (failed) return [];
+      }
+
+      return {
+        for (final place in partnerPlaces) place.id: place,
+      }.values.toList();
+    } catch (e) {
+      error = 'Nao foi possivel carregar seus estabelecimentos.';
       return [];
     }
-
-    final ownerIds = {
-      currentUser.id,
-      if (currentUser.partnerId != null &&
-          currentUser.partnerId!.trim().isNotEmpty)
-        currentUser.partnerId!,
-    };
-
-    final partnerPlaces = <PlaceEntity>[];
-
-    for (final ownerId in ownerIds) {
-      final result = await _placeRepository.getPlacesByOwnerId(ownerId);
-
-      final failed = result.fold(
-        (failure) {
-          error = failure.message;
-          return true;
-        },
-        (places) {
-          partnerPlaces.addAll(places);
-          return false;
-        },
-      );
-
-      if (failed) return [];
-    }
-
-    return {for (final place in partnerPlaces) place.id: place}.values.toList();
   }
-
-  //==========================================================
-  // Save
-  //==========================================================
-  String? coverImage;
 
   @action
   Future<bool> save() async {
@@ -211,17 +232,9 @@ abstract class CreateEventViewModelBase with Store {
 
     loading = true;
     error = null;
+    coverImage = null;
 
     try {
-      if (coverPhoto != null) {
-        try {
-          coverImage = await ImageHelper.fileToBase64(coverPhoto!);
-        } on ImageTooLargeException catch (e) {
-          error = e.message;
-          return false;
-        }
-      }
-
       final validation = _validate();
 
       if (validation != null) {
@@ -229,12 +242,18 @@ abstract class CreateEventViewModelBase with Store {
         return false;
       }
 
+      final processedCover = await _processCoverImage();
+      if (processedCover == null) return false;
+
+      coverImage = processedCover;
+
       await resolveAddressLocation();
+      if (error != null) return false;
 
       final currentUser = await _authRepository.getCurrentUser();
 
       if (currentUser == null) {
-        error = 'Faça login para criar um evento.';
+        error = 'Faca login para criar um evento.';
         return false;
       }
 
@@ -245,17 +264,72 @@ abstract class CreateEventViewModelBase with Store {
         error = failure.message;
         return false;
       }, (_) => true);
+    } catch (e) {
+      error ??= 'Nao foi possivel criar o evento.';
+      return false;
     } finally {
       loading = false;
     }
   }
 
-  //==========================================================
-  // Helpers
-  //==========================================================
+  Future<String?> _processCoverImage() async {
+    final photo = coverPhoto;
+
+    if (photo == null) {
+      error = 'Adicione uma imagem de capa para o evento.';
+      return null;
+    }
+
+    try {
+      return await ImageHelper.fileToBase64(photo);
+    } on ImageTooLargeException catch (e) {
+      error = e.message;
+      return null;
+    } catch (_) {
+      error = 'Nao foi possivel processar a imagem de capa.';
+      return null;
+    }
+  }
+
   Future<EventEntity> _buildEvent(UserSummaryEntity currentUser) async {
     final now = DateTime.now();
+    final gallery = await _processGalleryImages();
+    final selectedPlace = place;
+    final selectedAddress = address;
 
+    if (selectedPlace == null && selectedAddress == null) {
+      throw Exception('Selecione um local para o evento.');
+    }
+
+    return EventEntity(
+      id: '',
+      title: title.trim(),
+      description: description.trim(),
+      placeId: selectedPlace?.id,
+      locationName: selectedPlace?.name ?? selectedAddress!.displayName,
+      address: selectedPlace?.address ?? selectedAddress!,
+      startDate: startDate!,
+      endDate: endDate!,
+      coverImage: coverImage!,
+      gallery: gallery,
+      musicGenres: musicGenres.toList(),
+      attractions: attractions.toList(),
+      ticket: ticket,
+      instagram: instagram.trim().isEmpty ? null : instagram.trim(),
+      boraCount: 0,
+      checkinCount: 0,
+      views: 0,
+      shares: 0,
+      isBora: false,
+      hasCheckedIn: false,
+      createdBy: currentUser,
+      createdAt: now,
+      updatedAt: now,
+      status: EventStatus.published,
+    );
+  }
+
+  Future<List<String>> _processGalleryImages() async {
     final gallery = <String>[];
 
     for (final photo in photos) {
@@ -263,64 +337,15 @@ abstract class CreateEventViewModelBase with Store {
         gallery.add(await ImageHelper.fileToBase64(photo));
       } on ImageTooLargeException catch (e) {
         error = e.message;
-        rethrow;
+        throw Exception(e.message);
+      } catch (_) {
+        const message = 'Nao foi possivel processar uma imagem da galeria.';
+        error = message;
+        throw Exception(message);
       }
     }
 
-    final selectedPlace = place;
-    final selectedAddress = address;
-
-    if (selectedPlace == null && selectedAddress == null) {
-      throw Exception('Selecione um local para o evento.');
-    }
-    return EventEntity(
-      id: '',
-      title: title.trim(),
-      description: description.trim(),
-
-      // Local
-      placeId: selectedPlace?.id,
-      locationName: selectedPlace?.name ?? selectedAddress!.displayName,
-      address: selectedPlace?.address ?? selectedAddress!,
-
-      // Datas
-      startDate: startDate!,
-      endDate: endDate!,
-
-      // Imagens
-      coverImage: coverImage!,
-
-      gallery: gallery,
-
-      // Música
-      musicGenres: musicGenres.toList(),
-
-      // Atrações
-      attractions: attractions.toList(),
-
-      // Ingresso
-      ticket: ticket,
-
-      // Instagram
-      instagram: instagram.trim().isEmpty ? null : instagram.trim(),
-
-      // Estatísticas
-      boraCount: 0,
-      checkinCount: 0,
-      views: 0,
-      shares: 0,
-
-      // Estado do usuário
-      isBora: false,
-      hasCheckedIn: false,
-
-      // Auditoria
-      createdBy: currentUser,
-      createdAt: now,
-      updatedAt: now,
-
-      status: EventStatus.published,
-    );
+    return gallery;
   }
 
   String? _validate() {
@@ -329,20 +354,23 @@ abstract class CreateEventViewModelBase with Store {
     }
 
     if (description.trim().isEmpty) {
-      return 'Informe uma descrição.';
+      return 'Informe uma descricao.';
     }
+
     if (coverPhoto == null) {
       return 'Adicione uma imagem de capa para o evento.';
     }
+
     if (place == null && address == null) {
       return 'Selecione um local.';
     }
+
     if (startDate == null) {
-      return 'Informe a data de início.';
+      return 'Informe a data de inicio.';
     }
 
     if (endDate == null) {
-      return 'Informe a data de término.';
+      return 'Informe a data de termino.';
     }
 
     if (endDate!.isBefore(startDate!)) {
@@ -359,16 +387,12 @@ abstract class CreateEventViewModelBase with Store {
       final uri = Uri.tryParse(url);
 
       if (uri == null || !(uri.isScheme('http') || uri.isScheme('https'))) {
-        return 'Informe um link válido.';
+        return 'Informe um link valido.';
       }
     }
 
     return null;
   }
-
-  //==========================================================
-  // Validators
-  //==========================================================
 
   String? validateTitle(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -380,7 +404,7 @@ abstract class CreateEventViewModelBase with Store {
 
   String? validateDescription(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Informe uma descrição.';
+      return 'Informe uma descricao.';
     }
 
     return null;
@@ -394,34 +418,24 @@ abstract class CreateEventViewModelBase with Store {
     if (value.contains('http') ||
         value.contains('www.') ||
         value.contains('instagram.com')) {
-      return 'Informe apenas o usuário do Instagram.';
+      return 'Informe apenas o usuario do Instagram.';
     }
 
     return null;
   }
 
-  bool get isValid =>
-      title.trim().isNotEmpty &&
-      description.trim().isNotEmpty &&
-      (place != null || address != null) &&
-      startDate != null &&
-      endDate != null;
-
-  bool get hasExternalTicket => ticket.type == TicketType.external;
-
-  bool get hasPhotos => photos.isNotEmpty;
-
-  bool get hasGenres => musicGenres.isNotEmpty;
-
-  bool get hasAttractions => attractions.isNotEmpty;
-
   Future<List<AddressEntity>> searchAddress(String query) async {
-    final result = await _locationRepository.searchAddress(query);
+    try {
+      final result = await _locationRepository.searchAddress(query);
 
-    return result.fold((failure) {
-      error = failure.message;
+      return result.fold((failure) {
+        error = failure.message;
+        return [];
+      }, (addresses) => addresses);
+    } catch (_) {
+      error = 'Nao foi possivel buscar o endereco.';
       return [];
-    }, (addresses) => addresses);
+    }
   }
 
   Future<void> resolveAddressLocation() async {

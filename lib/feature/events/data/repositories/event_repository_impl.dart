@@ -14,6 +14,10 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
 
   EventRepositoryImpl({required this.datasource, required this.userDatasource});
 
+  Exception _toException(Object error) {
+    return error is Exception ? error : Exception(error.toString());
+  }
+
   @override
   Future<Either<FailureGetEventById, EventEntity?>> getEventById({
     required String eventId,
@@ -45,7 +49,7 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       return Right(entity);
     } catch (e, s) {
       logError(
-        error: e is Exception ? e : Exception(e.toString()),
+        error: _toException(e),
         failure: FailureGetEventById(),
         stackTrace: s,
       );
@@ -85,6 +89,12 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
 
       return Right(entities);
     } catch (e, s) {
+      logError(
+        error: _toException(e),
+        failure: FailureGetEvents(),
+        stackTrace: s,
+      );
+
       return Left(FailureGetEvents());
     }
   }
@@ -97,14 +107,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       await datasource.createEvent(EventDto.fromEntity(event));
 
       return const Right(true);
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureCreateEvent(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureCreateEvent(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureCreateEvent());
+      return Left(FailureCreateEvent(exception: e, stackTrace: s));
     }
   }
 
@@ -116,14 +126,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       await datasource.updateEvent(EventDto.fromEntity(event));
 
       return const Right(true);
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureUpdateEvent(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureUpdateEvent(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureUpdateEvent());
+      return Left(FailureUpdateEvent(exception: e, stackTrace: s));
     }
   }
 
@@ -133,14 +143,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       await datasource.deleteEvent(id);
 
       return const Right(true);
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureDeleteEvent(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureDeleteEvent(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureDeleteEvent());
+      return Left(FailureDeleteEvent(exception: e, stackTrace: s));
     }
   }
 
@@ -152,14 +162,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       await datasource.incrementViews(id);
 
       return const Right(true);
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureIncrementEventViews(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureIncrementEventViews(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureIncrementEventViews());
+      return Left(FailureIncrementEventViews(exception: e, stackTrace: s));
     }
   }
 
@@ -171,14 +181,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       await datasource.incrementShares(id);
 
       return const Right(true);
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureIncrementEventShares(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureIncrementEventShares(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureIncrementEventShares());
+      return Left(FailureIncrementEventShares(exception: e, stackTrace: s));
     }
   }
 
@@ -190,6 +200,12 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
 
       return Right(events.map((e) => e.toEntity()).toList());
     } catch (e, s) {
+      logError(
+        error: _toException(e),
+        failure: FailureGetUpcomingEventsByPlace(exception: e, stackTrace: s),
+        stackTrace: s,
+      );
+
       return Left(FailureGetUpcomingEventsByPlace());
     }
   }
@@ -204,7 +220,7 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       return Right(events.map((event) => event.toEntity()).toList());
     } catch (e, s) {
       logError(
-        error: e is Exception ? e : Exception(e.toString()),
+        error: _toException(e),
         failure: FailureGetEvents(),
         stackTrace: s,
       );
@@ -222,14 +238,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       return Right(
         await datasource.isUserGoing(eventId: eventId, userId: userId),
       );
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureIsUserGoing(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureIsUserGoing(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureIsUserGoing());
+      return Left(FailureIsUserGoing(exception: e, stackTrace: s));
     }
   }
 
@@ -243,14 +259,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       await datasource.toggleBora(eventId: eventId, user: user, isBora: isBora);
 
       return const Right(true);
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureToggleBora(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureToggleBora(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureToggleBora());
+      return Left(FailureToggleBora(exception: e, stackTrace: s));
     }
   }
 
@@ -270,14 +286,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       );
 
       return const Right(true);
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureCheckIn(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureCheckIn(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureCheckIn());
+      return Left(FailureCheckIn(exception: e, stackTrace: s));
     }
   }
 
@@ -290,14 +306,14 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
       return Right(
         await datasource.hasCheckedIn(eventId: eventId, userId: userId),
       );
-    } catch (e) {
+    } catch (e, s) {
       logError(
-        error: e as Exception,
-        failure: FailureHasCheckedIn(),
-        stackTrace: StackTrace.current,
+        error: _toException(e),
+        failure: FailureHasCheckedIn(exception: e, stackTrace: s),
+        stackTrace: s,
       );
 
-      return Left(FailureHasCheckedIn());
+      return Left(FailureHasCheckedIn(exception: e, stackTrace: s));
     }
   }
 }

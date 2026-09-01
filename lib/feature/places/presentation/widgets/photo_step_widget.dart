@@ -61,14 +61,18 @@ class _PhotoStepState extends State<PhotoStep> {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: widget.vm.photos.length + 1,
+              itemCount:
+                  widget.vm.existingPhotos.length + widget.vm.photos.length + 1,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
               itemBuilder: (_, index) {
-                if (index == widget.vm.photos.length) {
+                final addButtonIndex =
+                    widget.vm.existingPhotos.length + widget.vm.photos.length;
+
+                if (index == addButtonIndex) {
                   return InkWell(
                     borderRadius: BorderRadius.circular(16),
                     onTap: pickImage,
@@ -86,49 +90,48 @@ class _PhotoStepState extends State<PhotoStep> {
                   );
                 }
 
-                final photo = widget.vm.photos[index];
+                if (index < widget.vm.existingPhotos.length) {
+                  final photo = widget.vm.existingPhotos[index];
 
-                return Stack(
-                  children: [
-                    if (kIsWeb)
-                      Image.network(
-                        photo.path,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      )
-                    else
-                      Image.file(
-                        File(photo.path),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                    Positioned(
-                      right: 4,
-                      top: 4,
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.black54,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(
-                            Icons.close,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            widget.vm.removePhoto(photo);
-                          },
-                        ),
-                      ),
+                  return _PhotoTile(
+                    child: Image.memory(
+                      ImageHelper.base64ToBytes(photo),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
                     ),
-                  ],
+                    onRemove: () {
+                      widget.vm.removeExistingPhoto(photo);
+                    },
+                  );
+                }
+
+                final photo =
+                    widget.vm.photos[index - widget.vm.existingPhotos.length];
+
+                return _PhotoTile(
+                  child: kIsWeb
+                      ? Image.network(
+                          photo.path,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        )
+                      : Image.file(
+                          File(photo.path),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                  onRemove: () {
+                    widget.vm.removePhoto(photo);
+                  },
                 );
               },
             ),
 
-            if (widget.vm.photos.isEmpty) ...[
+            if (widget.vm.existingPhotos.isEmpty &&
+                widget.vm.photos.isEmpty) ...[
               const SizedBox(height: 32),
 
               Card(
@@ -157,6 +160,36 @@ class _PhotoStepState extends State<PhotoStep> {
           ],
         );
       },
+    );
+  }
+}
+
+class _PhotoTile extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onRemove;
+
+  const _PhotoTile({required this.child, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ClipRRect(borderRadius: BorderRadius.circular(12), child: child),
+        Positioned(
+          right: 4,
+          top: 4,
+          child: CircleAvatar(
+            radius: 16,
+            backgroundColor: Colors.black54,
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.close, size: 16, color: Colors.white),
+              onPressed: onRemove,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -95,33 +95,35 @@ class _EventCardState extends State<EventCard> {
                       ),
 
                       const SizedBox(height: 20),
-                      Column(
-                        children: [
-                          const Text("Organizador:"),
+                      if (event.createdBy.isPartner) ...[
+                        Column(
+                          children: [
+                            const Text("Organizador:"),
 
-                          if (event.createdBy.photoUrl?.isNotEmpty ?? false)
-                            CircleAvatar(
-                              radius: 28,
-                              backgroundImage: NetworkImage(
-                                event.createdBy.photoUrl!,
+                            if (event.createdBy.photoUrl?.isNotEmpty ?? false)
+                              CircleAvatar(
+                                radius: 28,
+                                backgroundImage: NetworkImage(
+                                  event.createdBy.photoUrl!,
+                                ),
+                              )
+                            else
+                              const CircleAvatar(
+                                radius: 28,
+                                child: Icon(Icons.person),
                               ),
-                            )
-                          else
-                            const CircleAvatar(
-                              radius: 28,
-                              child: Icon(Icons.person),
+
+                            const SizedBox(height: 8),
+
+                            Text(
+                              event.createdBy.name.isNotEmpty
+                                  ? event.createdBy.name
+                                  : "Organizador",
                             ),
-
-                          const SizedBox(height: 8),
-
-                          Text(
-                            event.createdBy.name.isNotEmpty
-                                ? event.createdBy.name
-                                : "Organizador:",
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                      ],
 
                       EventActions(
                         vm: vm,

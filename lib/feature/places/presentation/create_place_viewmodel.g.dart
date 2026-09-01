@@ -9,6 +9,14 @@ part of 'create_place_viewmodel.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$CreatePlaceViewModel on CreatePlaceViewModelBase, Store {
+  Computed<bool>? _$isEditingComputed;
+
+  @override
+  bool get isEditing => (_$isEditingComputed ??= Computed<bool>(
+    () => super.isEditing,
+    name: 'CreatePlaceViewModelBase.isEditing',
+  )).value;
+
   late final _$loadingAtom = Atom(
     name: 'CreatePlaceViewModelBase.loading',
     context: context,
@@ -24,6 +32,24 @@ mixin _$CreatePlaceViewModel on CreatePlaceViewModelBase, Store {
   set loading(bool value) {
     _$loadingAtom.reportWrite(value, super.loading, () {
       super.loading = value;
+    });
+  }
+
+  late final _$editingPlaceAtom = Atom(
+    name: 'CreatePlaceViewModelBase.editingPlace',
+    context: context,
+  );
+
+  @override
+  PlaceEntity? get editingPlace {
+    _$editingPlaceAtom.reportRead();
+    return super.editingPlace;
+  }
+
+  @override
+  set editingPlace(PlaceEntity? value) {
+    _$editingPlaceAtom.reportWrite(value, super.editingPlace, () {
+      super.editingPlace = value;
     });
   }
 
@@ -135,6 +161,24 @@ mixin _$CreatePlaceViewModel on CreatePlaceViewModelBase, Store {
     });
   }
 
+  late final _$existingPhotosAtom = Atom(
+    name: 'CreatePlaceViewModelBase.existingPhotos',
+    context: context,
+  );
+
+  @override
+  ObservableList<String> get existingPhotos {
+    _$existingPhotosAtom.reportRead();
+    return super.existingPhotos;
+  }
+
+  @override
+  set existingPhotos(ObservableList<String> value) {
+    _$existingPhotosAtom.reportWrite(value, super.existingPhotos, () {
+      super.existingPhotos = value;
+    });
+  }
+
   late final _$nameAtom = Atom(
     name: 'CreatePlaceViewModelBase.name',
     context: context,
@@ -235,6 +279,30 @@ mixin _$CreatePlaceViewModel on CreatePlaceViewModelBase, Store {
     return _$searchAddressAsyncAction.run(() => super.searchAddress(query));
   }
 
+  late final _$setAddressNumberAsyncAction = AsyncAction(
+    'CreatePlaceViewModelBase.setAddressNumber',
+    context: context,
+  );
+
+  @override
+  Future<void> setAddressNumber(String number) {
+    return _$setAddressNumberAsyncAction.run(
+      () => super.setAddressNumber(number),
+    );
+  }
+
+  late final _$resolveAddressLocationAsyncAction = AsyncAction(
+    'CreatePlaceViewModelBase.resolveAddressLocation',
+    context: context,
+  );
+
+  @override
+  Future<void> resolveAddressLocation() {
+    return _$resolveAddressLocationAsyncAction.run(
+      () => super.resolveAddressLocation(),
+    );
+  }
+
   late final _$saveAsyncAction = AsyncAction(
     'CreatePlaceViewModelBase.save',
     context: context,
@@ -243,6 +311,16 @@ mixin _$CreatePlaceViewModel on CreatePlaceViewModelBase, Store {
   @override
   Future<bool> save() {
     return _$saveAsyncAction.run(() => super.save());
+  }
+
+  late final _$loadAsyncAction = AsyncAction(
+    'CreatePlaceViewModelBase.load',
+    context: context,
+  );
+
+  @override
+  Future<void> load(PlaceEntity place) {
+    return _$loadAsyncAction.run(() => super.load(place));
   }
 
   late final _$CreatePlaceViewModelBaseActionController = ActionController(
@@ -395,20 +473,35 @@ mixin _$CreatePlaceViewModel on CreatePlaceViewModelBase, Store {
   }
 
   @override
+  void removeExistingPhoto(String photo) {
+    final _$actionInfo = _$CreatePlaceViewModelBaseActionController.startAction(
+      name: 'CreatePlaceViewModelBase.removeExistingPhoto',
+    );
+    try {
+      return super.removeExistingPhoto(photo);
+    } finally {
+      _$CreatePlaceViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 loading: ${loading},
+editingPlace: ${editingPlace},
 error: ${error},
 address: ${address},
 type: ${type},
 musicGenres: ${musicGenres},
 openingHours: ${openingHours},
 photos: ${photos},
+existingPhotos: ${existingPhotos},
 name: ${name},
 description: ${description},
 phone: ${phone},
 instagram: ${instagram},
-website: ${website}
+website: ${website},
+isEditing: ${isEditing}
     ''';
   }
 }

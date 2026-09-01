@@ -8,7 +8,6 @@ import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
 import 'package:entao_bora/shared/enum/week_day_enum.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
-import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
 
@@ -54,6 +53,9 @@ abstract class CreatePlaceViewModelBase with Store {
 
   @observable
   ObservableList<XFile> photos = ObservableList();
+
+  @observable
+  ObservableList<String> existingPhotos = ObservableList();
 
   @observable
   String name = '';
@@ -105,7 +107,6 @@ abstract class CreatePlaceViewModelBase with Store {
   @action
   void setOpeningHours(OpeningHours value) {
     openingHours.removeWhere((e) => e.weekday == value.weekday);
-
     openingHours.add(value);
   }
 
@@ -122,6 +123,11 @@ abstract class CreatePlaceViewModelBase with Store {
   @action
   void removePhoto(XFile file) {
     photos.remove(file);
+  }
+
+  @action
+  void removeExistingPhoto(String photo) {
+    existingPhotos.remove(photo);
   }
 
   @action
@@ -143,10 +149,8 @@ abstract class CreatePlaceViewModelBase with Store {
   Future<void> setAddressNumber(String number) async {
     if (address == null) return;
 
-    // Atualiza o número imediatamente para a UI
     address = address!.copyWith(number: number);
 
-    // Não tenta buscar enquanto o campo estiver vazio
     if (number.trim().isEmpty) return;
 
     await resolveAddressLocation();
@@ -159,55 +163,23 @@ abstract class CreatePlaceViewModelBase with Store {
     final currentAddress = address!;
     final number = currentAddress.number?.trim();
 
-    debugPrint('================ RESOLVE ADDRESS ================');
-    debugPrint('Rua: ${currentAddress.street}');
-    debugPrint('Número: $number');
-    debugPrint('Endereço: ${currentAddress.fullAddress}');
-    debugPrint(
-      'Coordenada ANTES: '
-      '${currentAddress.location.latitude}, '
-      '${currentAddress.location.longitude}',
-    );
-
-    if (number == null || number.isEmpty) {
-      debugPrint('⚠️ Número vazio.');
-      return;
-    }
+    if (number == null || number.isEmpty) return;
 
     final result = await _locationRepository.geocodeAddress(currentAddress);
 
     result.fold(
       (failure) {
-        debugPrint('❌ ERRO: ${failure.message}');
         error = failure.message;
       },
       (resolvedAddress) {
-        if (resolvedAddress == null) {
-          debugPrint('⚠️ Google Geocoding não encontrou o endereço.');
-          return;
-        }
-
-        debugPrint(
-          '✅ ENDEREÇO GEOCODIFICADO:\n'
-          '  ${resolvedAddress.displayName}\n'
-          '  LAT: ${resolvedAddress.location.latitude}\n'
-          '  LNG: ${resolvedAddress.location.longitude}',
-        );
+        if (resolvedAddress == null) return;
 
         address = currentAddress.copyWith(
           location: resolvedAddress.location,
           displayName: resolvedAddress.displayName,
         );
-
-        debugPrint(
-          '📍 Coordenada DEPOIS: '
-          '${address!.location.latitude}, '
-          '${address!.location.longitude}',
-        );
       },
     );
-
-    debugPrint('================================================');
   }
 
   @action
@@ -215,16 +187,25 @@ abstract class CreatePlaceViewModelBase with Store {
     if (loading) return false;
 
     loading = true;
+    error = null;
 
     try {
+      final validation = _validate();
+
+      if (validation != null) {
+        error = validation;
+        return false;
+      }
+
       await resolveAddressLocation();
 
       final user = await _authRepository.getCurrentUser();
 
       if (user == null) {
-        error = 'Usuário não autenticado.';
+        error = 'Usuario nao autenticado.';
         return false;
       }
+
       final photosBase64 = <String>[];
 
       for (final photo in photos) {
@@ -232,32 +213,35 @@ abstract class CreatePlaceViewModelBase with Store {
       }
 
       final place = PlaceEntity(
-        id: '',
+        id: editingPlace?.id ?? '',
         name: name.trim(),
         description: description.trim(),
         address: address!,
         musicGenres: musicGenres.toList(),
         type: type,
-
-        // Proprietário
-        ownerId: user,
-
+        ownerId: editingPlace?.ownerId ?? user,
         phone: phone.trim(),
         instagram: instagram.trim(),
         website: website.trim(),
         openingHours: openingHours.toList(),
-        photos: photosBase64,
+        photos: [...existingPhotos, ...photosBase64],
       );
 
       if (isEditing) {
-        await _placeRepository.updatePlace(
-          place.copyWith(id: editingPlace!.id),
-        );
-      } else {
-        await _placeRepository.createPlace(place);
+        final result = await _placeRepository.updatePlace(place);
+
+        return result.fold((failure) {
+          error = failure.message;
+          return false;
+        }, (_) => true);
       }
 
-      return true;
+      final result = await _placeRepository.createPlace(place);
+
+      return result.fold((failure) {
+        error = failure.message;
+        return false;
+      }, (success) => success);
     } catch (e) {
       error = e.toString();
       return false;
@@ -288,6 +272,29 @@ abstract class CreatePlaceViewModelBase with Store {
       ..addAll(place.openingHours);
 
     photos.clear();
+    existingPhotos
+      ..clear()
+      ..addAll(place.photos);
+  }
+
+  String? _validate() {
+    if (name.trim().isEmpty) {
+      return 'Informe o nome.';
+    }
+
+    if (description.trim().isEmpty) {
+      return 'Informe uma descricao.';
+    }
+
+    if (address == null) {
+      return 'Selecione um endereco.';
+    }
+
+    if (musicGenres.isEmpty) {
+      return 'Selecione pelo menos um estilo musical.';
+    }
+
+    return null;
   }
 
   String? validateName(String? value) {
@@ -300,7 +307,7 @@ abstract class CreatePlaceViewModelBase with Store {
 
   String? validateDescription(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Informe uma descrição.';
+      return 'Informe uma descricao.';
     }
 
     return null;

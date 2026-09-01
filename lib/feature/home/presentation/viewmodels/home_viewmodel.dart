@@ -46,7 +46,6 @@ abstract class HomeViewModelBase with Store {
     try {
       await _loadPlaces();
       await _loadEvents();
-
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -68,32 +67,11 @@ abstract class HomeViewModelBase with Store {
   }
 
   Future<void> _loadEvents() async {
- 
     final eventsResult = await _eventRepository.getEvents();
 
-    eventsResult.fold(
-      (failure) {
-    
-      },
-      (events) {
-        print('');
-        print('✅✅✅ HOME: EVENTOS RECEBIDOS: ${events.length}');
-
-        for (final event in events) {
-          print(
-            'EVENTO: ${event.id} | '
-            '${event.title} | '
-            'placeId=${event.placeId} | '
-            'lat=${event.address.location.latitude} | '
-            'lng=${event.address.location.longitude}',
-          );
-        }
-
-        _events = events;
-      },
-    );
-
-    print('🔥🔥🔥 HOME: TERMINOU GET EVENTS');
+    eventsResult.fold((failure) {}, (events) {
+      _events = events;
+    });
   }
 
   @action

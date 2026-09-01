@@ -51,8 +51,6 @@ class PlaceDatasourceImpl implements IPlaceDatasource {
     final snapshots = await Future.wait([
       collection.where('ownerId', isEqualTo: ownerId).get(),
       collection.where('ownerId.id', isEqualTo: ownerId).get(),
-      collection.where('ownderId', isEqualTo: ownerId).get(),
-      collection.where('ownderId.id', isEqualTo: ownerId).get(),
     ]);
 
     for (final snapshot in snapshots) {

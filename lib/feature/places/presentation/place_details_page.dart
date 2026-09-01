@@ -326,29 +326,30 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
           ),
           Column(
             children: [
-              Row(
-                children: [
-                  UserAvatar(photoUrl: place.ownerId.photoUrl, radius: 22),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Responsável',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                      ),
-                      Text(
-                        place.ownerId.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+              if (place.ownerId.isPartner) ...[
+                Row(
+                  children: [
+                    UserAvatar(photoUrl: place.ownerId.photoUrl, radius: 22),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Responsável',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                        Text(
+                          place.ownerId.name,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
 
               if (currentUser?.id == place.ownerId.id)
                 Padding(
