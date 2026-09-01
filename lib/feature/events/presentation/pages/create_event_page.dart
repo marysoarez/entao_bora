@@ -160,7 +160,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                         RadioListTile<bool>(
                           value: true,
                           groupValue: useRegisteredPlace,
-                          title: const Text('Estabelecimento cadastrado'),
+                          title: const Text('Meus Locais'),
                           onChanged: (value) {
                             setState(() {
                               useRegisteredPlace = true;
@@ -185,7 +185,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                           DropdownButtonFormField<PlaceEntity>(
                             initialValue: vm.place,
                             decoration: const InputDecoration(
-                              labelText: 'Estabelecimento',
+                              labelText: 'Selecionar parceiro',
                             ),
                             items: places.map((place) {
                               return DropdownMenuItem(
