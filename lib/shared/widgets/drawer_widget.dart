@@ -49,8 +49,8 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                       _drawerItem(
                         context,
-                        icon: Icons.dashboard_outlined,
-                        title: 'Area do parceiro',
+                        icon: Icons.event_note_outlined,
+                        title: 'Meus eventos',
                         onTap: () => _openPartnerArea(context),
                       ),
                       _drawerItem(

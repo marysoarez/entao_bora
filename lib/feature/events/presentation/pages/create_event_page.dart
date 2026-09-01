@@ -55,6 +55,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
           vm.setPlace(places[index]);
         }
       }
+    } else {
+      useRegisteredPlace = false;
     }
 
     if (mounted) {

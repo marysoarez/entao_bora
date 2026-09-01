@@ -14,6 +14,7 @@ abstract class _EventDetailsViewModelBase with Store {
   final IEventRepository eventRepository;
   final IPlaceRepository placeRepository;
   final IAuthRepository _authRepository;
+  final Set<String> _registeredViewEventIds = {};
 
   _EventDetailsViewModelBase(
     this.eventRepository,
@@ -37,6 +38,7 @@ abstract class _EventDetailsViewModelBase with Store {
   Future<void> load(String id) async {
     loading = true;
     error = null;
+    place = null;
 
     final userId = _authRepository.currentUser?.id;
 
@@ -57,6 +59,8 @@ abstract class _EventDetailsViewModelBase with Store {
 
         event = loadedEvent;
 
+        await _registerView(loadedEvent);
+
         if (loadedEvent.placeId != null) {
           final placeResult = await placeRepository.getPlaceById(
             loadedEvent.placeId!,
@@ -75,5 +79,17 @@ abstract class _EventDetailsViewModelBase with Store {
     );
 
     loading = false;
+  }
+
+  Future<void> _registerView(EventEntity loadedEvent) async {
+    if (_registeredViewEventIds.contains(loadedEvent.id)) return;
+
+    _registeredViewEventIds.add(loadedEvent.id);
+
+    final result = await eventRepository.incrementViews(loadedEvent.id);
+
+    result.fold((failure) => null, (_) {
+      event = loadedEvent.copyWith(views: loadedEvent.views + 1);
+    });
   }
 }

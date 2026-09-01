@@ -175,12 +175,9 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
   }
 
   Future<void> openCreateEvent() async {
-    final place = selectedPlace;
-    if (place == null) return;
-
     final created = await Modular.to.pushNamed(
       '/events/create',
-      arguments: place,
+      arguments: selectedPlace,
     );
 
     if (created == true) {
@@ -193,7 +190,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('Area do parceiro'),
+        title: const Text('Meus eventos'),
         actions: [
           IconButton(
             tooltip: 'Atualizar',
@@ -227,14 +224,14 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
       );
     }
 
-    if (places.isEmpty) {
+    if (places.isEmpty && events.isEmpty) {
       return _EmptyState(
-        icon: Icons.storefront_outlined,
-        title: 'Cadastre seu primeiro estabelecimento',
+        icon: Icons.event_busy_outlined,
+        title: 'Nenhum evento criado',
         message:
-            'Depois disso voce podera publicar eventos e acompanhar os resultados por aqui.',
-        actionLabel: 'Novo estabelecimento',
-        onAction: openCreatePlace,
+            'Crie seu primeiro evento para acompanhar visualizacoes, boras e check-ins por aqui.',
+        actionLabel: 'Criar evento',
+        onAction: openCreateEvent,
       );
     }
 
@@ -246,9 +243,12 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
           const SizedBox(height: 16),
           _InlineError(message: error!),
         ],
-        const SizedBox(height: 24),
-        _buildPlaceSelector(),
-        const SizedBox(height: 32),
+        if (places.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          _buildPlaceSelector(),
+          const SizedBox(height: 32),
+        ] else
+          const SizedBox(height: 24),
         _buildSectionTitle('Resumo'),
         const SizedBox(height: 16),
         _buildMetrics(),
@@ -277,7 +277,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Gerencie seus estabelecimentos e acompanhe os eventos publicados.',
+                'Acompanhe os eventos que voce criou e veja os resultados publicados.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
@@ -291,7 +291,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
         OutlinedButton.icon(
           onPressed: openCreatePlace,
           icon: const Icon(Icons.add_business_outlined),
-          label: const Text('Novo estabelecimento'),
+          label: const Text('Novo local'),
         ),
       ],
     );
@@ -414,7 +414,8 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
       return _EmptyState(
         icon: Icons.event_busy_outlined,
         title: 'Nenhum evento futuro',
-        message: 'Publique o proximo evento deste estabelecimento.',
+        message:
+            'Publique o proximo evento para acompanhar os resultados por aqui.',
         actionLabel: 'Criar evento',
         onAction: openCreateEvent,
       );
