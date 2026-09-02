@@ -82,6 +82,41 @@ class EventDatasourceImpl implements EventDatasource {
   }
 
   @override
+  Stream<List<EventDto>> watchEvents() {
+    final query = firestore
+        .collection(FirestorePaths.events)
+        .where('status', isEqualTo: 'published')
+        .where('endDate', isGreaterThanOrEqualTo: Timestamp.now())
+        .orderBy('endDate');
+
+    return query.snapshots().asyncMap((snapshot) async {
+      final events = <EventDto>[];
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+
+        final createdById = _createdByIdFrom(data);
+
+        if (createdById == null || createdById.isEmpty) {
+          continue;
+        }
+
+        final users = await userDatasource.getUsersByIds([createdById]);
+
+        if (users.isEmpty) {
+          continue;
+        }
+
+        final creator = users.first;
+
+        events.add(EventDto.fromMap(doc.id, data, createdBy: creator));
+      }
+
+      return events;
+    });
+  }
+
+  @override
   Future<EventDto?> getEvent(String id) async {
     final snapshot = await firestore.getDocument(FirestorePaths.event(id));
 

@@ -5,6 +5,8 @@ import '../dtos/event_dto.dart';
 abstract class EventDatasource {
   Future<List<EventDto>> getEvents();
 
+  Stream<List<EventDto>> watchEvents();
+
   Future<EventDto?> getEvent(String id);
 
   Future<void> createEvent(EventDto event);

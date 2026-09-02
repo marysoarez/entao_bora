@@ -100,6 +100,50 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
   }
 
   @override
+  Stream<Either<FailureGetEvents, List<EventEntity>>> watchEvents({
+    String? userId,
+  }) async* {
+    try {
+      await for (final events in datasource.watchEvents()) {
+        final entities = <EventEntity>[];
+
+        for (final dto in events) {
+          var entity = dto.toEntity();
+
+          if (userId != null) {
+            final isBora = await datasource.isUserGoing(
+              eventId: entity.id,
+              userId: userId,
+            );
+
+            final hasCheckedIn = await datasource.hasCheckedIn(
+              eventId: entity.id,
+              userId: userId,
+            );
+
+            entity = entity.copyWith(
+              isBora: isBora,
+              hasCheckedIn: hasCheckedIn,
+            );
+          }
+
+          entities.add(entity);
+        }
+
+        yield Right(entities);
+      }
+    } catch (e, s) {
+      logError(
+        error: _toException(e),
+        failure: FailureGetEvents(exception: e, stackTrace: s),
+        stackTrace: s,
+      );
+
+      yield Left(FailureGetEvents(exception: e, stackTrace: s));
+    }
+  }
+
+  @override
   Future<Either<FailureCreateEvent, bool>> createEvent(
     EventEntity event,
   ) async {

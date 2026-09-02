@@ -7,6 +7,11 @@ abstract class IEventRepository {
   Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
     String? userId,
   });
+
+  Stream<Either<FailureGetEvents, List<EventEntity>>> watchEvents({
+    String? userId,
+  });
+
   Future<Either<FailureGetEventById, EventEntity?>> getEventById({
     required String eventId,
     String? userId,

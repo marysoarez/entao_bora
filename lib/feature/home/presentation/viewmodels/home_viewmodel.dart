@@ -1,4 +1,8 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
+import 'package:entao_bora/feature/events/domain/errors/event_errors.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
@@ -20,6 +24,8 @@ abstract class HomeViewModelBase with Store {
   final ILocationRepository _locationRepository;
   final IPlaceRepository _placeRepository;
   final IEventRepository _eventRepository;
+  StreamSubscription<Either<FailureGetEvents, List<EventEntity>>>?
+  _eventsSubscription;
 
   @readonly
   bool _loading = false;
@@ -46,6 +52,7 @@ abstract class HomeViewModelBase with Store {
     try {
       await _loadPlaces();
       await _loadEvents();
+      _watchEvents();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -74,6 +81,33 @@ abstract class HomeViewModelBase with Store {
     });
   }
 
+  void _watchEvents() {
+    _eventsSubscription?.cancel();
+
+    _eventsSubscription = _eventRepository.watchEvents().listen(
+      (result) {
+        result.fold(
+          (failure) {
+            runInAction(() {
+              _error = failure.message;
+            });
+          },
+          (events) {
+            runInAction(() {
+              _events = events;
+              _error = null;
+            });
+          },
+        );
+      },
+      onError: (Object error) {
+        runInAction(() {
+          _error = error.toString();
+        });
+      },
+    );
+  }
+
   @action
   Future<void> reloadPlaces() async {
     _error = null;
@@ -81,6 +115,7 @@ abstract class HomeViewModelBase with Store {
     try {
       await _loadPlaces();
       await _loadEvents();
+      _watchEvents();
     } catch (e) {
       _error = e.toString();
     }
@@ -106,5 +141,10 @@ abstract class HomeViewModelBase with Store {
   @action
   void disableLocation() {
     _currentLocation = null;
+  }
+
+  void dispose() {
+    _eventsSubscription?.cancel();
+    _eventsSubscription = null;
   }
 }

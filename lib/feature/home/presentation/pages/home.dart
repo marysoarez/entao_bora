@@ -37,6 +37,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void dispose() {
+    vm.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (context) {
@@ -108,7 +114,6 @@ class _HomePageState extends State<HomePage> {
                         },
                       ),
                     ),
-                    
                   ],
                 ),
         );
