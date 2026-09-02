@@ -15,6 +15,18 @@ class _AppDrawerState extends State<AppDrawer> {
   final auth = Modular.get<AuthViewModel>();
 
   Future<void> _openPartnerArea(BuildContext context) async {
+    await _openPartnerRoute(context, '/partner-dashboard');
+  }
+
+  Future<void> _openPartnerPlaces(BuildContext context) async {
+    await _openPartnerRoute(context, '/places/manage');
+  }
+
+  Future<void> _openPartnerMenus(BuildContext context) async {
+    await _openPartnerRoute(context, '/places/menu');
+  }
+
+  Future<void> _openPartnerRoute(BuildContext context, String route) async {
     if (!auth.isLogged) {
       await LoginDialog.show(context);
       await auth.refresh();
@@ -25,7 +37,7 @@ class _AppDrawerState extends State<AppDrawer> {
     if (!context.mounted) return;
 
     Navigator.pop(context);
-    Modular.to.pushNamed('/partner-dashboard');
+    Modular.to.pushNamed(route);
   }
 
   @override
@@ -56,8 +68,14 @@ class _AppDrawerState extends State<AppDrawer> {
                       _drawerItem(
                         context,
                         icon: Icons.place_outlined,
-                        title: 'Locais',
-                        onTap: () => Modular.to.navigate('/'),
+                        title: 'Meus locais',
+                        onTap: () => _openPartnerPlaces(context),
+                      ),
+                      _drawerItem(
+                        context,
+                        icon: Icons.restaurant_menu_outlined,
+                        title: 'Cardapios',
+                        onTap: () => _openPartnerMenus(context),
                       ),
                       const Divider(),
                       _drawerItem(

@@ -64,6 +64,15 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
       return;
     }
 
+    if (!currentUser.isPartner) {
+      setState(() {
+        user = currentUser;
+        loading = false;
+        error = 'Voce precisa ser parceiro para acessar esta area.';
+      });
+      return;
+    }
+
     final ownerIds = _ownerIdsFor(currentUser);
     final partnerPlaces = <PlaceEntity>[];
 
@@ -192,6 +201,20 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     final updated = await Modular.to.pushNamed(
       '/events/create',
       arguments: event,
+    );
+
+    if (updated == true) {
+      await loadDashboard();
+    }
+  }
+
+  Future<void> openManageMenu() async {
+    final place = selectedPlace;
+    if (place == null) return;
+
+    final updated = await Modular.to.pushNamed(
+      '/places/menu',
+      arguments: place,
     );
 
     if (updated == true) {
@@ -338,6 +361,10 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
         _buildSectionTitle('Proximos eventos'),
         const SizedBox(height: 16),
         _buildUpcomingEvents(),
+        if (selectedPlace != null) ...[
+          const SizedBox(height: 36),
+          _buildMenuSection(selectedPlace!),
+        ],
       ],
     );
   }
@@ -515,6 +542,45 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
             if (index != visibleEvents.length - 1) const Divider(height: 1),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildMenuSection(PlaceEntity place) {
+    final items = place.menuItems;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            const Icon(Icons.restaurant_menu_outlined),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Cardapio',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    items.isEmpty
+                        ? 'Nenhum item cadastrado.'
+                        : '${items.length} item(s) cadastrado(s).',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            FilledButton.icon(
+              onPressed: openManageMenu,
+              icon: const Icon(Icons.edit_outlined),
+              label: const Text('Editar cardapio'),
+            ),
+          ],
+        ),
       ),
     );
   }

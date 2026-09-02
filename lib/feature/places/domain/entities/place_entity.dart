@@ -1,6 +1,7 @@
 import 'package:entao_bora/core/location/domain/entities/adress_entit.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/places/data/dtos/place_dto.dart';
+import 'package:entao_bora/feature/places/domain/entities/menu_item_entity.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
@@ -21,6 +22,7 @@ class PlaceEntity {
 
   final List<OpeningHours> openingHours;
   final List<String> photos;
+  final List<MenuItemEntity> menuItems;
 
   const PlaceEntity({
     required this.id,
@@ -34,6 +36,7 @@ class PlaceEntity {
     required this.website,
     required this.openingHours,
     required this.photos,
+    this.menuItems = const [],
     required this.ownerId,
   });
 
@@ -49,6 +52,7 @@ class PlaceEntity {
     String? website,
     List<OpeningHours>? openingHours,
     List<String>? photos,
+    List<MenuItemEntity>? menuItems,
     UserSummaryEntity? ownerId,
   }) {
     return PlaceDto(
@@ -63,6 +67,7 @@ class PlaceEntity {
       website: website ?? this.website,
       openingHours: openingHours ?? this.openingHours,
       photos: photos ?? this.photos,
+      menuItems: menuItems ?? this.menuItems,
       ownerId: ownerId ?? this.ownerId,
     );
   }

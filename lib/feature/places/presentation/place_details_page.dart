@@ -6,9 +6,97 @@ import 'package:entao_bora/feature/places/domain/repositories/place_repository.d
 import 'package:entao_bora/feature/places/presentation/widgets/user_avatar_widget.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+class PlaceDetailsByIdPage extends StatefulWidget {
+  final String id;
+
+  const PlaceDetailsByIdPage({super.key, required this.id});
+
+  @override
+  State<PlaceDetailsByIdPage> createState() => _PlaceDetailsByIdPageState();
+}
+
+class _PlaceDetailsByIdPageState extends State<PlaceDetailsByIdPage> {
+  final placeRepository = Modular.get<IPlaceRepository>();
+
+  bool loading = true;
+  String? error;
+  PlaceEntity? place;
+
+  @override
+  void initState() {
+    super.initState();
+    loadPlace();
+  }
+
+  Future<void> loadPlace() async {
+    setState(() {
+      loading = true;
+      error = null;
+    });
+
+    final result = await placeRepository.getPlaceById(widget.id);
+
+    if (!mounted) return;
+
+    result.fold(
+      (failure) {
+        setState(() {
+          loading = false;
+          error = failure.message;
+        });
+      },
+      (loadedPlace) {
+        setState(() {
+          loading = false;
+          place = loadedPlace;
+          error = loadedPlace == null
+              ? 'Estabelecimento nao encontrado.'
+              : null;
+        });
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final loadedPlace = place;
+
+    if (loadedPlace == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              error ?? 'Estabelecimento nao encontrado.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return PlaceDetailsPage(place: loadedPlace);
+  }
+}
 
 class PlaceDetailsPage extends StatefulWidget {
   final PlaceEntity place;
@@ -29,6 +117,67 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
     super.initState();
     place = widget.place;
     vm.load(place.id);
+  }
+
+  String get shareUrl => 'https://entaobora.com.br/#/places/${place.id}';
+
+  Future<void> showSharePlaceDialog() async {
+    await showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (_) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.chat, color: Colors.green),
+                title: const Text('Compartilhar no WhatsApp'),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  final text = Uri.encodeComponent(
+                    'Confira ${place.name}\n\n$shareUrl',
+                  );
+
+                  final uri = Uri.parse('https://wa.me/?text=$text');
+
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: const Text('Copiar link'),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  await Clipboard.setData(ClipboardData(text: shareUrl));
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Link copiado!')),
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text('Mais opcoes'),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  await SharePlus.instance.share(
+                    ShareParams(text: 'Confira ${place.name}\n\n$shareUrl'),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -79,6 +228,26 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                             padding: EdgeInsets.all(10),
                             child: Icon(
                               Icons.arrow_back,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: Material(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(30),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(30),
+                          onTap: showSharePlaceDialog,
+                          child: const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.share_outlined,
                               color: Colors.white,
                               size: 22,
                             ),

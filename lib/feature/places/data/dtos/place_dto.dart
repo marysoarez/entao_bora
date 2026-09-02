@@ -1,5 +1,6 @@
 import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/feature/places/domain/entities/menu_item_entity.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
@@ -18,6 +19,7 @@ class PlaceDto extends PlaceEntity {
     required super.website,
     required super.openingHours,
     required super.photos,
+    super.menuItems,
     required super.ownerId,
   });
 
@@ -44,6 +46,9 @@ class PlaceDto extends PlaceEntity {
           .map((e) => OpeningHours.fromMap(Map<String, dynamic>.from(e)))
           .toList(),
       photos: List<String>.from(map['photos'] ?? []),
+      menuItems: (map['menuItems'] as List<dynamic>? ?? [])
+          .map((e) => MenuItemDto.fromMap(Map<String, dynamic>.from(e)))
+          .toList(),
     );
   }
 
@@ -61,6 +66,9 @@ class PlaceDto extends PlaceEntity {
       'ownerId': ownerId.id,
       'musicGenres': musicGenres.map((e) => e.name).toList(),
       'openingHours': openingHours.map((e) => e.toMap()).toList(),
+      'menuItems': menuItems
+          .map((e) => MenuItemDto.fromEntity(e).toMap())
+          .toList(),
     };
   }
 
@@ -79,6 +87,47 @@ class PlaceDto extends PlaceEntity {
       website: entity.website,
       openingHours: entity.openingHours,
       photos: entity.photos,
+      menuItems: entity.menuItems,
     );
+  }
+}
+
+class MenuItemDto extends MenuItemEntity {
+  const MenuItemDto({
+    required super.id,
+    required super.title,
+    required super.description,
+    required super.price,
+    required super.photo,
+  });
+
+  factory MenuItemDto.fromMap(Map<String, dynamic> map) {
+    return MenuItemDto(
+      id: map['id']?.toString() ?? '',
+      title: map['title']?.toString() ?? '',
+      description: map['description']?.toString() ?? '',
+      price: (map['price'] as num?)?.toDouble() ?? 0,
+      photo: map['photo']?.toString() ?? '',
+    );
+  }
+
+  factory MenuItemDto.fromEntity(MenuItemEntity entity) {
+    return MenuItemDto(
+      id: entity.id,
+      title: entity.title,
+      description: entity.description,
+      price: entity.price,
+      photo: entity.photo,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'price': price,
+      'photo': photo,
+    };
   }
 }

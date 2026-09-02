@@ -30,6 +30,8 @@ import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_page.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.dart';
+import 'package:entao_bora/feature/places/presentation/manage_menu_page.dart';
+import 'package:entao_bora/feature/places/presentation/manage_places_page.dart';
 import 'package:entao_bora/feature/places/presentation/place_details_page.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource_impl.dart';
@@ -104,12 +106,21 @@ class AppModule extends Module {
       ),
     );
     r.child('/places/create', child: (_) => const CreatePlacePage());
+    r.child('/places/manage', child: (_) => const ManagePlacesPage());
+    r.child(
+      '/places/menu',
+      child: (_) => ManageMenuPage(place: r.args.data as PlaceEntity?),
+    );
 
     r.child('/events/create', child: (_) => const CreateEventPage());
 
     r.child(
       '/place',
       child: (_) => PlaceDetailsPage(place: r.args.data as PlaceEntity),
+    );
+    r.child(
+      '/places/:id',
+      child: (_) => PlaceDetailsByIdPage(id: r.args.params['id']!),
     );
     r.child(
       '/partner-dashboard',
