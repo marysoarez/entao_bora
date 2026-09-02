@@ -96,7 +96,7 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
           appBar: AppAppBar(
             title: vm.isEditing
                 ? 'Editar estabelecimento'
-                : 'Novo estabelecimento',
+                : 'Reivindicar local',
           ),
 
           body: Column(
@@ -147,7 +147,9 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
                                 )
                               : Text(
                                   isLastPage
-                                      ? (vm.isEditing ? 'Atualizar' : 'Salvar')
+                                      ? (vm.isEditing
+                                            ? 'Atualizar'
+                                            : 'Reivindicar')
                                       : 'Próximo',
                                 ),
                         ),

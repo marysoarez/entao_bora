@@ -92,7 +92,7 @@ class _CreateFabState extends State<CreateFab>
                                 minTileHeight: 40,
                                 contentPadding: EdgeInsets.zero,
                                 leading: const Icon(Icons.place, size: 20),
-                                title: const Text('Novo estabelecimento'),
+                                title: const Text('Reivindicar local'),
                                 onTap: () {
                                   setState(() => expanded = false);
                                   widget.onCreatePlace();
@@ -127,7 +127,7 @@ class _CreateFabState extends State<CreateFab>
               ),
               child: FloatingActionButton.small(
                 heroTag: 'locationFab',
-                  shape: const CircleBorder(),
+                shape: const CircleBorder(),
 
                 elevation: 0,
                 backgroundColor: Colors.grey.shade900,
@@ -156,7 +156,7 @@ class _CreateFabState extends State<CreateFab>
                 ],
               ),
               child: FloatingActionButton(
-               shape: const CircleBorder(),
+                shape: const CircleBorder(),
 
                 heroTag: 'createFab',
                 onPressed: () {

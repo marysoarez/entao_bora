@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class PlaceInfoStep extends StatelessWidget {
-  const PlaceInfoStep({super.key, required this.vm,
-  });
+  const PlaceInfoStep({super.key, required this.vm});
 
   final CreatePlaceViewModel vm;
   @override
   Widget build(BuildContext context) {
-
     return Observer(
       builder: (_) {
         return ListView(
@@ -24,7 +22,7 @@ class PlaceInfoStep extends StatelessWidget {
             const SizedBox(height: 8),
 
             Text(
-              "Conte um pouco sobre o estabelecimento.",
+              "Informe os dados do local que voce quer reivindicar.",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
 
@@ -52,10 +50,8 @@ class PlaceInfoStep extends StatelessWidget {
               ),
               items: PlaceType.values
                   .map(
-                    (type) => DropdownMenuItem(
-                      value: type,
-                      child: Text(type.label),
-                    ),
+                    (type) =>
+                        DropdownMenuItem(value: type, child: Text(type.label)),
                   )
                   .toList(),
               onChanged: (value) {
@@ -73,8 +69,7 @@ class PlaceInfoStep extends StatelessWidget {
               maxLines: 6,
               decoration: const InputDecoration(
                 labelText: "Descrição",
-                hintText:
-                    "Fale sobre o ambiente, estilos musicais, público...",
+                hintText: "Fale sobre o ambiente, estilos musicais, público...",
                 alignLabelWithHint: true,
                 prefixIcon: Icon(Icons.description),
               ),
@@ -135,7 +130,7 @@ class PlaceInfoStep extends StatelessWidget {
 
                     Expanded(
                       child: Text(
-                        "Nas próximas etapas você irá selecionar o endereço, os estilos musicais, horários de funcionamento e adicionar fotos.",
+                        "Voce precisa ser um parceiro para reivindicar um local. Na proxima etapa, pesquise pelo nome ou endereco como aparece no Google.",
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),

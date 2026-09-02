@@ -30,7 +30,7 @@ class _AddressStepState extends State<AddressStep> {
               const SizedBox(height: 8),
 
               Text(
-                "Pesquise e selecione o endereço do estabelecimento.",
+                "Pesquise pelo nome do local ou endereco como aparece no Google.",
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
 

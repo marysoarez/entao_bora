@@ -78,7 +78,7 @@ class MapMarkers {
       ..color = Colors.black.withValues(alpha: .22)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
-    final markerPaint = Paint()..color = const Color(0xFFFFC107);
+    final markerPaint = Paint()..color = const Color(0xFFDB4437);
     final borderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke

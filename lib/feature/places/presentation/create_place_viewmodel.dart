@@ -206,6 +206,11 @@ abstract class CreatePlaceViewModelBase with Store {
         return false;
       }
 
+      if (!user.isPartner) {
+        error = 'Voce precisa ser um parceiro para reivindicar um local.';
+        return false;
+      }
+
       final photosBase64 = <String>[];
 
       for (final photo in photos) {

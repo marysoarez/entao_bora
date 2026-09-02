@@ -69,7 +69,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       _drawerItem(
                         context,
                         icon: Icons.add_location_alt_outlined,
-                        title: 'Novo local',
+                        title: 'Reivindicar local',
                         onTap: () => Modular.to.pushNamed('/places/create'),
                       ),
                       const Divider(),
