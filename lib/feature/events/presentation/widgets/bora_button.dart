@@ -1,7 +1,9 @@
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 
 class BoraButton extends StatelessWidget {
-  const BoraButton({super.key, 
+  const BoraButton({
+    super.key,
     required this.active,
     required this.count,
     required this.loading,
@@ -19,21 +21,15 @@ class BoraButton extends StatelessWidget {
       height: 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(DsRadius.lg + 2),
           gradient: LinearGradient(
             colors: active
-                ? const [
-                    Color(0xffD32F2F),
-                    Color(0xffF44336),
-                  ]
-                : const [
-                    Color(0xff8B0000),
-                    Color(0xffC62828),
-                  ],
+                ? const [Color(0xFFD32F2F), Color(0xFFF44336)]
+                : const [Color(0xFF8B0000), Color(0xFFC62828)],
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(.35),
+              color: DsColors.accent.withValues(alpha: .35),
               blurRadius: 14,
               offset: const Offset(0, 5),
             ),
@@ -44,20 +40,14 @@ class BoraButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
-            foregroundColor: Colors.white,
+            foregroundColor: DsColors.publicText,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(DsRadius.lg + 2),
             ),
           ),
-          icon: Icon(
-            active
-                ? Icons.favorite
-                : Icons.favorite_border,
-          ),
+          icon: Icon(active ? Icons.favorite : Icons.favorite_border),
           label: Text(
-            active
-                ? "BORA! ($count)"
-                : "ENTÃO BORA ($count)",
+            active ? 'BORA! ($count)' : 'ENTAO BORA ($count)',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               letterSpacing: 1,

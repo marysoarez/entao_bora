@@ -3,10 +3,7 @@ import 'package:entao_bora/feature/events/presentation/widgets/event_stat_widget
 import 'package:flutter/material.dart';
 
 class EventStats extends StatelessWidget {
-  const EventStats({
-    super.key,
-    required this.event,
-  });
+  const EventStats({super.key, required this.event});
 
   final EventEntity event;
 

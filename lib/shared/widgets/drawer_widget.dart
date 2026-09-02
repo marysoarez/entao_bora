@@ -1,5 +1,6 @@
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -109,10 +110,13 @@ class _AppDrawerState extends State<AppDrawer> {
                 const Divider(height: 1),
                 auth.isLogged
                     ? ListTile(
-                        leading: const Icon(Icons.logout, color: Colors.red),
+                        leading: const Icon(
+                          Icons.logout,
+                          color: DsColors.accent,
+                        ),
                         title: const Text(
                           'Sair',
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(color: DsColors.accent),
                         ),
                         onTap: () async {
                           Navigator.pop(context);
@@ -120,10 +124,13 @@ class _AppDrawerState extends State<AppDrawer> {
                         },
                       )
                     : ListTile(
-                        leading: const Icon(Icons.login, color: Colors.green),
+                        leading: const Icon(
+                          Icons.login,
+                          color: DsColors.success,
+                        ),
                         title: const Text(
                           'Entrar',
-                          style: TextStyle(color: Colors.green),
+                          style: TextStyle(color: DsColors.success),
                         ),
                         onTap: () async {
                           Navigator.pop(context);
@@ -143,32 +150,32 @@ class _AppDrawerState extends State<AppDrawer> {
   Widget _buildHeader(AuthViewModel auth) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(color: Color(0xFF1E1E1E)),
+      padding: const EdgeInsets.all(DsSpacing.xl),
+      decoration: const BoxDecoration(color: DsColors.primary),
       child: Column(
         children: [
           CircleAvatar(
             radius: 34,
-            backgroundColor: Colors.white24,
+            backgroundColor: DsColors.publicTextSubtle,
             backgroundImage: auth.user?.photoUrl != null
                 ? NetworkImage(auth.user!.photoUrl!)
                 : null,
             child: auth.user?.photoUrl == null
-                ? const Icon(Icons.person, size: 38, color: Colors.white)
+                ? const Icon(Icons.person, size: 38, color: DsColors.publicText)
                 : null,
           ),
           const SizedBox(height: 12),
           Text(
             auth.user?.name ?? 'Visitante',
             style: const TextStyle(
-              color: Colors.white,
+              color: DsColors.publicText,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
             auth.user?.email ?? 'Faca login para continuar',
-            style: TextStyle(color: Colors.grey.shade400),
+            style: const TextStyle(color: DsColors.publicTextSubtle),
           ),
         ],
       ),

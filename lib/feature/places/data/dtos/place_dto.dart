@@ -20,6 +20,7 @@ class PlaceDto extends PlaceEntity {
     required super.openingHours,
     required super.photos,
     super.menuItems,
+    super.menuCategories,
     required super.ownerId,
   });
 
@@ -49,6 +50,7 @@ class PlaceDto extends PlaceEntity {
       menuItems: (map['menuItems'] as List<dynamic>? ?? [])
           .map((e) => MenuItemDto.fromMap(Map<String, dynamic>.from(e)))
           .toList(),
+      menuCategories: List<String>.from(map['menuCategories'] ?? []),
     );
   }
 
@@ -69,6 +71,7 @@ class PlaceDto extends PlaceEntity {
       'menuItems': menuItems
           .map((e) => MenuItemDto.fromEntity(e).toMap())
           .toList(),
+      'menuCategories': menuCategories,
     };
   }
 
@@ -88,6 +91,7 @@ class PlaceDto extends PlaceEntity {
       openingHours: entity.openingHours,
       photos: entity.photos,
       menuItems: entity.menuItems,
+      menuCategories: entity.menuCategories,
     );
   }
 }
@@ -99,6 +103,7 @@ class MenuItemDto extends MenuItemEntity {
     required super.description,
     required super.price,
     required super.photo,
+    super.category,
   });
 
   factory MenuItemDto.fromMap(Map<String, dynamic> map) {
@@ -108,6 +113,7 @@ class MenuItemDto extends MenuItemEntity {
       description: map['description']?.toString() ?? '',
       price: (map['price'] as num?)?.toDouble() ?? 0,
       photo: map['photo']?.toString() ?? '',
+      category: map['category']?.toString() ?? 'Geral',
     );
   }
 
@@ -118,6 +124,7 @@ class MenuItemDto extends MenuItemEntity {
       description: entity.description,
       price: entity.price,
       photo: entity.photo,
+      category: entity.category,
     );
   }
 
@@ -128,6 +135,7 @@ class MenuItemDto extends MenuItemEntity {
       'description': description,
       'price': price,
       'photo': photo,
+      'category': category,
     };
   }
 }

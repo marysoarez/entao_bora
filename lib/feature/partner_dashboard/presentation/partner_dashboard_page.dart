@@ -1,4 +1,3 @@
-import 'package:entao_bora/core/app_theme.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
@@ -6,6 +5,7 @@ import 'package:entao_bora/feature/events/domain/repositories/event_repositor.da
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
@@ -293,7 +293,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: DsColors.adminBackground,
       appBar: AppBar(
         title: const Text('Meus eventos'),
         actions: [
@@ -306,21 +306,13 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1200),
-                  child: _buildContent(),
-                ),
-              ),
-            ),
+          : DsAdminPage(child: _buildContent()),
     );
   }
 
   Widget _buildContent() {
     if (error != null && places.isEmpty) {
-      return _EmptyState(
+      return DsEmptyState(
         icon: Icons.lock_outline,
         title: 'Nao foi possivel abrir o dashboard',
         message: error!,
@@ -330,7 +322,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     }
 
     if (places.isEmpty && events.isEmpty) {
-      return _EmptyState(
+      return DsEmptyState(
         icon: Icons.event_busy_outlined,
         title: 'Nenhum evento criado',
         message:
@@ -346,7 +338,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
         _buildHeader(),
         if (error != null) ...[
           const SizedBox(height: 16),
-          _InlineError(message: error!),
+          DsInlineError(message: error!),
         ],
         if (places.isNotEmpty) ...[
           const SizedBox(height: 24),
@@ -520,7 +512,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
 
   Widget _buildUpcomingEvents() {
     if (visibleEvents.isEmpty) {
-      return _EmptyState(
+      return DsEmptyState(
         icon: Icons.event_busy_outlined,
         title: 'Nenhum evento futuro',
         message:
@@ -607,7 +599,7 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 28, color: AppTheme.primary),
+            Icon(icon, size: 28, color: DsColors.primary),
             const SizedBox(height: 18),
             Text(title, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 4),
@@ -620,7 +612,7 @@ class _MetricCard extends StatelessWidget {
               subtitle,
               style: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
+              ).textTheme.bodySmall?.copyWith(color: DsColors.adminTextMuted),
             ),
           ],
         ),
@@ -806,7 +798,7 @@ class _EventCover extends StatelessWidget {
       child: Container(
         width: 112,
         height: 112,
-        color: AppTheme.background,
+        color: DsColors.adminBackground,
         child: coverImage.isEmpty
             ? const Icon(Icons.music_note)
             : Image.memory(
@@ -849,7 +841,7 @@ class _Detail extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: AppTheme.textSecondary),
+          Icon(icon, size: 18, color: DsColors.adminTextMuted),
           const SizedBox(width: 6),
           Flexible(
             child: Text(
@@ -875,71 +867,10 @@ class _EventMetric extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 18, color: AppTheme.textSecondary),
+        Icon(icon, size: 18, color: DsColors.adminTextMuted),
         const SizedBox(width: 5),
         Text('$value', style: const TextStyle(fontWeight: FontWeight.w600)),
       ],
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-  final String actionLabel;
-  final VoidCallback onAction;
-
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 34, color: AppTheme.primary),
-            const SizedBox(height: 18),
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 20),
-            FilledButton(onPressed: onAction, child: Text(actionLabel)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InlineError extends StatelessWidget {
-  final String message;
-
-  const _InlineError({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppTheme.secondary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        message,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: AppTheme.secondary),
-      ),
     );
   }
 }

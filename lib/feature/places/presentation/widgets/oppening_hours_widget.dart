@@ -5,14 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class OpeningHoursStep extends StatelessWidget {
-  const OpeningHoursStep({super.key, required this.vm,
-  });
+  const OpeningHoursStep({super.key, required this.vm});
 
   final CreatePlaceViewModel vm;
 
   @override
   Widget build(BuildContext context) {
-
     return Observer(
       builder: (_) {
         return ListView(
@@ -32,93 +30,78 @@ class OpeningHoursStep extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            ...Weekday.values.map(
-              (weekday) {
-                final current = vm.openingHours.where(
-                  (e) => e.weekday == weekday,
-                );
+            ...Weekday.values.map((weekday) {
+              final current = vm.openingHours.where(
+                (e) => e.weekday == weekday,
+              );
 
-                final opening =
-                    current.isNotEmpty ? current.first : null;
+              final opening = current.isNotEmpty ? current.first : null;
 
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 90,
-                          child: Text(
-                            weekday.label,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 90,
+                        child: Text(
+                          weekday.label,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+
+                      Expanded(
+                        child: opening == null
+                            ? const Text("Fechado")
+                            : Text(opening.formatted),
+                      ),
+
+                      TextButton(
+                        onPressed: () async {
+                          final open = await showTimePicker(
+                            context: context,
+                            initialTime:
+                                opening?.opensAt ??
+                                const TimeOfDay(hour: 18, minute: 0),
+                          );
+
+                          if (open == null) return;
+
+                          if (!context.mounted) return;
+
+                          final close = await showTimePicker(
+                            context: context,
+                            initialTime:
+                                opening?.closesAt ??
+                                const TimeOfDay(hour: 23, minute: 0),
+                          );
+
+                          if (close == null) return;
+
+                          vm.setOpeningHours(
+                            OpeningHours(
+                              weekday: weekday,
+                              opensAt: open,
+                              closesAt: close,
                             ),
-                          ),
-                        ),
+                          );
+                        },
+                        child: Text(opening == null ? "Adicionar" : "Editar"),
+                      ),
 
-                        Expanded(
-                          child: opening == null
-                              ? const Text("Fechado")
-                              : Text(opening.formatted),
-                        ),
-
-                        TextButton(
-                          onPressed: () async {
-                            final open = await showTimePicker(
-                              context: context,
-                              initialTime:
-                                  opening?.opensAt ??
-                                      const TimeOfDay(
-                                        hour: 18,
-                                        minute: 0,
-                                      ),
-                            );
-
-                            if (open == null) return;
-
-                            if (!context.mounted) return;
-
-                            final close = await showTimePicker(
-                              context: context,
-                              initialTime:
-                                  opening?.closesAt ??
-                                      const TimeOfDay(
-                                        hour: 23,
-                                        minute: 0,
-                                      ),
-                            );
-
-                            if (close == null) return;
-
-                            vm.setOpeningHours(
-                              OpeningHours(
-                                weekday: weekday,
-                                opensAt: open,
-                                closesAt: close,
-                              ),
-                            );
+                      if (opening != null)
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () {
+                            vm.removeOpeningHours(weekday);
                           },
-                          child: Text(
-                            opening == null
-                                ? "Adicionar"
-                                : "Editar",
-                          ),
                         ),
-
-                        if (opening != null)
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () {
-                              vm.removeOpeningHours(weekday);
-                            },
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            }),
 
             const SizedBox(height: 24),
 

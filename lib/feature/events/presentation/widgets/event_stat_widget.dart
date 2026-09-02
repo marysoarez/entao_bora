@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class EventStat extends StatelessWidget {
@@ -28,13 +27,8 @@ class EventStat extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(
-            vertical: 12,
-            horizontal: 6,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -44,15 +38,9 @@ class EventStat extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: statColor.withOpacity(.12),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: statColor.withOpacity(.30),
-                  ),
+                  border: Border.all(color: statColor.withOpacity(.30)),
                 ),
-                child: Icon(
-                  icon,
-                  color: statColor,
-                  size: 20,
-                ),
+                child: Icon(icon, color: statColor, size: 20),
               ),
 
               const SizedBox(height: 10),

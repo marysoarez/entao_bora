@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 
 class AppTheme {
   AppTheme._();
 
   // Cores
-  static const Color primary = Color(0xFF1F1F1F);
-  static const Color secondary = Color(0xFFD64545);
+  static const Color primary = DsColors.primary;
+  static const Color secondary = DsColors.accent;
 
-  static const Color background = Color(0xFFF7F6F3);
-  static const Color surface = Colors.white;
+  static const Color background = DsColors.adminBackground;
+  static const Color surface = DsColors.adminSurface;
 
-  static const Color textPrimary = Color(0xFF222222);
-  static const Color textSecondary = Color(0xFF6B6B6B);
+  static const Color textPrimary = DsColors.adminText;
+  static const Color textSecondary = DsColors.adminTextMuted;
 
-  static const Color divider = Color(0xFFE5E5E5);
+  static const Color divider = DsColors.adminDivider;
 
   static ThemeData get light {
     return ThemeData(
@@ -41,7 +42,7 @@ class AppTheme {
         elevation: 0,
         color: surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(DsRadius.xl),
         ),
       ),
 
@@ -52,7 +53,7 @@ class AppTheme {
           elevation: 0,
           minimumSize: const Size(160, 52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(DsRadius.md),
           ),
         ),
       ),
@@ -63,7 +64,7 @@ class AppTheme {
           minimumSize: const Size(160, 52),
           side: const BorderSide(color: divider),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(DsRadius.md),
           ),
         ),
       ),
@@ -73,18 +74,18 @@ class AppTheme {
         fillColor: surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
-          vertical: 16,
+          vertical: DsSpacing.md,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(DsRadius.md),
           borderSide: const BorderSide(color: divider),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(DsRadius.md),
           borderSide: const BorderSide(color: divider),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(DsRadius.md),
           borderSide: const BorderSide(color: primary, width: 1.5),
         ),
       ),
@@ -116,16 +117,8 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: textPrimary,
         ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          color: textPrimary,
-          height: 1.6,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          color: textSecondary,
-          height: 1.5,
-        ),
+        bodyLarge: TextStyle(fontSize: 16, color: textPrimary, height: 1.6),
+        bodyMedium: TextStyle(fontSize: 14, color: textSecondary, height: 1.5),
       ),
     );
   }

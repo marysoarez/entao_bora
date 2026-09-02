@@ -7,11 +7,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import '../../../../shared/enum/checkin_results.dart';
 
 class EventActions extends StatelessWidget {
-  const EventActions({
-    super.key,
-    required this.vm,
-    required this.onLogin,
-  });
+  const EventActions({super.key, required this.vm, required this.onLogin});
 
   final EventActionsViewModel vm;
   final Future<void> Function() onLogin;
@@ -64,9 +60,7 @@ class EventActions extends StatelessWidget {
                   switch (result) {
                     case CheckInResult.success:
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("🤘 Check-in realizado!"),
-                        ),
+                        const SnackBar(content: Text("🤘 Check-in realizado!")),
                       );
                       break;
 
@@ -78,32 +72,20 @@ class EventActions extends StatelessWidget {
                       break;
 
                     case CheckInResult.eventNotStarted:
-                      _snack(
-                        context,
-                        "⏰ O evento ainda não começou.",
-                      );
+                      _snack(context, "⏰ O evento ainda não começou.");
                       break;
 
                     case CheckInResult.eventFinished:
-                      _snack(
-                        context,
-                        "🎉 Este evento já terminou.",
-                      );
+                      _snack(context, "🎉 Este evento já terminou.");
                       break;
 
                     case CheckInResult.alreadyCheckedIn:
-                      _snack(
-                        context,
-                        "✅ Você já fez check-in.",
-                      );
+                      _snack(context, "✅ Você já fez check-in.");
                       break;
 
                     case CheckInResult.error:
                     case null:
-                      _snack(
-                        context,
-                        vm.error ?? "Erro inesperado.",
-                      );
+                      _snack(context, vm.error ?? "Erro inesperado.");
                       break;
                   }
                 },
@@ -116,10 +98,6 @@ class EventActions extends StatelessWidget {
   }
 
   void _snack(BuildContext context, String text) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(
-      SnackBar(content: Text(text)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 }

@@ -5,6 +5,7 @@ import 'package:entao_bora/feature/events/presentation/widgets/event_genres_widg
 import 'package:entao_bora/feature/events/presentation/widgets/event_header_widget.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_info_widget.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -49,11 +50,14 @@ class _EventCardState extends State<EventCard> {
 
           return Card(
             elevation: 0,
-            color: const Color(0xff161616),
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: DsColors.publicSurface,
+            margin: const EdgeInsets.symmetric(
+              horizontal: DsSpacing.md,
+              vertical: DsSpacing.xs,
+            ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(22),
-              side: BorderSide(color: Colors.red.withOpacity(.15)),
+              borderRadius: BorderRadius.circular(DsRadius.xxl - 2),
+              side: BorderSide(color: DsColors.accent.withValues(alpha: .15)),
             ),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -75,7 +79,7 @@ class _EventCardState extends State<EventCard> {
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(DsSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -91,7 +95,7 @@ class _EventCardState extends State<EventCard> {
                         event.description,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.white),
+                        style: DsTextStyles.publicBody,
                       ),
 
                       const SizedBox(height: 20),
@@ -195,7 +199,9 @@ class _EventCardState extends State<EventCard> {
                 onTap: () async {
                   Navigator.pop(context);
 
-                  await Share.share('🤘 $title\n\n$url');
+                  await SharePlus.instance.share(
+                    ShareParams(text: '🤘 $title\n\n$url'),
+                  );
                 },
               ),
             ],

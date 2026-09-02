@@ -1,9 +1,11 @@
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_mini_card.dart';
+import 'package:entao_bora/feature/places/domain/entities/menu_item_entity.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/user_avatar_widget.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -180,11 +182,21 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
     );
   }
 
+  void showMenu() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: DsColors.publicSheet,
+      builder: (_) => _PlaceMenuSheet(place: place),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = authRepository.currentUser;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: DsColors.publicBackground,
 
       body: ListView(
         children: [
@@ -216,43 +228,21 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                     Positioned(
                       top: 16,
                       left: 16,
-                      child: Material(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(30),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(30),
-                          onTap: () {
-                            Modular.to.navigate('/');
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                          ),
-                        ),
+                      child: DsHeroIconButton(
+                        icon: Icons.arrow_back,
+                        tooltip: 'Voltar',
+                        onTap: () {
+                          Modular.to.navigate('/');
+                        },
                       ),
                     ),
                     Positioned(
                       top: 16,
                       right: 16,
-                      child: Material(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(30),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(30),
-                          onTap: showSharePlaceDialog,
-                          child: const Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Icon(
-                              Icons.share_outlined,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                          ),
-                        ),
+                      child: DsHeroIconButton(
+                        icon: Icons.share_outlined,
+                        tooltip: 'Compartilhar',
+                        onTap: showSharePlaceDialog,
                       ),
                     ),
                     IgnorePointer(
@@ -279,14 +269,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            place.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          Text(place.name, style: DsTextStyles.publicTitle),
 
                           const SizedBox(height: 10),
 
@@ -361,7 +344,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
               runSpacing: 12,
               children: [
                 if (place.phone.isNotEmpty)
-                  _InfoChip(
+                  DsActionChip(
                     icon: Icons.call_outlined,
                     label: "Telefone",
                     onTap: () async {
@@ -370,7 +353,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                   ),
 
                 if (place.instagram.isNotEmpty)
-                  _InfoChip(
+                  DsActionChip(
                     icon: Icons.camera_alt_outlined,
                     label: "Instagram",
                     color: Colors.pinkAccent,
@@ -385,7 +368,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                   ),
 
                 if (place.website.isNotEmpty)
-                  _InfoChip(
+                  DsActionChip(
                     icon: Icons.language,
                     label: "Site",
                     onTap: () async {
@@ -394,6 +377,14 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                         mode: LaunchMode.externalApplication,
                       );
                     },
+                  ),
+
+                if (place.menuItems.isNotEmpty)
+                  DsActionChip(
+                    icon: Icons.restaurant_menu_outlined,
+                    label: "Cardapio",
+                    color: DsColors.warning,
+                    onTap: showMenu,
                   ),
               ],
             ),
@@ -412,9 +403,11 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(.15),
+                        color: DsColors.accent.withValues(alpha: .15),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.red.withOpacity(.30)),
+                        border: Border.all(
+                          color: DsColors.accent.withValues(alpha: .30),
+                        ),
                       ),
                       child: Text(
                         genre.label,
@@ -479,7 +472,8 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: vm.events.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (_, index) {
                   final event = vm.events[index];
 
@@ -558,44 +552,130 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
   }
 }
 
-class _InfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color? color;
-  final VoidCallback? onTap;
+class _PlaceMenuSheet extends StatelessWidget {
+  final PlaceEntity place;
 
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-    this.color,
-    this.onTap,
-  });
+  const _PlaceMenuSheet({required this.place});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withOpacity(.08),
-      borderRadius: BorderRadius.circular(24),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+    final groupedItems = _itemsByCategory(place.menuItems);
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.78,
+      minChildSize: 0.42,
+      maxChildSize: 0.94,
+      builder: (context, scrollController) {
+        return SafeArea(
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
-              Icon(icon, size: 18, color: color ?? Colors.redAccent),
-              const SizedBox(width: 8),
               Text(
-                label,
-                style: const TextStyle(
+                'Cardapio',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: Colors.white,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(height: 4),
+              Text(place.name, style: const TextStyle(color: Colors.white70)),
+              const SizedBox(height: 20),
+              for (final entry in groupedItems.entries) ...[
+                Text(
+                  entry.key,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                for (final item in entry.value) ...[
+                  _PublicMenuItemTile(item: item),
+                  const SizedBox(height: 12),
+                ],
+                const SizedBox(height: 8),
+              ],
             ],
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Map<String, List<MenuItemEntity>> _itemsByCategory(
+    List<MenuItemEntity> items,
+  ) {
+    final grouped = <String, List<MenuItemEntity>>{};
+
+    for (final item in items) {
+      final category = item.category.trim().isEmpty ? 'Geral' : item.category;
+      grouped.putIfAbsent(category, () => []).add(item);
+    }
+
+    return grouped;
+  }
+}
+
+class _PublicMenuItemTile extends StatelessWidget {
+  final MenuItemEntity item;
+
+  const _PublicMenuItemTile({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return DsPublicCard(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 86,
+              height: 86,
+              color: Colors.white.withValues(alpha: .06),
+              child: item.photo.isEmpty
+                  ? const Icon(
+                      Icons.restaurant_menu_outlined,
+                      color: Colors.white54,
+                    )
+                  : Image.memory(
+                      ImageHelper.base64ToBytes(item.photo),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image, color: Colors.white54),
+                    ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.description,
+                  style: const TextStyle(color: Colors.white70, height: 1.35),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  DsFormatters.brl(item.price),
+                  style: DsTextStyles.publicPrice,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

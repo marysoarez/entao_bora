@@ -1,9 +1,9 @@
-import 'package:entao_bora/core/app_theme.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/places/domain/entities/menu_item_entity.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/errors/image_exception.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
@@ -127,13 +127,20 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
     });
   }
 
-  Future<void> openMenuItemForm([MenuItemEntity? item]) async {
+  Future<void> openMenuItemForm([
+    MenuItemEntity? item,
+    String? initialCategory,
+  ]) async {
     final place = selectedPlace;
     if (place == null) return;
 
     final savedItem = await showDialog<MenuItemEntity>(
       context: context,
-      builder: (context) => _MenuItemDialog(item: item),
+      builder: (context) => _MenuItemDialog(
+        item: item,
+        categories: _categoriesFor(place),
+        initialCategory: initialCategory,
+      ),
     );
 
     if (savedItem == null) return;
@@ -144,7 +151,103 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
               .map((current) => current.id == item.id ? savedItem : current)
               .toList();
 
-    await _saveMenuItems(place, updatedItems);
+    await _saveMenu(place, menuItems: updatedItems);
+  }
+
+  List<String> _categoriesFor(PlaceEntity place) {
+    final categories =
+        [
+              ...place.menuCategories,
+              ...place.menuItems.map((item) => item.category),
+            ]
+            .map((category) => category.trim())
+            .where((category) => category.isNotEmpty)
+            .toSet()
+            .toList();
+
+    if (!categories.contains('Geral')) {
+      categories.insert(0, 'Geral');
+    }
+
+    categories.sort((a, b) {
+      if (a == 'Geral') return -1;
+      if (b == 'Geral') return 1;
+      return a.compareTo(b);
+    });
+
+    return categories;
+  }
+
+  Future<void> createCategory() async {
+    final place = selectedPlace;
+    if (place == null) return;
+
+    final controller = TextEditingController();
+
+    final category = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Nova categoria'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Nome da categoria',
+              hintText: 'Ex: Drinks, Porcoes, Sobremesas',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(context).pop(controller.text.trim()),
+              child: const Text('Criar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (category == null || category.isEmpty) return;
+
+    final exists = _categoriesFor(
+      place,
+    ).any((current) => current.toLowerCase() == category.toLowerCase());
+
+    if (exists) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Categoria ja existe.')));
+      return;
+    }
+
+    await _saveMenu(
+      place,
+      menuItems: place.menuItems,
+      menuCategories: [...place.menuCategories, category],
+    );
+  }
+
+  Map<String, List<MenuItemEntity>> _itemsByCategory(PlaceEntity place) {
+    final grouped = {
+      for (final category in _categoriesFor(place))
+        category: <MenuItemEntity>[],
+    };
+
+    for (final item in place.menuItems) {
+      final category = item.category.trim().isEmpty ? 'Geral' : item.category;
+      grouped.putIfAbsent(category, () => []).add(item);
+    }
+
+    return grouped;
   }
 
   Future<void> deleteMenuItem(MenuItemEntity item) async {
@@ -173,22 +276,28 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
 
     if (confirmed != true) return;
 
-    await _saveMenuItems(
+    await _saveMenu(
       place,
-      place.menuItems.where((current) => current.id != item.id).toList(),
+      menuItems: place.menuItems
+          .where((current) => current.id != item.id)
+          .toList(),
     );
   }
 
-  Future<void> _saveMenuItems(
-    PlaceEntity place,
-    List<MenuItemEntity> menuItems,
-  ) async {
+  Future<void> _saveMenu(
+    PlaceEntity place, {
+    required List<MenuItemEntity> menuItems,
+    List<String>? menuCategories,
+  }) async {
     setState(() {
       loading = true;
       error = null;
     });
 
-    final updatedPlace = place.copyWith(menuItems: menuItems);
+    final updatedPlace = place.copyWith(
+      menuItems: menuItems,
+      menuCategories: menuCategories,
+    );
     final result = await _placeRepository.updatePlace(updatedPlace);
 
     if (!mounted) return;
@@ -224,7 +333,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: DsColors.adminBackground,
       appBar: AppBar(
         title: const Text('Editar cardapio'),
         actions: [
@@ -237,15 +346,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1100),
-                  child: _buildContent(),
-                ),
-              ),
-            ),
+          : DsAdminPage(maxWidth: DsSizes.maxFormWidth, child: _buildContent()),
       floatingActionButton: selectedPlace == null || error != null
           ? null
           : FloatingActionButton.extended(
@@ -258,7 +359,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
 
   Widget _buildContent() {
     if (error != null && places.isEmpty) {
-      return _EmptyState(
+      return DsEmptyState(
         icon: Icons.lock_outline,
         title: 'Nao foi possivel editar o cardapio',
         message: error!,
@@ -268,7 +369,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
     }
 
     if (places.isEmpty) {
-      return _EmptyState(
+      return DsEmptyState(
         icon: Icons.storefront_outlined,
         title: 'Nenhum estabelecimento cadastrado',
         message: 'Cadastre um local antes de montar o cardapio.',
@@ -309,6 +410,12 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
               icon: const Icon(Icons.add),
               label: const Text('Adicionar item'),
             ),
+            const SizedBox(width: 12),
+            OutlinedButton.icon(
+              onPressed: createCategory,
+              icon: const Icon(Icons.create_new_folder_outlined),
+              label: const Text('Nova categoria'),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -318,11 +425,11 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
         ),
         if (error != null) ...[
           const SizedBox(height: 16),
-          _InlineError(message: error!),
+          DsInlineError(message: error!),
         ],
         const SizedBox(height: 24),
         if (items.isEmpty)
-          _EmptyState(
+          DsEmptyState(
             icon: Icons.restaurant_menu_outlined,
             title: 'Nenhum item no cardapio',
             message:
@@ -331,20 +438,33 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
             onAction: () => openMenuItemForm(),
           )
         else
-          Card(
-            child: Column(
-              children: [
-                for (var index = 0; index < items.length; index++) ...[
-                  _MenuItemTile(
-                    item: items[index],
-                    onEdit: () => openMenuItemForm(items[index]),
-                    onDelete: () => deleteMenuItem(items[index]),
-                  ),
-                  if (index != items.length - 1) const Divider(height: 1),
-                ],
-              ],
-            ),
-          ),
+          for (final entry in _itemsByCategory(place).entries) ...[
+            _CategoryHeader(title: entry.key, count: entry.value.length),
+            const SizedBox(height: 10),
+            if (entry.value.isEmpty)
+              _EmptyCategory(onAdd: () => openMenuItemForm(null, entry.key))
+            else
+              Card(
+                child: Column(
+                  children: [
+                    for (
+                      var index = 0;
+                      index < entry.value.length;
+                      index++
+                    ) ...[
+                      _MenuItemTile(
+                        item: entry.value[index],
+                        onEdit: () => openMenuItemForm(entry.value[index]),
+                        onDelete: () => deleteMenuItem(entry.value[index]),
+                      ),
+                      if (index != entry.value.length - 1)
+                        const Divider(height: 1),
+                    ],
+                  ],
+                ),
+              ),
+            const SizedBox(height: 20),
+          ],
       ],
     );
   }
@@ -352,8 +472,14 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
 
 class _MenuItemDialog extends StatefulWidget {
   final MenuItemEntity? item;
+  final List<String> categories;
+  final String? initialCategory;
 
-  const _MenuItemDialog({this.item});
+  const _MenuItemDialog({
+    this.item,
+    required this.categories,
+    this.initialCategory,
+  });
 
   @override
   State<_MenuItemDialog> createState() => _MenuItemDialogState();
@@ -364,9 +490,11 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
+  final _categoryController = TextEditingController();
   final _picker = ImagePicker();
 
   String _photo = '';
+  String? _selectedCategory;
   bool _processingPhoto = false;
 
   @override
@@ -374,6 +502,10 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
     super.initState();
 
     final item = widget.item;
+    _selectedCategory = item?.category.trim().isNotEmpty == true
+        ? item!.category
+        : widget.initialCategory ?? widget.categories.first;
+
     if (item == null) return;
 
     _titleController.text = item.title;
@@ -387,6 +519,7 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
     _titleController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -436,6 +569,10 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
+    final category = _categoryController.text.trim().isNotEmpty
+        ? _categoryController.text.trim()
+        : _selectedCategory?.trim() ?? 'Geral';
+
     Navigator.of(context).pop(
       MenuItemEntity(
         id: widget.item?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
@@ -443,12 +580,17 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
         description: _descriptionController.text.trim(),
         price: _parsePrice(_priceController.text),
         photo: _photo,
+        category: category,
       ),
     );
   }
 
   double _parsePrice(String value) {
-    return double.parse(value.replaceAll('.', '').replaceAll(',', '.'));
+    final normalized = value.contains(',')
+        ? value.replaceAll('.', '').replaceAll(',', '.')
+        : value;
+
+    return double.parse(normalized);
   }
 
   @override
@@ -472,7 +614,7 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Theme.of(context).dividerColor),
-                      color: AppTheme.background,
+                      color: DsColors.adminBackground,
                     ),
                     child: _processingPhoto
                         ? const Center(child: CircularProgressIndicator())
@@ -500,6 +642,31 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedCategory,
+                  decoration: const InputDecoration(labelText: 'Categoria'),
+                  items: widget.categories.map((category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text(category),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategory = value;
+                      _categoryController.clear();
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _categoryController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nova categoria personalizada',
+                    hintText: 'Ex: Drinks, Porcoes, Sobremesas',
+                  ),
+                ),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(labelText: 'Titulo'),
@@ -520,7 +687,10 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _priceController,
-                  decoration: const InputDecoration(labelText: 'Preco'),
+                  decoration: const InputDecoration(
+                    labelText: 'Preco',
+                    prefixText: 'R\$ ',
+                  ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -529,9 +699,10 @@ class _MenuItemDialogState extends State<_MenuItemDialog> {
                       return 'Informe o preco.';
                     }
 
-                    final price = double.tryParse(
-                      value.replaceAll('.', '').replaceAll(',', '.'),
-                    );
+                    final normalized = value.contains(',')
+                        ? value.replaceAll('.', '').replaceAll(',', '.')
+                        : value;
+                    final price = double.tryParse(normalized);
 
                     if (price == null || price <= 0) {
                       return 'Informe um preco valido.';
@@ -626,7 +797,61 @@ class _MenuItemTile extends StatelessWidget {
   }
 
   String _formatPrice(double value) {
-    return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
+    return DsFormatters.brl(value);
+  }
+}
+
+class _CategoryHeader extends StatelessWidget {
+  final String title;
+  final int count;
+
+  const _CategoryHeader({required this.title, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+        ),
+        Chip(
+          label: Text('$count item(s)'),
+          visualDensity: VisualDensity.compact,
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyCategory extends StatelessWidget {
+  final VoidCallback onAdd;
+
+  const _EmptyCategory({required this.onAdd});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, color: DsColors.adminTextMuted),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Categoria sem itens.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add),
+              label: const Text('Adicionar item'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -642,7 +867,7 @@ class _MenuItemPhoto extends StatelessWidget {
       child: Container(
         width: 112,
         height: 112,
-        color: AppTheme.background,
+        color: DsColors.adminBackground,
         child: photo.isEmpty
             ? const Icon(Icons.restaurant_menu_outlined)
             : Image.memory(
@@ -651,67 +876,6 @@ class _MenuItemPhoto extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) =>
                     const Icon(Icons.broken_image),
               ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-  final String actionLabel;
-  final VoidCallback onAction;
-
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 34, color: AppTheme.primary),
-            const SizedBox(height: 18),
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 20),
-            FilledButton(onPressed: onAction, child: Text(actionLabel)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InlineError extends StatelessWidget {
-  final String message;
-
-  const _InlineError({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppTheme.secondary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        message,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: AppTheme.secondary),
       ),
     );
   }

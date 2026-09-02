@@ -4,6 +4,7 @@ class MenuItemEntity {
   final String description;
   final double price;
   final String photo;
+  final String category;
 
   const MenuItemEntity({
     required this.id,
@@ -11,6 +12,7 @@ class MenuItemEntity {
     required this.description,
     required this.price,
     required this.photo,
+    this.category = 'Geral',
   });
 
   MenuItemEntity copyWith({
@@ -19,6 +21,7 @@ class MenuItemEntity {
     String? description,
     double? price,
     String? photo,
+    String? category,
   }) {
     return MenuItemEntity(
       id: id ?? this.id,
@@ -26,6 +29,7 @@ class MenuItemEntity {
       description: description ?? this.description,
       price: price ?? this.price,
       photo: photo ?? this.photo,
+      category: category ?? this.category,
     );
   }
 }

@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class GenreStep extends StatelessWidget {
-  const GenreStep({super.key, required this.vm,
-  });
+  const GenreStep({super.key, required this.vm});
 
   final CreatePlaceViewModel vm;
 
   @override
   Widget build(BuildContext context) {
-
     return Observer(
       builder: (_) {
         return ListView(
@@ -41,12 +39,7 @@ class GenreStep extends StatelessWidget {
                   label: Text(genre.label),
                   selected: selected,
                   showCheckmark: false,
-                  avatar: selected
-                      ? const Icon(
-                          Icons.check,
-                          size: 18,
-                        )
-                      : null,
+                  avatar: selected ? const Icon(Icons.check, size: 18) : null,
                   onSelected: (_) {
                     vm.toggleGenre(genre);
                   },

@@ -1,11 +1,9 @@
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:flutter/material.dart';
 
 class EventGenres extends StatelessWidget {
-  const EventGenres({
-    super.key,
-    required this.genres,
-  });
+  const EventGenres({super.key, required this.genres});
 
   final List<MusicGenre> genres;
 
@@ -16,23 +14,15 @@ class EventGenres extends StatelessWidget {
     }
 
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: genres
-          .map(
-            (genre) => _GenreBadge(
-              genre: genre.name,
-            ),
-          )
-          .toList(),
+      spacing: DsSpacing.xs,
+      runSpacing: DsSpacing.xs,
+      children: genres.map((genre) => _GenreBadge(genre: genre.name)).toList(),
     );
   }
 }
 
 class _GenreBadge extends StatelessWidget {
-  const _GenreBadge({
-    required this.genre,
-  });
+  const _GenreBadge({required this.genre});
 
   final String genre;
 
@@ -40,24 +30,18 @@ class _GenreBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 8,
+        horizontal: DsSpacing.md - 2,
+        vertical: DsSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xff1E1E1E),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _genreColor(genre),
-          width: 1.3,
-        ),
+        color: DsColors.primary,
+        borderRadius: BorderRadius.circular(DsRadius.sm),
+        border: Border.all(color: _genreColor(genre), width: 1.3),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            _genreIcon(genre),
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(_genreIcon(genre), style: const TextStyle(fontSize: 14)),
 
           const SizedBox(width: 6),
 

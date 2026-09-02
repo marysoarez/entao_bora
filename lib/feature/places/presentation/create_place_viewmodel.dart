@@ -231,6 +231,7 @@ abstract class CreatePlaceViewModelBase with Store {
         openingHours: openingHours.toList(),
         photos: [...existingPhotos, ...photosBase64],
         menuItems: editingPlace?.menuItems ?? const [],
+        menuCategories: editingPlace?.menuCategories ?? const [],
       );
 
       if (isEditing) {

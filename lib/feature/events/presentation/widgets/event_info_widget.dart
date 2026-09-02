@@ -1,4 +1,5 @@
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -9,24 +10,21 @@ class EventInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final start = DateFormat("dd MMM • HH:mm", "pt_BR").format(event.startDate);
-
-    final end = DateFormat("HH:mm", "pt_BR").format(event.endDate);
+    final start = DateFormat('dd MMM - HH:mm', 'pt_BR').format(event.startDate);
+    final end = DateFormat('HH:mm', 'pt_BR').format(event.endDate);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _InfoTile(
           icon: Icons.calendar_month_rounded,
-          title: "Quando",
-          value: "$start até $end",
+          title: 'Quando',
+          value: '$start ate $end',
         ),
-
-        const SizedBox(height: 12),
-
+        const SizedBox(height: DsSpacing.sm),
         _InfoTile(
           icon: Icons.location_on_rounded,
-          title: "Onde",
+          title: 'Onde',
           value: event.locationName,
         ),
       ],
@@ -54,15 +52,13 @@ class _InfoTile extends StatelessWidget {
           width: 35,
           height: 35,
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(.12),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.red.withOpacity(.35)),
+            color: DsColors.accent.withValues(alpha: .12),
+            borderRadius: BorderRadius.circular(DsRadius.sm),
+            border: Border.all(color: DsColors.accent.withValues(alpha: .35)),
           ),
-          child: Icon(icon, color: Colors.redAccent, size: 22),
+          child: Icon(icon, color: DsColors.accent, size: 22),
         ),
-
-        const SizedBox(width: 14),
-
+        const SizedBox(width: DsSpacing.md - 2),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,18 +66,16 @@ class _InfoTile extends StatelessWidget {
               Text(
                 title.toUpperCase(),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white54,
+                  color: DsColors.publicTextSubtle,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-              const SizedBox(height: 3),
-
+              const SizedBox(height: DsSpacing.xxs - 1),
               Text(
                 value,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
+                  color: DsColors.publicText,
                   fontWeight: FontWeight.w700,
                 ),
               ),

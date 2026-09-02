@@ -1,4 +1,5 @@
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -30,29 +31,36 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       elevation: 0,
-      backgroundColor: Colors.black,
+      backgroundColor: DsColors.publicBackground,
       surfaceTintColor: Colors.transparent,
       centerTitle: centerTitle,
       automaticallyImplyLeading: false,
       systemOverlayStyle: SystemUiOverlayStyle.light,
 
-      leading: leading ??
+      leading:
+          leading ??
           (canPop
               ? IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: DsColors.publicText,
+                  ),
                   onPressed: () => Modular.to.pop(),
                 )
               : showDrawer
-                  ? Builder(
-                      builder: (context) => IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                      ),
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.home_outlined, color: Colors.white),
-                      onPressed: () => Modular.to.navigate('/home'),
-                    )),
+              ? Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu, color: DsColors.publicText),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(
+                    Icons.home_outlined,
+                    color: DsColors.publicText,
+                  ),
+                  onPressed: () => Modular.to.navigate('/home'),
+                )),
 
       title: Row(
         children: [
@@ -61,7 +69,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
             height: 22,
             decoration: BoxDecoration(
               color: Colors.greenAccent,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(DsRadius.sm - 2),
             ),
           ),
           const SizedBox(width: 10),
@@ -70,7 +78,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
               title,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: Colors.white,
+                color: DsColors.publicText,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 letterSpacing: .3,
@@ -89,7 +97,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
               tooltip: auth.isLogged ? 'Sair' : 'Entrar',
               icon: Icon(
                 auth.isLogged ? Icons.logout : Icons.login,
-                color: auth.isLogged ? Colors.red : Colors.green,
+                color: auth.isLogged ? DsColors.accent : DsColors.success,
               ),
               onPressed: () async {
                 if (auth.isLogged) {

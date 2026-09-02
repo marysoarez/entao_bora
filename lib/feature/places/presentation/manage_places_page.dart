@@ -1,8 +1,8 @@
-import 'package:entao_bora/core/app_theme.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -131,7 +131,7 @@ class _ManagePlacesPageState extends State<ManagePlacesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: DsColors.adminBackground,
       appBar: AppBar(
         title: const Text('Meus estabelecimentos'),
         actions: [
@@ -144,15 +144,7 @@ class _ManagePlacesPageState extends State<ManagePlacesPage> {
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1100),
-                  child: _buildContent(),
-                ),
-              ),
-            ),
+          : DsAdminPage(maxWidth: DsSizes.maxFormWidth, child: _buildContent()),
       floatingActionButton: error == null
           ? FloatingActionButton.extended(
               onPressed: openCreatePlace,
@@ -165,7 +157,7 @@ class _ManagePlacesPageState extends State<ManagePlacesPage> {
 
   Widget _buildContent() {
     if (error != null) {
-      return _EmptyState(
+      return DsEmptyState(
         icon: Icons.lock_outline,
         title: 'Nao foi possivel abrir esta area',
         message: error!,
@@ -175,7 +167,7 @@ class _ManagePlacesPageState extends State<ManagePlacesPage> {
     }
 
     if (places.isEmpty) {
-      return _EmptyState(
+      return DsEmptyState(
         icon: Icons.storefront_outlined,
         title: 'Nenhum estabelecimento cadastrado',
         message:
@@ -342,7 +334,7 @@ class _PlacePhoto extends StatelessWidget {
       child: Container(
         width: 112,
         height: 112,
-        color: AppTheme.background,
+        color: DsColors.adminBackground,
         child: place.photos.isEmpty
             ? const Icon(Icons.storefront_outlined)
             : Image.memory(
@@ -368,43 +360,6 @@ class _InfoChip extends StatelessWidget {
       avatar: Icon(icon, size: 16),
       label: Text(label),
       visualDensity: VisualDensity.compact,
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
-  final String actionLabel;
-  final VoidCallback onAction;
-
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 34, color: AppTheme.primary),
-            const SizedBox(height: 18),
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 20),
-            FilledButton(onPressed: onAction, child: Text(actionLabel)),
-          ],
-        ),
-      ),
     );
   }
 }

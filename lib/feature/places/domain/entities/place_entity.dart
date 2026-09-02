@@ -23,6 +23,7 @@ class PlaceEntity {
   final List<OpeningHours> openingHours;
   final List<String> photos;
   final List<MenuItemEntity> menuItems;
+  final List<String> menuCategories;
 
   const PlaceEntity({
     required this.id,
@@ -37,6 +38,7 @@ class PlaceEntity {
     required this.openingHours,
     required this.photos,
     this.menuItems = const [],
+    this.menuCategories = const [],
     required this.ownerId,
   });
 
@@ -53,6 +55,7 @@ class PlaceEntity {
     List<OpeningHours>? openingHours,
     List<String>? photos,
     List<MenuItemEntity>? menuItems,
+    List<String>? menuCategories,
     UserSummaryEntity? ownerId,
   }) {
     return PlaceDto(
@@ -68,6 +71,7 @@ class PlaceEntity {
       openingHours: openingHours ?? this.openingHours,
       photos: photos ?? this.photos,
       menuItems: menuItems ?? this.menuItems,
+      menuCategories: menuCategories ?? this.menuCategories,
       ownerId: ownerId ?? this.ownerId,
     );
   }
