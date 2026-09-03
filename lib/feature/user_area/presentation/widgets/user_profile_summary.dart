@@ -72,6 +72,8 @@ class _InfoRow extends StatelessWidget {
                 const SizedBox(height: DsSpacing.xxs),
                 Text(
                   value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(
                     context,
                   ).textTheme.bodyLarge?.copyWith(color: DsColors.publicText),

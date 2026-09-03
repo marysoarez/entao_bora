@@ -39,58 +39,58 @@ class UserAreaHeader extends StatelessWidget {
                   ),
           );
 
-          final info = Expanded(
-            child: Column(
-              crossAxisAlignment: compact
-                  ? CrossAxisAlignment.center
-                  : CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.name.isNotEmpty ? user.name : 'Usuario',
-                  textAlign: compact ? TextAlign.center : TextAlign.start,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: DsColors.publicText,
-                    fontWeight: FontWeight.w800,
+          final info = Column(
+            crossAxisAlignment: compact
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
+            children: [
+              Text(
+                user.name.isNotEmpty ? user.name : 'Usuario',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: compact ? TextAlign.center : TextAlign.start,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: DsColors.publicText,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: DsSpacing.xs),
+              Text(
+                user.email ?? 'Conta sem e-mail cadastrado',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: compact ? TextAlign.center : TextAlign.start,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: DsColors.publicTextMuted,
+                ),
+              ),
+              const SizedBox(height: DsSpacing.md),
+              Wrap(
+                spacing: DsSpacing.sm,
+                runSpacing: DsSpacing.sm,
+                alignment: compact ? WrapAlignment.center : WrapAlignment.start,
+                children: [
+                  _MetricChip(
+                    icon: Icons.bolt,
+                    label: 'Boras',
+                    value: borasCount,
+                    color: DsColors.warning,
                   ),
-                ),
-                const SizedBox(height: DsSpacing.xs),
-                Text(
-                  user.email ?? 'Conta sem e-mail cadastrado',
-                  textAlign: compact ? TextAlign.center : TextAlign.start,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: DsColors.publicTextMuted,
+                  _MetricChip(
+                    icon: Icons.how_to_reg,
+                    label: 'Check-ins',
+                    value: checkinsCount,
+                    color: Colors.greenAccent,
                   ),
-                ),
-                const SizedBox(height: DsSpacing.md),
-                Wrap(
-                  spacing: DsSpacing.sm,
-                  runSpacing: DsSpacing.sm,
-                  alignment: compact
-                      ? WrapAlignment.center
-                      : WrapAlignment.start,
-                  children: [
-                    _MetricChip(
-                      icon: Icons.bolt,
-                      label: 'Boras',
-                      value: borasCount,
-                      color: DsColors.warning,
-                    ),
-                    _MetricChip(
-                      icon: Icons.how_to_reg,
-                      label: 'Check-ins',
-                      value: checkinsCount,
-                      color: Colors.greenAccent,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           );
 
           final editButton = OutlinedButton.icon(
             onPressed: onEditProfile,
-            icon: const Icon(Icons.edit_outlined),
-            label: const Text('Editar perfil'),
+            icon: const Icon(Icons.edit_outlined, color: Colors.white,),
+            label: const Text('Editar perfil', style:TextStyle(color: Colors.white)),
           );
 
           if (compact) {
@@ -110,7 +110,7 @@ class UserAreaHeader extends StatelessWidget {
             children: [
               avatar,
               const SizedBox(width: DsSpacing.lg),
-              info,
+              Expanded(child: info),
               const SizedBox(width: DsSpacing.lg),
               editButton,
             ],
@@ -153,6 +153,8 @@ class _MetricChip extends StatelessWidget {
           const SizedBox(width: DsSpacing.xs),
           Text(
             '$value $label',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: DsColors.publicText,
               fontWeight: FontWeight.w700,

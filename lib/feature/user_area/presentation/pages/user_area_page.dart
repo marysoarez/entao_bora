@@ -35,7 +35,7 @@ class _UserAreaPageState extends State<UserAreaPage> {
     return Scaffold(
       backgroundColor: DsColors.publicBackground,
       appBar: const AppAppBar(title: 'Minha area', showDrawer: true),
-      drawer: const AppDrawer(),
+      drawer: Observer(builder: (_) => AppDrawer(user: vm.user)),
       body: Observer(
         builder: (_) {
           if (vm.loading) {

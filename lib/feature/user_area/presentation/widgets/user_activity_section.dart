@@ -72,7 +72,12 @@ class _ActivityItem extends StatelessWidget {
             ),
           ),
           const SizedBox(width: DsSpacing.sm),
-          Text(date, style: const TextStyle(color: DsColors.publicTextSubtle)),
+          Text(
+            date,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: DsColors.publicTextSubtle),
+          ),
         ],
       ),
     );

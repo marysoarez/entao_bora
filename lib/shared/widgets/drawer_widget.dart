@@ -1,12 +1,15 @@
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
+import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AppDrawer extends StatefulWidget {
-  const AppDrawer({super.key});
+  const AppDrawer({super.key, this.user});
+
+  final UserSummaryEntity? user;
 
   @override
   State<AppDrawer> createState() => _AppDrawerState();
@@ -59,11 +62,13 @@ class _AppDrawerState extends State<AppDrawer> {
   Widget build(BuildContext context) {
     return Observer(
       builder: (context) {
+        final user = widget.user ?? auth.user;
+
         return Drawer(
           child: SafeArea(
             child: Column(
               children: [
-                _buildHeader(auth),
+                _buildHeader(user),
                 Expanded(
                   child: ListView(
                     padding: EdgeInsets.zero,
@@ -80,8 +85,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         title: 'Minha area',
                         onTap: () => _openUserArea(context),
                       ),
-                      if (auth.user?.isPartner == true ||
-                          auth.user?.isAdmin == true) ...[
+                      if (user?.isPartner == true || user?.isAdmin == true) ...[
                         _drawerItem(
                           context,
                           icon: Icons.event_note_outlined,
@@ -170,7 +174,10 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
-  Widget _buildHeader(AuthViewModel auth) {
+  Widget _buildHeader(UserSummaryEntity? user) {
+    final photoUrl = user?.photoUrl?.trim();
+    final hasPhoto = photoUrl?.isNotEmpty == true;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(DsSpacing.xl),
@@ -180,16 +187,16 @@ class _AppDrawerState extends State<AppDrawer> {
           CircleAvatar(
             radius: 34,
             backgroundColor: DsColors.publicTextSubtle,
-            backgroundImage: auth.user?.photoUrl != null
-                ? NetworkImage(auth.user!.photoUrl!)
-                : null,
-            child: auth.user?.photoUrl == null
+            backgroundImage: hasPhoto ? NetworkImage(photoUrl!) : null,
+            child: !hasPhoto
                 ? const Icon(Icons.person, size: 38, color: DsColors.publicText)
                 : null,
           ),
           const SizedBox(height: 12),
           Text(
-            auth.user?.name ?? 'Visitante',
+            user?.name.isNotEmpty == true ? user!.name : 'Visitante',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: DsColors.publicText,
               fontSize: 18,
@@ -197,7 +204,9 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
           ),
           Text(
-            auth.user?.email ?? 'Faca login para continuar',
+            user?.email ?? 'Faca login para continuar',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(color: DsColors.publicTextSubtle),
           ),
         ],

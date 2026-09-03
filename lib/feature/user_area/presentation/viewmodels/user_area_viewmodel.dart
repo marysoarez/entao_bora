@@ -76,6 +76,7 @@ abstract class UserAreaViewModelBase with Store {
     try {
       final currentUser = await _authRepository.getCurrentUser();
       user = currentUser;
+      loading = false;
 
       if (currentUser == null) {
         boraEvents = [];

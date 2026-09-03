@@ -113,12 +113,13 @@ class _UserEventTile extends StatelessWidget {
                     const SizedBox(height: DsSpacing.xxs),
                     Text(
                       start,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: DsColors.publicTextSubtle),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: DsColors.publicTextSubtle),
             ],
           ),
         ),
@@ -136,8 +137,8 @@ class _EventThumb extends StatelessWidget {
   Widget build(BuildContext context) {
     if (coverImage.isEmpty) {
       return Container(
-        width: 72,
-        height: 72,
+        width: 56,
+        height: 56,
         color: DsColors.publicBackground,
         child: const Icon(Icons.event, color: DsColors.publicTextSubtle),
       );
@@ -145,13 +146,13 @@ class _EventThumb extends StatelessWidget {
 
     return Image.memory(
       base64Decode(coverImage),
-      width: 72,
-      height: 72,
+      width: 56,
+      height: 56,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) {
         return Container(
-          width: 72,
-          height: 72,
+          width: 56,
+          height: 56,
           color: DsColors.publicBackground,
           child: const Icon(
             Icons.broken_image,
