@@ -485,6 +485,18 @@ mixin _$CreatePlaceViewModel on CreatePlaceViewModelBase, Store {
   }
 
   @override
+  void reset() {
+    final _$actionInfo = _$CreatePlaceViewModelBaseActionController.startAction(
+      name: 'CreatePlaceViewModelBase.reset',
+    );
+    try {
+      return super.reset();
+    } finally {
+      _$CreatePlaceViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 loading: ${loading},

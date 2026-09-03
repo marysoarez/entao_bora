@@ -22,6 +22,7 @@ import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
 import 'package:entao_bora/feature/home/presentation/pages/home.dart';
 import 'package:entao_bora/feature/home/presentation/viewmodels/home_viewmodel.dart';
+import 'package:entao_bora/feature/notifications/data/notification_service.dart';
 import 'package:entao_bora/feature/partner_dashboard/presentation/partner_dashboard_page.dart';
 import 'package:entao_bora/feature/places/data/datasource/place_datasource.dart';
 import 'package:entao_bora/feature/places/data/datasource/place_datasource.impl.dart';
@@ -38,6 +39,7 @@ import 'package:entao_bora/feature/user/domain/datasource/user_datasource_impl.d
 import 'package:entao_bora/shared/errors/log_events.dart';
 import 'package:entao_bora/shared/errors/log_events_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AppModule extends Module {
@@ -48,9 +50,11 @@ class AppModule extends Module {
     //==========================================================
 
     i.addSingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+    i.addSingleton<FirebaseMessaging>(() => FirebaseMessaging.instance);
 
     i.addSingleton<FirestoreClient>(() => FirestoreClientImpl(i()));
     i.addSingleton<LogEventsClient>(LogEventsClientImpl.new);
+    i.addSingleton<NotificationService>(() => NotificationService(i(), i()));
     //==========================================================
     // LOCATION
     //==========================================================

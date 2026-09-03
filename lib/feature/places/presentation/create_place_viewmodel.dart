@@ -258,7 +258,28 @@ abstract class CreatePlaceViewModelBase with Store {
   }
 
   @action
+  void reset() {
+    loading = false;
+    editingPlace = null;
+    error = null;
+    address = null;
+    type = PlaceType.bar;
+    name = '';
+    description = '';
+    phone = '';
+    instagram = '';
+    website = '';
+
+    musicGenres.clear();
+    openingHours.clear();
+    photos.clear();
+    existingPhotos.clear();
+  }
+
+  @action
   Future<void> load(PlaceEntity place) async {
+    reset();
+
     editingPlace = place;
 
     name = place.name;

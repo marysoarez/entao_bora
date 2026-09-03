@@ -1,6 +1,7 @@
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
 import 'package:entao_bora/feature/home/presentation/widgets/create_fab.dart';
+import 'package:entao_bora/feature/notifications/data/notification_service.dart';
 import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
 import 'package:entao_bora/shared/widgets/drawer_widget.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final vm = Modular.get<HomeViewModel>();
   final auth = Modular.get<AuthViewModel>();
+  final notifications = Modular.get<NotificationService>();
 
   @override
   void initState() {
@@ -89,6 +91,44 @@ class _HomePageState extends State<HomePage> {
                           }
                         },
                         locationEnabled: vm.locationEnabled,
+                        onEnableNotifications: () async {
+                          if (!await auth.ensureLogged(context)) return;
+
+                          var location = vm.currentLocation;
+
+                          if (location == null) {
+                            final enabled = await vm.enableLocation();
+
+                            if (!context.mounted) return;
+
+                            if (!enabled) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    vm.error ??
+                                        'Compartilhe sua localizacao para melhorar a experiencia.',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+
+                            location = vm.currentLocation;
+                          }
+
+                          if (location == null || auth.user == null) return;
+
+                          final result = await notifications.activate(
+                            user: auth.user!,
+                            location: location,
+                          );
+
+                          if (!context.mounted) return;
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(result.message)),
+                          );
+                        },
                         onCreateEvent: () async {
                           if (!await auth.ensureLogged(context)) return;
 

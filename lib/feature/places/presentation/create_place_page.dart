@@ -37,6 +37,8 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
 
     if (place is PlaceEntity) {
       vm.load(place);
+    } else {
+      vm.reset();
     }
   }
 
@@ -54,7 +56,7 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
       if (!mounted) return;
 
       if (success) {
-        Navigator.pop(context, true);
+        Modular.to.pop(true);
       } else {
         ScaffoldMessenger.of(
           context,
@@ -72,7 +74,7 @@ class _CreatePlacePageState extends State<CreatePlacePage> {
 
   void previous() {
     if (page == 0) {
-      Navigator.pop(context);
+      Modular.to.pop();
       return;
     }
 

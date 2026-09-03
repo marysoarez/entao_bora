@@ -419,6 +419,18 @@ mixin _$CreateEventViewModel on CreateEventViewModelBase, Store {
   }
 
   @override
+  void editEvent(EventEntity event) {
+    final _$actionInfo = _$CreateEventViewModelBaseActionController.startAction(
+      name: 'CreateEventViewModelBase.editEvent',
+    );
+    try {
+      return super.editEvent(event);
+    } finally {
+      _$CreateEventViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setTicketType(TicketType type) {
     final _$actionInfo = _$CreateEventViewModelBaseActionController.startAction(
       name: 'CreateEventViewModelBase.setTicketType',

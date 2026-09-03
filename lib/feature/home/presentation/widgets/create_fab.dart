@@ -4,6 +4,7 @@ class CreateFab extends StatefulWidget {
   final VoidCallback onCreateEvent;
   final VoidCallback onCreatePlace;
   final VoidCallback onMyLocation;
+  final VoidCallback onEnableNotifications;
   final bool locationEnabled;
 
   const CreateFab({
@@ -11,6 +12,7 @@ class CreateFab extends StatefulWidget {
     required this.onCreateEvent,
     required this.onCreatePlace,
     required this.onMyLocation,
+    required this.onEnableNotifications,
     required this.locationEnabled,
   });
 
@@ -96,6 +98,23 @@ class _CreateFabState extends State<CreateFab>
                                 onTap: () {
                                   setState(() => expanded = false);
                                   widget.onCreatePlace();
+                                },
+                              ),
+
+                              ListTile(
+                                dense: true,
+                                visualDensity: VisualDensity.compact,
+                                minLeadingWidth: 32,
+                                minTileHeight: 40,
+                                contentPadding: EdgeInsets.zero,
+                                leading: const Icon(
+                                  Icons.notifications_active,
+                                  size: 20,
+                                ),
+                                title: const Text('Ativar notificacoes'),
+                                onTap: () {
+                                  setState(() => expanded = false);
+                                  widget.onEnableNotifications();
                                 },
                               ),
                             ],
