@@ -7,6 +7,11 @@ abstract class IPlaceRepository {
   Future<Either<FailureUpdatePlace, Unit>> updatePlace(PlaceEntity place);
   Future<Either<FailureCreatePlace, bool>> createPlace(PlaceEntity place);
   Future<Either<FailureGetPlaceById, PlaceEntity?>> getPlaceById(String id);
+  Future<Either<FailureGetPlaceById, PlaceEntity?>> getPlaceBySlug(String slug);
+  Future<Either<FailureGetPlaces, bool>> slugExists(
+    String slug, {
+    String? exceptId,
+  });
   Future<Either<FailureGetPlaceByOwner, List<PlaceEntity>>> getPlacesByOwnerId(
     String ownerId,
   );

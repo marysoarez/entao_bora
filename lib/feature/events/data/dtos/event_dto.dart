@@ -9,6 +9,7 @@ import 'package:entao_bora/shared/enum/music_genre.dart';
 
 class EventDto {
   final String id;
+  final String slug;
 
   /// Informações básicas
   final String title;
@@ -53,6 +54,7 @@ class EventDto {
 
   const EventDto({
     required this.id,
+    this.slug = '',
     required this.title,
     required this.description,
     this.placeId,
@@ -90,6 +92,7 @@ class EventDto {
   }) {
     return EventDto(
       id: id,
+      slug: map['slug']?.toString() ?? '',
       title: map['title'] ?? '',
       description: map['description'] ?? '',
       placeId: map['placeId'],
@@ -124,6 +127,7 @@ class EventDto {
   factory EventDto.fromEntity(EventEntity entity) {
     return EventDto(
       id: entity.id,
+      slug: entity.slug,
       title: entity.title,
       description: entity.description,
       placeId: entity.placeId,
@@ -153,6 +157,7 @@ class EventDto {
   Map<String, dynamic> toMap() {
     return {
       'title': title,
+      'slug': slug,
       'description': description,
       'placeId': placeId,
       'locationName': locationName,
@@ -179,6 +184,7 @@ class EventDto {
   EventEntity toEntity({bool isBora = false, bool hasCheckedIn = false}) {
     return EventEntity(
       id: id,
+      slug: slug,
       title: title,
       description: description,
       placeId: placeId,
@@ -208,6 +214,7 @@ class EventDto {
 
   EventDto copyWith({
     String? id,
+    String? slug,
     String? title,
     String? description,
     String? placeId,
@@ -232,6 +239,7 @@ class EventDto {
   }) {
     return EventDto(
       id: id ?? this.id,
+      slug: slug ?? this.slug,
       title: title ?? this.title,
       description: description ?? this.description,
       placeId: placeId ?? this.placeId,

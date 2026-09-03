@@ -34,10 +34,31 @@ class PlaceDatasourceImpl implements IPlaceDatasource {
     final doc = await collection.doc(id).get();
 
     if (!doc.exists) {
-      return null;
+      return getPlaceBySlug(id);
     }
 
     return _mapDocument(doc);
+  }
+
+  @override
+  Future<PlaceDto?> getPlaceBySlug(String slug) async {
+    final snapshot = await collection
+        .where('slug', isEqualTo: slug)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isEmpty) {
+      return null;
+    }
+
+    return _mapDocument(snapshot.docs.first);
+  }
+
+  @override
+  Future<bool> slugExists(String slug, {String? exceptId}) async {
+    final place = await getPlaceBySlug(slug);
+
+    return place != null && place.id != exceptId;
   }
 
   PlaceDto _mapDocument(DocumentSnapshot<Map<String, dynamic>> doc) {

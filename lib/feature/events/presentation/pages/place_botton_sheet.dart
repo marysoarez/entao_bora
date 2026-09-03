@@ -1,5 +1,6 @@
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
+import 'package:entao_bora/shared/helpers/public_url_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -152,8 +153,10 @@ class PlaceDetailsSheet extends StatelessWidget {
                           Navigator.pop(context);
 
                           Modular.to.pushNamed(
-                            '/place',
-                            arguments: place,
+                            PublicUrlHelper.placePath(
+                              slug: place.slug,
+                              id: place.id,
+                            ),
                           );
                         },
                         icon: const Icon(Icons.event),

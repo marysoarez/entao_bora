@@ -95,6 +95,49 @@ class PlaceRepositoryImpl extends HandleLogError implements IPlaceRepository {
     }
   }
 
+  @override
+  Future<Either<FailureGetPlaceById, PlaceEntity?>> getPlaceBySlug(
+    String slug,
+  ) async {
+    try {
+      final place = await datasource.getPlaceBySlug(slug);
+
+      if (place == null) {
+        return const Right(null);
+      }
+
+      final placesWithOwners = await _withOwners([place]);
+
+      return Right(placesWithOwners.first);
+    } catch (e, s) {
+      logError(
+        error: e,
+        failure: FailureGetPlaceById(exception: e, stackTrace: s),
+        stackTrace: s,
+      );
+
+      return Left(FailureGetPlaceById(exception: e, stackTrace: s));
+    }
+  }
+
+  @override
+  Future<Either<FailureGetPlaces, bool>> slugExists(
+    String slug, {
+    String? exceptId,
+  }) async {
+    try {
+      return Right(await datasource.slugExists(slug, exceptId: exceptId));
+    } catch (e, s) {
+      logError(
+        error: e,
+        failure: FailureGetPlaces(exception: e, stackTrace: s),
+        stackTrace: s,
+      );
+
+      return Left(FailureGetPlaces(exception: e, stackTrace: s));
+    }
+  }
+
   Future<List<PlaceEntity>> _withOwners(List<PlaceEntity> places) async {
     if (places.isEmpty) {
       return places;

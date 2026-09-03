@@ -13,6 +13,7 @@ import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
 import 'package:entao_bora/shared/errors/image_exception.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
+import 'package:entao_bora/shared/helpers/slug_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
 
@@ -271,6 +272,14 @@ abstract class CreateEventViewModelBase with Store {
       await resolveAddressLocation();
       if (error != null) return false;
 
+      final slug = SlugHelper.fromTitle(title);
+      final slugValidation = await _validateUniqueSlug(slug);
+
+      if (slugValidation != null) {
+        error = slugValidation;
+        return false;
+      }
+
       final currentUser = await _authRepository.getCurrentUser();
 
       if (currentUser == null) {
@@ -278,7 +287,7 @@ abstract class CreateEventViewModelBase with Store {
         return false;
       }
 
-      final event = await _buildEvent(currentUser);
+      final event = await _buildEvent(currentUser, slug);
       final editing = editingEvent;
       final result = editing == null
           ? await _eventRepository.createEvent(event)
@@ -320,7 +329,10 @@ abstract class CreateEventViewModelBase with Store {
     }
   }
 
-  Future<EventEntity> _buildEvent(UserSummaryEntity currentUser) async {
+  Future<EventEntity> _buildEvent(
+    UserSummaryEntity currentUser,
+    String slug,
+  ) async {
     final now = DateTime.now();
     final gallery = await _processGalleryImages();
     final editing = editingEvent;
@@ -333,6 +345,7 @@ abstract class CreateEventViewModelBase with Store {
 
     return EventEntity(
       id: editing?.id ?? '',
+      slug: slug,
       title: title.trim(),
       description: description.trim(),
       placeId: selectedPlace?.id,
@@ -422,6 +435,23 @@ abstract class CreateEventViewModelBase with Store {
     }
 
     return null;
+  }
+
+  Future<String?> _validateUniqueSlug(String slug) async {
+    if (slug.isEmpty) {
+      return 'Informe um titulo valido para gerar o link.';
+    }
+
+    final result = await _eventRepository.slugExists(
+      slug,
+      exceptId: editingEvent?.id,
+    );
+
+    return result.fold((failure) => failure.message, (exists) {
+      if (!exists) return null;
+
+      return 'Ja existe um evento com esse titulo.';
+    });
   }
 
   String? validateTitle(String? value) {

@@ -7,6 +7,7 @@ import 'package:entao_bora/shared/enum/music_genre.dart';
 
 class EventEntity {
   final String id;
+  final String slug;
 
   /// Informações básicas
   final String title;
@@ -57,6 +58,7 @@ class EventEntity {
 
   const EventEntity({
     required this.id,
+    this.slug = '',
     required this.title,
     required this.description,
     this.placeId,
@@ -93,6 +95,7 @@ class EventEntity {
 
   EventEntity copyWith({
     String? id,
+    String? slug,
     String? title,
     String? description,
     String? placeId,
@@ -120,6 +123,7 @@ class EventEntity {
   }) {
     return EventEntity(
       id: id ?? this.id,
+      slug: slug ?? this.slug,
       title: title ?? this.title,
       description: description ?? this.description,
       placeId: placeId ?? this.placeId,

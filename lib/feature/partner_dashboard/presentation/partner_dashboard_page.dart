@@ -9,6 +9,7 @@ import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
+import 'package:entao_bora/shared/helpers/public_url_helper.dart';
 
 class PartnerDashboardPage extends StatefulWidget {
   final PlaceEntity? place;
@@ -690,8 +691,9 @@ class _EventDashboardTile extends StatelessWidget {
                 children: [
                   IconButton(
                     tooltip: 'Ver evento',
-                    onPressed: () =>
-                        Modular.to.pushNamed('/events/${event.id}'),
+                    onPressed: () => Modular.to.pushNamed(
+                      PublicUrlHelper.eventPath(slug: event.slug, id: event.id),
+                    ),
                     icon: const Icon(Icons.open_in_new),
                   ),
                   IconButton(

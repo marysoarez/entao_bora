@@ -6,6 +6,7 @@ import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/presentation/pages/place_botton_sheet.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/shared/helpers/public_url_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
@@ -209,7 +210,9 @@ class _MapMarkerItem {
       icon: Icons.event,
       markerHue: google.BitmapDescriptor.hueBlue,
       open: (_) {
-        Modular.to.pushNamed('/events/${event.id}');
+        Modular.to.pushNamed(
+          PublicUrlHelper.eventPath(slug: event.slug, id: event.id),
+        );
       },
     );
   }

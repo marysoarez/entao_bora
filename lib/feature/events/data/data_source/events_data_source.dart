@@ -9,6 +9,10 @@ abstract class EventDatasource {
 
   Future<EventDto?> getEvent(String id);
 
+  Future<EventDto?> getEventBySlug(String slug);
+
+  Future<bool> slugExists(String slug, {String? exceptId});
+
   Future<void> createEvent(EventDto event);
 
   Future<void> updateEvent(EventDto event);

@@ -8,6 +8,7 @@ import 'package:entao_bora/shared/enum/place_type_enum.dart';
 
 class PlaceEntity {
   final String id;
+  final String slug;
   final String name;
   final String description;
 
@@ -27,6 +28,7 @@ class PlaceEntity {
 
   const PlaceEntity({
     required this.id,
+    this.slug = '',
     required this.name,
     required this.description,
     required this.address,
@@ -44,6 +46,7 @@ class PlaceEntity {
 
   PlaceDto copyWith({
     String? id,
+    String? slug,
     String? name,
     String? description,
     AddressEntity? address,
@@ -60,6 +63,7 @@ class PlaceEntity {
   }) {
     return PlaceDto(
       id: id ?? this.id,
+      slug: slug ?? this.slug,
       name: name ?? this.name,
       description: description ?? this.description,
       address: address ?? this.address,

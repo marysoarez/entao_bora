@@ -120,11 +120,40 @@ class EventDatasourceImpl implements EventDatasource {
   Future<EventDto?> getEvent(String id) async {
     final snapshot = await firestore.getDocument(FirestorePaths.event(id));
 
-    if (!snapshot.exists) {
+    if (snapshot.exists) {
+      return _mapEvent(snapshot);
+    }
+
+    return getEventBySlug(id);
+  }
+
+  @override
+  Future<EventDto?> getEventBySlug(String slug) async {
+    final snapshot = await _runQuery(
+      firestore
+          .collection(FirestorePaths.events)
+          .where('slug', isEqualTo: slug)
+          .limit(1),
+    );
+
+    if (snapshot.docs.isEmpty) {
       return null;
     }
 
-    final data = snapshot.data()!;
+    return _mapEvent(snapshot.docs.first);
+  }
+
+  @override
+  Future<bool> slugExists(String slug, {String? exceptId}) async {
+    final event = await getEventBySlug(slug);
+
+    return event != null && event.id != exceptId;
+  }
+
+  Future<EventDto?> _mapEvent(
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) async {
+    final data = doc.data()!;
 
     final createdById = _createdByIdFrom(data);
 
@@ -136,7 +165,7 @@ class EventDatasourceImpl implements EventDatasource {
 
     final creator = users.first;
 
-    return EventDto.fromMap(snapshot.id, data, createdBy: creator);
+    return EventDto.fromMap(doc.id, data, createdBy: creator);
   }
 
   @override

@@ -16,6 +16,14 @@ abstract class IEventRepository {
     required String eventId,
     String? userId,
   });
+  Future<Either<FailureGetEventById, EventEntity?>> getEventBySlug({
+    required String slug,
+    String? userId,
+  });
+  Future<Either<FailureGetEvents, bool>> slugExists(
+    String slug, {
+    String? exceptId,
+  });
   Future<Either<FailureCreateEvent, bool>> createEvent(EventEntity event);
 
   Future<Either<FailureUpdateEvent, bool>> updateEvent(EventEntity event);

@@ -59,6 +59,64 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
   }
 
   @override
+  Future<Either<FailureGetEventById, EventEntity?>> getEventBySlug({
+    required String slug,
+    String? userId,
+  }) async {
+    try {
+      final dto = await datasource.getEventBySlug(slug);
+
+      if (dto == null) {
+        return const Right(null);
+      }
+
+      var entity = dto.toEntity();
+
+      if (userId != null) {
+        final isBora = await datasource.isUserGoing(
+          eventId: entity.id,
+          userId: userId,
+        );
+
+        final hasCheckedIn = await datasource.hasCheckedIn(
+          eventId: entity.id,
+          userId: userId,
+        );
+
+        entity = entity.copyWith(isBora: isBora, hasCheckedIn: hasCheckedIn);
+      }
+
+      return Right(entity);
+    } catch (e, s) {
+      logError(
+        error: _toException(e),
+        failure: FailureGetEventById(),
+        stackTrace: s,
+      );
+
+      return Left(FailureGetEventById());
+    }
+  }
+
+  @override
+  Future<Either<FailureGetEvents, bool>> slugExists(
+    String slug, {
+    String? exceptId,
+  }) async {
+    try {
+      return Right(await datasource.slugExists(slug, exceptId: exceptId));
+    } catch (e, s) {
+      logError(
+        error: _toException(e),
+        failure: FailureGetEvents(exception: e, stackTrace: s),
+        stackTrace: s,
+      );
+
+      return Left(FailureGetEvents(exception: e, stackTrace: s));
+    }
+  }
+
+  @override
   Future<Either<FailureGetEvents, List<EventEntity>>> getEvents({
     String? userId,
   }) async {

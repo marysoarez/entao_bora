@@ -7,6 +7,7 @@ import 'package:entao_bora/feature/places/domain/repositories/place_repository.d
 import 'package:entao_bora/feature/places/presentation/widgets/user_avatar_widget.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
+import 'package:entao_bora/shared/helpers/public_url_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -121,7 +122,8 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
     vm.load(place.id);
   }
 
-  String get shareUrl => 'https://entaobora.com.br/#/places/${place.id}';
+  String get shareUrl =>
+      PublicUrlHelper.placeUrl(slug: place.slug, id: place.id);
 
   Future<void> showSharePlaceDialog() async {
     await showModalBottomSheet(
@@ -479,7 +481,12 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
 
                   return GestureDetector(
                     onTap: () {
-                      Modular.to.pushNamed('/events/${event.id}');
+                      Modular.to.pushNamed(
+                        PublicUrlHelper.eventPath(
+                          slug: event.slug,
+                          id: event.id,
+                        ),
+                      );
                     },
                     child: EventMiniCard(event: event, place: place),
                   );

@@ -8,6 +8,7 @@ import 'package:entao_bora/shared/enum/oppening_hours.dart';
 import 'package:entao_bora/shared/enum/place_type_enum.dart';
 import 'package:entao_bora/shared/enum/week_day_enum.dart';
 import 'package:entao_bora/shared/helpers/image_helper.dart';
+import 'package:entao_bora/shared/helpers/slug_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobx/mobx.dart';
 
@@ -217,8 +218,17 @@ abstract class CreatePlaceViewModelBase with Store {
         photosBase64.add(await ImageHelper.fileToBase64(photo));
       }
 
+      final slug = SlugHelper.fromTitle(name);
+      final slugValidation = await _validateUniqueSlug(slug);
+
+      if (slugValidation != null) {
+        error = slugValidation;
+        return false;
+      }
+
       final place = PlaceEntity(
         id: editingPlace?.id ?? '',
+        slug: slug,
         name: name.trim(),
         description: description.trim(),
         address: address!,
@@ -323,6 +333,23 @@ abstract class CreatePlaceViewModelBase with Store {
     }
 
     return null;
+  }
+
+  Future<String?> _validateUniqueSlug(String slug) async {
+    if (slug.isEmpty) {
+      return 'Informe um nome valido para gerar o link.';
+    }
+
+    final result = await _placeRepository.slugExists(
+      slug,
+      exceptId: editingPlace?.id,
+    );
+
+    return result.fold((failure) => failure.message, (exists) {
+      if (!exists) return null;
+
+      return 'Ja existe um local com esse nome.';
+    });
   }
 
   String? validateName(String? value) {

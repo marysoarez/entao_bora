@@ -9,6 +9,7 @@ import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart
 class PlaceDto extends PlaceEntity {
   const PlaceDto({
     required super.id,
+    super.slug,
     required super.name,
     required super.description,
     required super.address,
@@ -32,6 +33,7 @@ class PlaceDto extends PlaceEntity {
 
     return PlaceDto(
       id: map['id'],
+      slug: map['slug']?.toString() ?? '',
       name: map['name'],
       description: map['description'],
       address: AddressDto.fromMap(map['address']),
@@ -57,6 +59,7 @@ class PlaceDto extends PlaceEntity {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'slug': slug,
       'name': name,
       'description': description,
       'address': AddressDto.fromEntity(address).toMap(),
@@ -78,6 +81,7 @@ class PlaceDto extends PlaceEntity {
   factory PlaceDto.fromEntity(PlaceEntity entity) {
     return PlaceDto(
       id: entity.id,
+      slug: entity.slug,
       name: entity.name,
       description: entity.description,
       address: entity.address,

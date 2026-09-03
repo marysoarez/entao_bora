@@ -10,6 +10,7 @@ import 'package:entao_bora/core/location/domain/repositories/location_repository
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/events_bora_viewmodel.dart';
+import 'package:entao_bora/shared/helpers/public_url_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -67,9 +68,10 @@ class _EventMiniCardState extends State<EventMiniCard> {
               EventMiniHeader(
                 event: event,
                 onShare: () {
-                  final baseUrl = 'https://entaobora.com.br';
-
-                  final url = '$baseUrl/#/events/${event.id}';
+                  final url = PublicUrlHelper.eventUrl(
+                    slug: event.slug,
+                    id: event.id,
+                  );
 
                   showShareEventDialog(
                     context: context,
