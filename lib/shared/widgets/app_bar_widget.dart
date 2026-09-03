@@ -39,7 +39,14 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       leading:
           leading ??
-          (canPop
+          (showDrawer
+              ? Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu, color: DsColors.publicText),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                )
+              : canPop
               ? IconButton(
                   icon: const Icon(
                     Icons.arrow_back,
@@ -47,19 +54,12 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   onPressed: () => Modular.to.pop(),
                 )
-              : showDrawer
-              ? Builder(
-                  builder: (context) => IconButton(
-                    icon: const Icon(Icons.menu, color: DsColors.publicText),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                  ),
-                )
               : IconButton(
                   icon: const Icon(
                     Icons.home_outlined,
                     color: DsColors.publicText,
                   ),
-                  onPressed: () => Modular.to.navigate('/home'),
+                  onPressed: () => Modular.to.navigate('/'),
                 )),
 
       title: Row(
