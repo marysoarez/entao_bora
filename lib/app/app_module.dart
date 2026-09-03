@@ -39,6 +39,8 @@ import 'package:entao_bora/feature/places/presentation/pages/place_details_page.
 import 'package:entao_bora/feature/places/presentation/viewmodels/place_details_viewmodel.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource_impl.dart';
+import 'package:entao_bora/feature/user_area/presentation/pages/user_area_page.dart';
+import 'package:entao_bora/feature/user_area/presentation/viewmodels/user_area_viewmodel.dart';
 import 'package:entao_bora/shared/errors/log_events.dart';
 import 'package:entao_bora/shared/errors/log_events_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -73,6 +75,7 @@ class AppModule extends Module {
     i.add(ManageMenuViewModel.new);
     i.add(CreateEventViewModel.new);
     i.add(EventDetailsViewModel.new);
+    i.add(UserAreaViewModel.new);
     i.addSingleton(SessionStore.new);
     i.addSingleton<UserDatasource>(() => UserDatasourceImpl(i()));
 
@@ -123,6 +126,7 @@ class AppModule extends Module {
     );
 
     r.child('/events/create', child: (_) => const CreateEventPage());
+    r.child('/minha-area', child: (_) => const UserAreaPage());
 
     r.child(
       '/place',

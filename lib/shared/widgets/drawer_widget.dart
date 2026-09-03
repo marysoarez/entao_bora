@@ -15,6 +15,20 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   final auth = Modular.get<AuthViewModel>();
 
+  Future<void> _openUserArea(BuildContext context) async {
+    if (!auth.isLogged) {
+      await LoginDialog.show(context);
+      await auth.refresh();
+
+      if (!auth.isLogged) return;
+    }
+
+    if (!context.mounted) return;
+
+    Navigator.pop(context);
+    Modular.to.pushNamed('/minha-area');
+  }
+
   Future<void> _openPartnerArea(BuildContext context) async {
     await _openPartnerRoute(context, '/partner-dashboard');
   }
@@ -62,22 +76,31 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                       _drawerItem(
                         context,
-                        icon: Icons.event_note_outlined,
-                        title: 'Meus eventos',
-                        onTap: () => _openPartnerArea(context),
+                        icon: Icons.person_outline,
+                        title: 'Minha area',
+                        onTap: () => _openUserArea(context),
                       ),
-                      _drawerItem(
-                        context,
-                        icon: Icons.place_outlined,
-                        title: 'Meus locais',
-                        onTap: () => _openPartnerPlaces(context),
-                      ),
-                      _drawerItem(
-                        context,
-                        icon: Icons.restaurant_menu_outlined,
-                        title: 'Cardapios',
-                        onTap: () => _openPartnerMenus(context),
-                      ),
+                      if (auth.user?.isPartner == true ||
+                          auth.user?.isAdmin == true) ...[
+                        _drawerItem(
+                          context,
+                          icon: Icons.event_note_outlined,
+                          title: 'Meus eventos',
+                          onTap: () => _openPartnerArea(context),
+                        ),
+                        _drawerItem(
+                          context,
+                          icon: Icons.place_outlined,
+                          title: 'Meus locais',
+                          onTap: () => _openPartnerPlaces(context),
+                        ),
+                        _drawerItem(
+                          context,
+                          icon: Icons.restaurant_menu_outlined,
+                          title: 'Cardapios',
+                          onTap: () => _openPartnerMenus(context),
+                        ),
+                      ],
                       const Divider(),
                       _drawerItem(
                         context,
