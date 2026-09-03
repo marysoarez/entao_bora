@@ -23,7 +23,8 @@ import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_v
 import 'package:entao_bora/feature/home/presentation/pages/home.dart';
 import 'package:entao_bora/feature/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:entao_bora/feature/notifications/data/notification_service.dart';
-import 'package:entao_bora/feature/partner_dashboard/presentation/partner_dashboard_page.dart';
+import 'package:entao_bora/feature/partner_dashboard/presentation/pages/partner_dashboard_page.dart';
+import 'package:entao_bora/feature/partner_dashboard/presentation/viewmodels/partner_dashboard_viewmodel.dart';
 import 'package:entao_bora/feature/places/data/datasource/place_datasource.dart';
 import 'package:entao_bora/feature/places/data/datasource/place_datasource.impl.dart';
 import 'package:entao_bora/feature/places/data/repositories/place_repositor_impl.dart';
@@ -68,6 +69,7 @@ class AppModule extends Module {
     i.add(CreatePlaceViewModel.new);
     i.add(PlaceDetailsViewModel.new);
     i.add(PlaceEventsViewModel.new);
+    i.add(PartnerDashboardViewModel.new);
     i.add(ManageMenuViewModel.new);
     i.add(CreateEventViewModel.new);
     i.add(EventDetailsViewModel.new);

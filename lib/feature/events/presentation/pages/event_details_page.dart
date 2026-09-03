@@ -1,3 +1,4 @@
+import 'package:entao_bora/feature/events/presentation/pages/event_details_skeleton.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_card_widget.dart';
 import 'package:flutter/material.dart';
@@ -30,9 +31,7 @@ class _EventsDetailsPageState extends State<EventsDetailsPage> {
     return Observer(
       builder: (_) {
         if (vm.loading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const EventDetailsSkeleton();
         }
 
         if (vm.event == null) {

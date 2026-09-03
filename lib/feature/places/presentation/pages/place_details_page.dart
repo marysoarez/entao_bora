@@ -1,6 +1,7 @@
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/place_events_viewmodel.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/feature/places/presentation/pages/place_details_skeleton.dart';
 import 'package:entao_bora/feature/places/presentation/viewmodels/place_details_viewmodel.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/place_about.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/place_actions.dart';
@@ -40,10 +41,7 @@ class _PlaceDetailsByIdPageState extends State<PlaceDetailsByIdPage> {
     return Observer(
       builder: (_) {
         if (vm.loading) {
-          return const Scaffold(
-            backgroundColor: Colors.black,
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const PlaceDetailsSkeleton();
         }
 
         final place = vm.place;

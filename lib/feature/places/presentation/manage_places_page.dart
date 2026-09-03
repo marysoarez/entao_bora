@@ -3,6 +3,7 @@ import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart'
 
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
+import 'package:entao_bora/feature/places/presentation/manage_place_skeleton.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/management_place_header.dart';
 import 'package:entao_bora/feature/places/presentation/widgets/management_place_tile.dart';
 
@@ -165,7 +166,7 @@ class _ManagePlacesPageState extends State<ManagePlacesPage> {
       ),
 
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ManagePlacesSkeleton()
           : DsAdminPage(maxWidth: DsSizes.maxFormWidth, child: _buildContent()),
 
       floatingActionButton: error == null
