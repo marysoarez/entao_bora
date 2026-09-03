@@ -35,10 +35,7 @@ class MenuToolbar extends StatelessWidget {
                   items: places.map((place) {
                     return DropdownMenuItem<PlaceEntity>(
                       value: place,
-                      child: Text(
-                        place.name,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      child: Text(place.name, overflow: TextOverflow.ellipsis),
                     );
                   }).toList(),
                   onChanged: (place) {
@@ -72,11 +69,7 @@ class MenuToolbar extends StatelessWidget {
         if (isMobile) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              placeSelector,
-              const SizedBox(height: 12),
-              actions,
-            ],
+            children: [placeSelector, const SizedBox(height: 12), actions],
           );
         }
 

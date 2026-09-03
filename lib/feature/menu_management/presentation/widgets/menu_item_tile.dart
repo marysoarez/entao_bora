@@ -1,4 +1,4 @@
-import 'package:entao_bora/feature/menu_management/widgets/menu_item_photo.dart';
+import 'package:entao_bora/feature/menu_management/presentation/widgets/menu_item_photo.dart';
 import 'package:entao_bora/feature/places/domain/entities/menu_item_entity.dart';
 import 'package:entao_bora/shared/design_system/ds_formatters.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ class MenuItemTile extends StatelessWidget {
   final VoidCallback onDelete;
 
   const MenuItemTile({
+    super.key,
     required this.item,
     required this.onEdit,
     required this.onDelete,

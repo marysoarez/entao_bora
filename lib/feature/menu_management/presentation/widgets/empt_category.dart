@@ -4,10 +4,7 @@ import 'package:entao_bora/shared/design_system/app_design_system.dart';
 class EmptyCategory extends StatelessWidget {
   final VoidCallback onAdd;
 
-  const EmptyCategory({
-    super.key,
-    required this.onAdd,
-  });
+  const EmptyCategory({super.key, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +21,7 @@ class EmptyCategory extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: DsColors.adminTextMuted,
-                      ),
+                      Icon(Icons.info_outline, color: DsColors.adminTextMuted),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -49,10 +43,7 @@ class EmptyCategory extends StatelessWidget {
 
             return Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  color: DsColors.adminTextMuted,
-                ),
+                Icon(Icons.info_outline, color: DsColors.adminTextMuted),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

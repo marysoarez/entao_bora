@@ -50,9 +50,7 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
 
     _titleController.text = item.title;
     _descriptionController.text = item.description;
-    _priceController.text = item.price
-        .toStringAsFixed(2)
-        .replaceAll('.', ',');
+    _priceController.text = item.price.toStringAsFixed(2).replaceAll('.', ',');
 
     _photo = item.photo;
   }
@@ -92,20 +90,14 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
     } on ImageTooLargeException catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (_) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Nao foi possivel processar a imagem.',
-          ),
-        ),
+        const SnackBar(content: Text('Nao foi possivel processar a imagem.')),
       );
     } finally {
       if (mounted) {
@@ -127,8 +119,7 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
 
     Navigator.of(context).pop(
       MenuItemEntity(
-        id: widget.item?.id ??
-            DateTime.now().microsecondsSinceEpoch.toString(),
+        id: widget.item?.id ?? DateTime.now().microsecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
         price: _parsePrice(_priceController.text),
@@ -175,11 +166,7 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        widget.item == null
-            ? 'Novo item'
-            : 'Editar item',
-      ),
+      title: Text(widget.item == null ? 'Novo item' : 'Editar item'),
       content: SizedBox(
         width: 520,
         child: Form(
@@ -194,9 +181,7 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
 
                 DropdownButtonFormField<String>(
                   initialValue: _selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: 'Categoria',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Categoria'),
                   items: widget.categories.map((category) {
                     return DropdownMenuItem(
                       value: category,
@@ -225,28 +210,20 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
 
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Titulo',
-                  ),
-                  validator: (value) => _requiredValidator(
-                    value,
-                    'Informe o titulo.',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Titulo'),
+                  validator: (value) =>
+                      _requiredValidator(value, 'Informe o titulo.'),
                 ),
 
                 const SizedBox(height: 12),
 
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Descricao',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Descricao'),
                   minLines: 3,
                   maxLines: 5,
-                  validator: (value) => _requiredValidator(
-                    value,
-                    'Informe a descricao.',
-                  ),
+                  validator: (value) =>
+                      _requiredValidator(value, 'Informe a descricao.'),
                 ),
 
                 const SizedBox(height: 12),
@@ -272,10 +249,7 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
-        FilledButton(
-          onPressed: _submit,
-          child: const Text('Salvar'),
-        ),
+        FilledButton(onPressed: _submit, child: const Text('Salvar')),
       ],
     );
   }
@@ -289,23 +263,16 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).dividerColor,
-          ),
+          border: Border.all(color: Theme.of(context).dividerColor),
           color: DsColors.adminBackground,
         ),
         child: _processingPhoto
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
+            ? const Center(child: CircularProgressIndicator())
             : _photo.isEmpty
             ? const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.add_photo_alternate_outlined,
-                    size: 42,
-                  ),
+                  Icon(Icons.add_photo_alternate_outlined, size: 42),
                   SizedBox(height: 8),
                   Text('Selecionar foto'),
                 ],
@@ -315,14 +282,8 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
                 child: Image.memory(
                   ImageHelper.base64ToBytes(_photo),
                   fit: BoxFit.cover,
-                  errorBuilder: (
-                    context,
-                    error,
-                    stackTrace,
-                  ) {
-                    return const Icon(
-                      Icons.broken_image,
-                    );
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.broken_image);
                   },
                 ),
               ),

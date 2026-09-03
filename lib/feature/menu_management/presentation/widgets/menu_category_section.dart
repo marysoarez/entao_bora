@@ -1,6 +1,6 @@
-import 'package:entao_bora/feature/menu_management/widgets/category_header.dart';
-import 'package:entao_bora/feature/menu_management/widgets/empt_category.dart';
-import 'package:entao_bora/feature/menu_management/widgets/menu_item_tile.dart';
+import 'package:entao_bora/feature/menu_management/presentation/widgets/category_header.dart';
+import 'package:entao_bora/feature/menu_management/presentation/widgets/empt_category.dart';
+import 'package:entao_bora/feature/menu_management/presentation/widgets/menu_item_tile.dart';
 import 'package:entao_bora/feature/places/domain/entities/menu_item_entity.dart';
 import 'package:flutter/material.dart';
 
@@ -25,17 +25,12 @@ class MenuCategorySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CategoryHeader(
-          title: title,
-          count: items.length,
-        ),
+        CategoryHeader(title: title, count: items.length),
 
         const SizedBox(height: 10),
 
         if (items.isEmpty)
-          EmptyCategory(
-            onAdd: onAdd,
-          )
+          EmptyCategory(onAdd: onAdd)
         else
           Card(
             child: Column(
@@ -46,8 +41,7 @@ class MenuCategorySection extends StatelessWidget {
                     onEdit: () => onEdit(items[index]),
                     onDelete: () => onDelete(items[index]),
                   ),
-                  if (index != items.length - 1)
-                    const Divider(height: 1),
+                  if (index != items.length - 1) const Divider(height: 1),
                 ],
               ],
             ),

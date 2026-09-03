@@ -9,9 +9,7 @@ Future<bool> showConfirmDeleteDialog(
     builder: (context) {
       return AlertDialog(
         title: const Text('Excluir item'),
-        content: Text(
-          'Deseja excluir "$itemName" do cardapio?',
-        ),
+        content: Text('Deseja excluir "$itemName" do cardapio?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),

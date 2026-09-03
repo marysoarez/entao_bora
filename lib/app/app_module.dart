@@ -31,9 +31,11 @@ import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/feature/places/domain/repositories/place_repository.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_page.dart';
 import 'package:entao_bora/feature/places/presentation/create_place_viewmodel.dart';
-import 'package:entao_bora/feature/menu_management/manage_menu_page.dart';
+import 'package:entao_bora/feature/menu_management/presentation/pages/manage_menu_page.dart';
+import 'package:entao_bora/feature/menu_management/presentation/viewmodels/manage_menu_viewmodel.dart';
 import 'package:entao_bora/feature/places/presentation/manage_places_page.dart';
-import 'package:entao_bora/feature/places/presentation/place_details_page.dart';
+import 'package:entao_bora/feature/places/presentation/pages/place_details_page.dart';
+import 'package:entao_bora/feature/places/presentation/viewmodels/place_details_viewmodel.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource_impl.dart';
 import 'package:entao_bora/shared/errors/log_events.dart';
@@ -64,7 +66,9 @@ class AppModule extends Module {
       () => LocationRepositoryImpl(datasource: i()),
     );
     i.add(CreatePlaceViewModel.new);
+    i.add(PlaceDetailsViewModel.new);
     i.add(PlaceEventsViewModel.new);
+    i.add(ManageMenuViewModel.new);
     i.add(CreateEventViewModel.new);
     i.add(EventDetailsViewModel.new);
     i.addSingleton(SessionStore.new);

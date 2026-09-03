@@ -6,7 +6,7 @@ class MenuItemPhoto extends StatelessWidget {
   final String photo;
   final double size;
 
-  const MenuItemPhoto({required this.photo, this.size = 112});
+  const MenuItemPhoto({super.key, required this.photo, this.size = 112});
 
   @override
   Widget build(BuildContext context) {
