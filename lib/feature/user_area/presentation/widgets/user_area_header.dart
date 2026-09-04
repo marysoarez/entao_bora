@@ -1,4 +1,5 @@
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
+import 'package:entao_bora/feature/places/presentation/widgets/user_avatar_widget.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 
@@ -24,19 +25,9 @@ class UserAreaHeader extends StatelessWidget {
         builder: (context, constraints) {
           final compact = constraints.maxWidth < 640;
 
-          final avatar = CircleAvatar(
+          final avatar = UserAvatar(
+            photoUrl: user.photoUrl?.trim(),
             radius: compact ? 38 : 46,
-            backgroundColor: DsColors.publicText.withValues(alpha: .12),
-            backgroundImage: user.photoUrl?.isNotEmpty == true
-                ? NetworkImage(user.photoUrl!)
-                : null,
-            child: user.photoUrl?.isNotEmpty == true
-                ? null
-                : const Icon(
-                    Icons.person,
-                    color: DsColors.publicText,
-                    size: 42,
-                  ),
           );
 
           final info = Column(
@@ -89,8 +80,11 @@ class UserAreaHeader extends StatelessWidget {
 
           final editButton = OutlinedButton.icon(
             onPressed: onEditProfile,
-            icon: const Icon(Icons.edit_outlined, color: Colors.white,),
-            label: const Text('Editar perfil', style:TextStyle(color: Colors.white)),
+            icon: const Icon(Icons.edit_outlined, color: Colors.white),
+            label: const Text(
+              'Editar perfil',
+              style: TextStyle(color: Colors.white),
+            ),
           );
 
           if (compact) {

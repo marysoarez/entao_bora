@@ -101,7 +101,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               onPressed: () async {
                 if (auth.isLogged) {
-                  await auth.logout();
+                  await auth.logoutAndGoHome();
 
                   if (!context.mounted) return;
 

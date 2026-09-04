@@ -1,9 +1,11 @@
+import 'package:entao_bora/feature/events/presentation/pages/create_event_skeleton.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/create_event_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/adress_autocomplete_field.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_cover_step.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:entao_bora/shared/enum/ticket_type_enum.dart';
+import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -85,11 +87,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: DsColors.publicBackground,
       appBar: AppAppBar(
         title: vm.editingEvent == null ? "Criar Evento" : "Editar Evento",
       ),
       body: loadingPlaces
-          ? const Center(child: CircularProgressIndicator())
+          ? const CreateEventSkeleton()
           : Observer(
               builder: (_) {
                 return Form(

@@ -7,6 +7,7 @@ import 'package:entao_bora/feature/events/data/dtos/event_checkin_dto.dart';
 import 'package:entao_bora/feature/events/data/dtos/event_dto.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/user/domain/datasource/user_datasource.dart';
+import 'package:flutter/foundation.dart';
 
 class EventDatasourceImpl implements EventDatasource {
   final FirestoreClient firestore;
@@ -163,9 +164,137 @@ class EventDatasourceImpl implements EventDatasource {
 
     final users = await userDatasource.getUsersByIds([createdById]);
 
+    if (users.isEmpty) {
+      return null;
+    }
+
     final creator = users.first;
 
     return EventDto.fromMap(doc.id, data, createdBy: creator);
+  }
+
+  Future<List<EventDto>> _getPersonalEvents({
+    required String collectionId,
+    required String userId,
+  }) async {
+    final eventsById = <String, EventDto>{};
+    final eventIds = <String>{};
+
+    try {
+      final snapshot = await _runQuery(
+        firestore.instance
+            .collectionGroup(collectionId)
+            .where('user.id', isEqualTo: userId),
+      );
+
+      await _addEventsFromPersonalSnapshot(
+        collectionId: collectionId,
+        snapshot: snapshot,
+        eventIds: eventIds,
+        eventsById: eventsById,
+      );
+    } on FirebaseException catch (e, stackTrace) {
+      _logPersonalQueryError(
+        collectionId: collectionId,
+        userId: userId,
+        exception: e,
+        stackTrace: stackTrace,
+      );
+
+      rethrow;
+    }
+
+    final events = eventsById.values.toList();
+    events.sort((a, b) => b.startDate.compareTo(a.startDate));
+
+    debugPrint(
+      'UserArea $collectionId loaded: uid=$userId count=${events.length}',
+    );
+
+    return events;
+  }
+
+  void _logPersonalQueryError({
+    required String collectionId,
+    required String userId,
+    required FirebaseException exception,
+    required StackTrace stackTrace,
+  }) {
+    debugPrint(
+      'UserArea personal query failed: collection=$collectionId uid=$userId code=${exception.code}',
+    );
+    debugPrint('Firebase message: ${exception.message}');
+    debugPrintStack(stackTrace: stackTrace);
+
+    final message = exception.message ?? '';
+    final urlMatch = RegExp(
+      r'https://console\.firebase\.google\.com/[^\s]+',
+    ).firstMatch(message);
+
+    if (urlMatch != null) {
+      debugPrint('');
+      debugPrint('========== FIREBASE INDEX REQUIRED ==========');
+      debugPrint('Collection: $collectionId');
+      debugPrint('FIREBASE INDEX URL: ${urlMatch.group(0)}');
+      debugPrint('=============================================');
+      debugPrint('');
+    }
+  }
+
+  Future<void> _addEventsFromPersonalSnapshot({
+    required String collectionId,
+    required QuerySnapshot<Map<String, dynamic>> snapshot,
+    required Set<String> eventIds,
+    required Map<String, EventDto> eventsById,
+  }) async {
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      final eventId = _eventIdFromPersonalDoc(doc, data);
+
+      if (eventId == null || eventId.isEmpty || eventIds.contains(eventId)) {
+        continue;
+      }
+
+      eventIds.add(eventId);
+
+      debugPrint(collectionId == 'checkins' ? 'CHECKIN FOUND:' : 'BORA FOUND:');
+      debugPrint('eventId=$eventId');
+      debugPrint('path=${doc.reference.path}');
+
+      final eventSnapshot = await doc.reference.parent.parent?.get();
+      final event = eventSnapshot?.exists == true
+          ? await _mapEvent(eventSnapshot!)
+          : await getEvent(eventId);
+
+      if (event != null) {
+        eventsById[event.id] = event;
+      }
+    }
+  }
+
+  String? _eventIdFromPersonalDoc(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    Map<String, dynamic> data,
+  ) {
+    final eventId = data['eventId'] as String?;
+
+    if (eventId != null && eventId.isNotEmpty) {
+      return eventId;
+    }
+
+    final eventRef = doc.reference.parent.parent;
+
+    return eventRef?.id;
+  }
+
+  @override
+  Future<List<EventDto>> getBoraEventsByUserId(String userId) {
+    return _getPersonalEvents(collectionId: 'boras', userId: userId);
+  }
+
+  @override
+  Future<List<EventDto>> getCheckinEventsByUserId(String userId) {
+    return _getPersonalEvents(collectionId: 'checkins', userId: userId);
   }
 
   @override

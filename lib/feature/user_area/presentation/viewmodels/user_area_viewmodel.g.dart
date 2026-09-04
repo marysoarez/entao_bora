@@ -208,6 +208,18 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
   );
 
   @override
+  void clearSessionData() {
+    final _$actionInfo = _$UserAreaViewModelBaseActionController.startAction(
+      name: 'UserAreaViewModelBase.clearSessionData',
+    );
+    try {
+      return super.clearSessionData();
+    } finally {
+      _$UserAreaViewModelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void disableLocation() {
     final _$actionInfo = _$UserAreaViewModelBaseActionController.startAction(
       name: 'UserAreaViewModelBase.disableLocation',

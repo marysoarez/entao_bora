@@ -8,7 +8,7 @@ abstract class IAuthRepository {
 
   Future<void> signOut();
 
-  Future<UserSummaryEntity?> getCurrentUser();
+  Future<UserSummaryEntity?> getCurrentUser({bool forceRefresh = false});
 
   Future<bool> isLogged();
 }

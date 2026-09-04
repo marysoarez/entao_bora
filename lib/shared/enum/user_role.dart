@@ -12,8 +12,10 @@ enum UserRole {
   bool get isAdmin => this == UserRole.admin;
 
   static UserRole fromSlug(String? slug) {
+    final normalizedSlug = slug?.trim().toLowerCase();
+
     return UserRole.values.firstWhere(
-      (e) => e.slug == slug,
+      (e) => e.slug == normalizedSlug,
       orElse: () => UserRole.user,
     );
   }

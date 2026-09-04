@@ -1,6 +1,7 @@
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
+import 'package:entao_bora/feature/places/presentation/widgets/user_avatar_widget.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -17,6 +18,12 @@ class AppDrawer extends StatefulWidget {
 
 class _AppDrawerState extends State<AppDrawer> {
   final auth = Modular.get<AuthViewModel>();
+
+  @override
+  void initState() {
+    super.initState();
+    auth.refresh();
+  }
 
   Future<void> _openUserArea(BuildContext context) async {
     if (!auth.isLogged) {
@@ -147,7 +154,7 @@ class _AppDrawerState extends State<AppDrawer> {
                         ),
                         onTap: () async {
                           Navigator.pop(context);
-                          await auth.logout();
+                          await auth.logoutAndGoHome();
                         },
                       )
                     : ListTile(
@@ -175,23 +182,13 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 
   Widget _buildHeader(UserSummaryEntity? user) {
-    final photoUrl = user?.photoUrl?.trim();
-    final hasPhoto = photoUrl?.isNotEmpty == true;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(DsSpacing.xl),
       decoration: const BoxDecoration(color: DsColors.primary),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 34,
-            backgroundColor: DsColors.publicTextSubtle,
-            backgroundImage: hasPhoto ? NetworkImage(photoUrl!) : null,
-            child: !hasPhoto
-                ? const Icon(Icons.person, size: 38, color: DsColors.publicText)
-                : null,
-          ),
+          UserAvatar(photoUrl: user?.photoUrl?.trim(), radius: 34),
           const SizedBox(height: 12),
           Text(
             user?.name.isNotEmpty == true ? user!.name : 'Visitante',

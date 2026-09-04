@@ -5,6 +5,7 @@ import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart'
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/notifications/data/notification_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 
 part 'user_area_viewmodel.g.dart';
@@ -69,36 +70,65 @@ abstract class UserAreaViewModelBase with Store {
   }
 
   @action
+  void clearSessionData() {
+    user = null;
+    boraEvents = [];
+    checkinEvents = [];
+    currentLocation = null;
+  }
+
+  @action
   Future<void> load() async {
     loading = true;
     error = null;
 
     try {
-      final currentUser = await _authRepository.getCurrentUser();
-      user = currentUser;
-      loading = false;
+      final currentUser = await _authRepository.getCurrentUser(
+        forceRefresh: true,
+      );
 
       if (currentUser == null) {
-        boraEvents = [];
-        checkinEvents = [];
+        clearSessionData();
         return;
       }
 
-      final eventsResult = await _eventRepository.getEvents(
-        userId: currentUser.id,
+      debugPrint('USER AREA UID: ${currentUser.id}');
+      debugPrint('USER AREA ROLE: ${currentUser.role.slug}');
+
+      final boraResult = await _eventRepository.getBoraEventsByUserId(
+        currentUser.id,
+      );
+      final checkinResult = await _eventRepository.getCheckinEventsByUserId(
+        currentUser.id,
       );
 
-      eventsResult.fold(
+      var loadedBoraEvents = <EventEntity>[];
+      var loadedCheckinEvents = <EventEntity>[];
+
+      boraResult.fold(
         (failure) {
           error = failure.message;
-          boraEvents = [];
-          checkinEvents = [];
         },
         (events) {
-          boraEvents = events.where((event) => event.isBora).toList();
-          checkinEvents = events.where((event) => event.hasCheckedIn).toList();
+          loadedBoraEvents = events;
         },
       );
+
+      checkinResult.fold(
+        (failure) {
+          error = failure.message;
+        },
+        (events) {
+          loadedCheckinEvents = events;
+        },
+      );
+
+      user = currentUser;
+      boraEvents = loadedBoraEvents;
+      checkinEvents = loadedCheckinEvents;
+
+      debugPrint('BORAS ENCONTRADOS: ${boraEvents.length}');
+      debugPrint('CHECKINS ENCONTRADOS: ${checkinEvents.length}');
     } catch (e) {
       error = e.toString();
     } finally {

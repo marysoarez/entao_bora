@@ -96,7 +96,7 @@ final vm = Modular.get<AuthViewModel>();
 
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Agora não"),
+                  child: const Text("Agora não", style: TextStyle(color: Colors.white),),
                 ),
               ],
             );

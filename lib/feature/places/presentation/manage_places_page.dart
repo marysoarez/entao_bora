@@ -46,7 +46,9 @@ class _ManagePlacesPageState extends State<ManagePlacesPage> {
       error = null;
     });
 
-    final currentUser = await _authRepository.getCurrentUser();
+    final currentUser = await _authRepository.getCurrentUser(
+      forceRefresh: true,
+    );
 
     if (currentUser == null) {
       setState(() {

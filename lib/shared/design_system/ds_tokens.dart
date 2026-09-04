@@ -8,11 +8,11 @@ class DsColors {
   static const success = Color(0xFF2E7D32);
   static const warning = Color(0xFFFFC107);
 
-  static const adminBackground = Color(0xFFF7F6F3);
-  static const adminSurface = Colors.white;
-  static const adminText = Color(0xFF222222);
-  static const adminTextMuted = Color(0xFF6B6B6B);
-  static const adminDivider = Color(0xFFE5E5E5);
+  static const adminBackground = publicBackground;
+  static const adminSurface = publicSurface;
+  static const adminText = publicText;
+  static const adminTextMuted = publicTextMuted;
+  static const adminDivider = Color(0xFF2A2A2A);
 
   static const publicBackground = Colors.black;
   static const publicSurface = Color(0xFF161616);

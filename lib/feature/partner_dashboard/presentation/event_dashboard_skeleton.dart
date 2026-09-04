@@ -1,4 +1,3 @@
-import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
 
 class PartnerDashboardSkeleton extends StatelessWidget {
@@ -6,74 +5,66 @@ class PartnerDashboardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-return SingleChildScrollView(
-  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-  child: Center(
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: 1200,
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final width = constraints.maxWidth;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
 
-          final metricWidth = width >= 900
-              ? (width - 48) / 4
-              : width >= 600
-              ? (width - 16) / 2
-              : width;
+              final metricWidth = width >= 900
+                  ? (width - 48) / 4
+                  : width >= 600
+                  ? (width - 16) / 2
+                  : width;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _HeaderSkeleton(),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _HeaderSkeleton(),
 
-              const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-              const _PlaceSelectorSkeleton(),
+                  const _PlaceSelectorSkeleton(),
 
-              const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-              const _SkeletonItem(
-                width: 100,
-                height: 26,
-              ),
+                  const _SkeletonItem(width: 100, height: 26),
 
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children: List.generate(
-                  4,
-                  (_) => SizedBox(
-                    width: metricWidth,
-                    child: const _MetricCardSkeleton(),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: List.generate(
+                      4,
+                      (_) => SizedBox(
+                        width: metricWidth,
+                        child: const _MetricCardSkeleton(),
+                      ),
+                    ),
                   ),
-                ),
-              ),
 
-              const SizedBox(height: 36),
+                  const SizedBox(height: 36),
 
-              const _SkeletonItem(
-                width: 180,
-                height: 26,
-              ),
+                  const _SkeletonItem(width: 180, height: 26),
 
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              const _EventsSkeleton(),
+                  const _EventsSkeleton(),
 
-              const SizedBox(height: 36),
+                  const SizedBox(height: 36),
 
-              const _MenuSkeleton(),
-            ],
-                    );
-        },
+                  const _MenuSkeleton(),
+                ],
+              );
+            },
+          ),
+        ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
 
@@ -90,20 +81,11 @@ class _HeaderSkeleton extends StatelessWidget {
           return const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SkeletonItem(
-                width: 220,
-                height: 34,
-              ),
+              _SkeletonItem(width: 220, height: 34),
               SizedBox(height: 8),
-              _SkeletonItem(
-                width: double.infinity,
-                height: 18,
-              ),
+              _SkeletonItem(width: double.infinity, height: 18),
               SizedBox(height: 6),
-              _SkeletonItem(
-                width: 280,
-                height: 18,
-              ),
+              _SkeletonItem(width: 280, height: 18),
               SizedBox(height: 20),
               _SkeletonItem(
                 width: double.infinity,
@@ -130,28 +112,14 @@ class _HeaderSkeleton extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _SkeletonItem(
-                    width: 250,
-                    height: 34,
-                  ),
+                  _SkeletonItem(width: 250, height: 34),
                   SizedBox(height: 8),
-                  _SkeletonItem(
-                    width: 480,
-                    height: 18,
-                  ),
+                  _SkeletonItem(width: 480, height: 18),
                 ],
               ),
             ),
-            _SkeletonItem(
-              width: 145,
-              height: 46,
-              borderRadius: 12,
-            ),
-            _SkeletonItem(
-              width: 135,
-              height: 46,
-              borderRadius: 12,
-            ),
+            _SkeletonItem(width: 145, height: 46, borderRadius: 12),
+            _SkeletonItem(width: 135, height: 46, borderRadius: 12),
           ],
         );
       },
@@ -176,11 +144,7 @@ class _PlaceSelectorSkeleton extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                const Expanded(
-                  child: _SkeletonItem(
-                    height: 24,
-                  ),
-                ),
+                const Expanded(child: _SkeletonItem(height: 24)),
 
                 const SizedBox(width: 16),
 
@@ -190,10 +154,7 @@ class _PlaceSelectorSkeleton extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            const _SkeletonItem(
-              width: 420,
-              height: 16,
-            ),
+            const _SkeletonItem(width: 420, height: 16),
           ],
         ),
       ),
@@ -216,24 +177,15 @@ class _MetricCardSkeleton extends StatelessWidget {
 
             SizedBox(height: 18),
 
-            _SkeletonItem(
-              width: 100,
-              height: 16,
-            ),
+            _SkeletonItem(width: 100, height: 16),
 
             SizedBox(height: 8),
 
-            _SkeletonItem(
-              width: 60,
-              height: 32,
-            ),
+            _SkeletonItem(width: 60, height: 32),
 
             SizedBox(height: 8),
 
-            _SkeletonItem(
-              width: 130,
-              height: 14,
-            ),
+            _SkeletonItem(width: 130, height: 14),
           ],
         ),
       ),
@@ -281,24 +233,15 @@ class _EventTileSkeleton extends StatelessWidget {
 
                 SizedBox(height: 16),
 
-                _SkeletonItem(
-                  width: 220,
-                  height: 22,
-                ),
+                _SkeletonItem(width: 220, height: 22),
 
                 SizedBox(height: 8),
 
-                _SkeletonItem(
-                  width: double.infinity,
-                  height: 16,
-                ),
+                _SkeletonItem(width: double.infinity, height: 16),
 
                 SizedBox(height: 6),
 
-                _SkeletonItem(
-                  width: 260,
-                  height: 16,
-                ),
+                _SkeletonItem(width: 260, height: 16),
 
                 SizedBox(height: 14),
 
@@ -321,11 +264,7 @@ class _EventTileSkeleton extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _SkeletonItem(
-                    width: 112,
-                    height: 112,
-                    borderRadius: 8,
-                  ),
+                  _SkeletonItem(width: 112, height: 112, borderRadius: 8),
 
                   SizedBox(width: 16),
 
@@ -333,24 +272,15 @@ class _EventTileSkeleton extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _SkeletonItem(
-                          width: 240,
-                          height: 22,
-                        ),
+                        _SkeletonItem(width: 240, height: 22),
 
                         SizedBox(height: 8),
 
-                        _SkeletonItem(
-                          width: double.infinity,
-                          height: 16,
-                        ),
+                        _SkeletonItem(width: double.infinity, height: 16),
 
                         SizedBox(height: 6),
 
-                        _SkeletonItem(
-                          width: 320,
-                          height: 16,
-                        ),
+                        _SkeletonItem(width: 320, height: 16),
 
                         SizedBox(height: 14),
 
@@ -397,21 +327,9 @@ class _InfoChipsSkeleton extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        _SkeletonItem(
-          width: 100,
-          height: 30,
-          borderRadius: 20,
-        ),
-        _SkeletonItem(
-          width: 120,
-          height: 30,
-          borderRadius: 20,
-        ),
-        _SkeletonItem(
-          width: 90,
-          height: 30,
-          borderRadius: 20,
-        ),
+        _SkeletonItem(width: 100, height: 30, borderRadius: 20),
+        _SkeletonItem(width: 120, height: 30, borderRadius: 20),
+        _SkeletonItem(width: 90, height: 30, borderRadius: 20),
       ],
     );
   }
@@ -426,26 +344,11 @@ class _DetailsSkeleton extends StatelessWidget {
       spacing: 20,
       runSpacing: 12,
       children: [
-        _SkeletonItem(
-          width: 170,
-          height: 18,
-        ),
-        _SkeletonItem(
-          width: 260,
-          height: 18,
-        ),
-        _SkeletonItem(
-          width: 220,
-          height: 18,
-        ),
-        _SkeletonItem(
-          width: 130,
-          height: 18,
-        ),
-        _SkeletonItem(
-          width: 150,
-          height: 18,
-        ),
+        _SkeletonItem(width: 170, height: 18),
+        _SkeletonItem(width: 260, height: 18),
+        _SkeletonItem(width: 220, height: 18),
+        _SkeletonItem(width: 130, height: 18),
+        _SkeletonItem(width: 150, height: 18),
       ],
     );
   }
@@ -460,22 +363,10 @@ class _MetricsRowSkeleton extends StatelessWidget {
       spacing: 20,
       runSpacing: 10,
       children: [
-        _SkeletonItem(
-          width: 55,
-          height: 18,
-        ),
-        _SkeletonItem(
-          width: 55,
-          height: 18,
-        ),
-        _SkeletonItem(
-          width: 55,
-          height: 18,
-        ),
-        _SkeletonItem(
-          width: 55,
-          height: 18,
-        ),
+        _SkeletonItem(width: 55, height: 18),
+        _SkeletonItem(width: 55, height: 18),
+        _SkeletonItem(width: 55, height: 18),
+        _SkeletonItem(width: 55, height: 18),
       ],
     );
   }
@@ -505,15 +396,9 @@ class _MenuSkeleton extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _SkeletonItem(
-                              width: 130,
-                              height: 24,
-                            ),
+                            _SkeletonItem(width: 130, height: 24),
                             SizedBox(height: 8),
-                            _SkeletonItem(
-                              width: 190,
-                              height: 16,
-                            ),
+                            _SkeletonItem(width: 190, height: 16),
                           ],
                         ),
                       ),
@@ -541,26 +426,16 @@ class _MenuSkeleton extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _SkeletonItem(
-                        width: 130,
-                        height: 24,
-                      ),
+                      _SkeletonItem(width: 130, height: 24),
 
                       SizedBox(height: 8),
 
-                      _SkeletonItem(
-                        width: 190,
-                        height: 16,
-                      ),
+                      _SkeletonItem(width: 190, height: 16),
                     ],
                   ),
                 ),
 
-                _SkeletonItem(
-                  width: 170,
-                  height: 46,
-                  borderRadius: 12,
-                ),
+                _SkeletonItem(width: 170, height: 46, borderRadius: 12),
               ],
             );
           },
@@ -573,9 +448,7 @@ class _MenuSkeleton extends StatelessWidget {
 class _CircleSkeleton extends StatelessWidget {
   final double size;
 
-  const _CircleSkeleton({
-    required this.size,
-  });
+  const _CircleSkeleton({required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -595,11 +468,7 @@ class _SkeletonItem extends StatelessWidget {
   final double? height;
   final double borderRadius;
 
-  const _SkeletonItem({
-    this.width,
-    this.height,
-    this.borderRadius = 8,
-  });
+  const _SkeletonItem({this.width, this.height, this.borderRadius = 8});
 
   @override
   Widget build(BuildContext context) {

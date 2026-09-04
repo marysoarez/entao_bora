@@ -48,6 +48,10 @@ class _UserAreaPageState extends State<UserAreaPage> {
             return _LoginRequired(onLogin: _login);
           }
 
+          debugPrint(
+            'USER AREA BUILD: boras=${vm.boraEvents.length} checkins=${vm.checkinEvents.length}',
+          );
+
           return RefreshIndicator(
             onRefresh: vm.load,
             child: LayoutBuilder(

@@ -19,6 +19,25 @@ class _MapSectionState extends State<MapSection> {
   google.GoogleMapController? _mapController;
 
   static final google.LatLng _initialCenter = google.LatLng(-22.9068, -43.1729);
+  static const String _darkMapStyle = '''
+[
+  {"elementType":"geometry","stylers":[{"color":"#141414"}]},
+  {"elementType":"labels.icon","stylers":[{"visibility":"off"}]},
+  {"elementType":"labels.text.fill","stylers":[{"color":"#8f8f8f"}]},
+  {"elementType":"labels.text.stroke","stylers":[{"color":"#141414"}]},
+  {"featureType":"administrative","elementType":"geometry","stylers":[{"color":"#2f2f2f"}]},
+  {"featureType":"poi","elementType":"geometry","stylers":[{"color":"#1c1c1c"}]},
+  {"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#7f7f7f"}]},
+  {"featureType":"road","elementType":"geometry","stylers":[{"color":"#292929"}]},
+  {"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#1a1a1a"}]},
+  {"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#a0a0a0"}]},
+  {"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#3a2a2a"}]},
+  {"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#4a2222"}]},
+  {"featureType":"transit","elementType":"geometry","stylers":[{"color":"#202020"}]},
+  {"featureType":"water","elementType":"geometry","stylers":[{"color":"#070707"}]},
+  {"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#4f4f4f"}]}
+]
+''';
 
   bool _mapReady = false;
   bool _markersLoaded = false;
@@ -176,6 +195,7 @@ class _MapSectionState extends State<MapSection> {
         target: _initialCenter,
         zoom: 11,
       ),
+      style: _darkMapStyle,
 
       onMapCreated: _onMapCreated,
 

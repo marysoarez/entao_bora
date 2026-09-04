@@ -40,4 +40,8 @@ abstract class EventDatasource {
   Future<List<EventDto>> getUpcomingEventsByPlace(String placeId);
 
   Future<List<EventDto>> getEventsByCreatorId(String creatorId);
+
+  Future<List<EventDto>> getBoraEventsByUserId(String userId);
+
+  Future<List<EventDto>> getCheckinEventsByUserId(String userId);
 }

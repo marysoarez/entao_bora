@@ -1,6 +1,7 @@
 import 'package:entao_bora/feature/menu_management/presentation/dialogs/confirma_delete_dialog.dart';
 import 'package:entao_bora/feature/menu_management/presentation/dialogs/create_category_dialog.dart';
 import 'package:entao_bora/feature/menu_management/presentation/dialogs/menu_item_dialog.dart';
+import 'package:entao_bora/feature/menu_management/presentation/pages/manage_menu_skeleton.dart';
 import 'package:entao_bora/feature/menu_management/presentation/viewmodels/manage_menu_viewmodel.dart';
 import 'package:entao_bora/feature/menu_management/presentation/widgets/menu_category_section.dart';
 import 'package:entao_bora/feature/menu_management/presentation/widgets/menu_toolbar.dart';
@@ -115,7 +116,7 @@ class _ManageMenuPageState extends State<ManageMenuPage> {
             ],
           ),
           body: vm.loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const ManageMenuSkeleton()
               : DsAdminPage(
                   maxWidth: DsSizes.maxFormWidth,
                   child: _buildContent(),

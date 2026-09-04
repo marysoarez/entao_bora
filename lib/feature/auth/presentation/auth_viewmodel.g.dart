@@ -45,6 +45,16 @@ mixin _$AuthViewModel on _AuthViewModelBase, Store {
     return _$loadUserAsyncAction.run(() => super.loadUser());
   }
 
+  late final _$reloadUserAsyncAction = AsyncAction(
+    '_AuthViewModelBase.reloadUser',
+    context: context,
+  );
+
+  @override
+  Future<void> reloadUser() {
+    return _$reloadUserAsyncAction.run(() => super.reloadUser());
+  }
+
   late final _$logoutAsyncAction = AsyncAction(
     '_AuthViewModelBase.logout',
     context: context,

@@ -4,6 +4,7 @@ import 'package:entao_bora/feature/events/presentation/widgets/event_actions_wid
 import 'package:entao_bora/feature/events/presentation/widgets/event_genres_widget.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_header_widget.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_info_widget.dart';
+import 'package:entao_bora/feature/places/presentation/widgets/user_avatar_widget.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:flutter/material.dart';
@@ -106,18 +107,10 @@ class _EventCardState extends State<EventCard> {
                           children: [
                             const Text("Organizador:"),
 
-                            if (event.createdBy.photoUrl?.isNotEmpty ?? false)
-                              CircleAvatar(
-                                radius: 28,
-                                backgroundImage: NetworkImage(
-                                  event.createdBy.photoUrl!,
-                                ),
-                              )
-                            else
-                              const CircleAvatar(
-                                radius: 28,
-                                child: Icon(Icons.person),
-                              ),
+                            UserAvatar(
+                              photoUrl: event.createdBy.photoUrl?.trim(),
+                              radius: 28,
+                            ),
 
                             const SizedBox(height: 8),
 

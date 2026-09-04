@@ -34,7 +34,7 @@ class UserSummaryDto extends UserSummaryEntity {
       email: map['email'] as String?,
       photoUrl: map['photoUrl'] as String?,
       isAnonymous: map['isAnonymous'] as bool? ?? false,
-      role: UserRole.fromSlug(map['role'] as String?),
+      role: UserRole.fromSlug(map['role']?.toString()),
       partnerId: map['partnerId'] as String?,
       active: map['active'] as bool? ?? true,
     );

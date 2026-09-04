@@ -71,7 +71,9 @@ abstract class PartnerDashboardViewModelBase with Store {
     loading = true;
     error = null;
 
-    final currentUser = await _authRepository.getCurrentUser();
+    final currentUser = await _authRepository.getCurrentUser(
+      forceRefresh: true,
+    );
 
     if (currentUser == null) {
       user = null;

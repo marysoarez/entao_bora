@@ -41,6 +41,14 @@ abstract class IEventRepository {
     String creatorId,
   );
 
+  Future<Either<FailureGetEvents, List<EventEntity>>> getBoraEventsByUserId(
+    String userId,
+  );
+
+  Future<Either<FailureGetEvents, List<EventEntity>>> getCheckinEventsByUserId(
+    String userId,
+  );
+
   Future<Either<FailureIsUserGoing, bool>> isUserGoing({
     required String eventId,
     required String userId,

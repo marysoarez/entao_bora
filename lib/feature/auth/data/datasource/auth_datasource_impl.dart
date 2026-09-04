@@ -98,6 +98,10 @@ class AuthDatasourceImpl implements AuthDatasource {
       return null;
     }
 
+    debugPrint(
+      'Auth datasource loading Firestore user: uid=${firebaseUser.uid}',
+    );
+
     return await _users.getUser(firebaseUser.uid);
   }
 

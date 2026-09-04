@@ -331,6 +331,77 @@ class EventRepositoryImpl extends HandleLogError implements IEventRepository {
     }
   }
 
+  Future<Either<FailureGetEvents, List<EventEntity>>> _getPersonalEvents({
+    required String userId,
+    required Future<List<EventDto>> Function(String userId) loadEvents,
+    required bool isBora,
+    required bool hasCheckedIn,
+  }) async {
+    try {
+      final events = await loadEvents(userId);
+      final entities = <EventEntity>[];
+
+      for (final dto in events) {
+        var entity = dto.toEntity().copyWith(
+          isBora: isBora,
+          hasCheckedIn: hasCheckedIn,
+        );
+
+        if (!isBora) {
+          final userIsGoing = await datasource.isUserGoing(
+            eventId: entity.id,
+            userId: userId,
+          );
+          entity = entity.copyWith(isBora: userIsGoing);
+        }
+
+        if (!hasCheckedIn) {
+          final userCheckedIn = await datasource.hasCheckedIn(
+            eventId: entity.id,
+            userId: userId,
+          );
+          entity = entity.copyWith(hasCheckedIn: userCheckedIn);
+        }
+
+        entities.add(entity);
+      }
+
+      return Right(entities);
+    } catch (e, s) {
+      logError(
+        error: _toException(e),
+        failure: FailureGetEvents(exception: e, stackTrace: s),
+        stackTrace: s,
+      );
+
+      return Left(FailureGetEvents(exception: e, stackTrace: s));
+    }
+  }
+
+  @override
+  Future<Either<FailureGetEvents, List<EventEntity>>> getBoraEventsByUserId(
+    String userId,
+  ) {
+    return _getPersonalEvents(
+      userId: userId,
+      loadEvents: datasource.getBoraEventsByUserId,
+      isBora: true,
+      hasCheckedIn: false,
+    );
+  }
+
+  @override
+  Future<Either<FailureGetEvents, List<EventEntity>>> getCheckinEventsByUserId(
+    String userId,
+  ) {
+    return _getPersonalEvents(
+      userId: userId,
+      loadEvents: datasource.getCheckinEventsByUserId,
+      isBora: false,
+      hasCheckedIn: true,
+    );
+  }
+
   @override
   Future<Either<FailureIsUserGoing, bool>> isUserGoing({
     required String eventId,

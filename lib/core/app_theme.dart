@@ -19,14 +19,17 @@ class AppTheme {
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: Brightness.dark,
 
       scaffoldBackgroundColor: background,
 
-      colorScheme: const ColorScheme.light(
+      colorScheme: const ColorScheme.dark(
         primary: primary,
         secondary: secondary,
         surface: surface,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: textPrimary,
       ),
 
       appBarTheme: const AppBarTheme(
@@ -71,23 +74,29 @@ class AppTheme {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surface,
+        fillColor: DsColors.publicText.withValues(alpha: .06),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 18,
           vertical: DsSpacing.md,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DsRadius.md),
-          borderSide: const BorderSide(color: divider),
+          borderSide: BorderSide(
+            color: DsColors.publicText.withValues(alpha: .12),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DsRadius.md),
-          borderSide: const BorderSide(color: divider),
+          borderSide: BorderSide(
+            color: DsColors.publicText.withValues(alpha: .12),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(DsRadius.md),
-          borderSide: const BorderSide(color: primary, width: 1.5),
+          borderSide: const BorderSide(color: secondary, width: 1.5),
         ),
+        labelStyle: const TextStyle(color: DsColors.publicTextMuted),
+        hintStyle: const TextStyle(color: DsColors.publicTextSubtle),
       ),
 
       textTheme: const TextTheme(

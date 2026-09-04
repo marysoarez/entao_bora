@@ -46,6 +46,7 @@ class DsEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: DsColors.publicSurface,
       child: Padding(
         padding: const EdgeInsets.all(DsSpacing.xxl - DsSpacing.xxs),
         child: Column(
@@ -53,9 +54,15 @@ class DsEmptyState extends StatelessWidget {
           children: [
             Icon(icon, size: 34, color: DsColors.primary),
             const SizedBox(height: DsSpacing.lg - 2),
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: DsColors.publicText,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
             const SizedBox(height: DsSpacing.xs),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium),
+            Text(message, style: DsTextStyles.publicBody),
             const SizedBox(height: DsSpacing.lg),
             FilledButton(onPressed: onAction, child: Text(actionLabel)),
           ],

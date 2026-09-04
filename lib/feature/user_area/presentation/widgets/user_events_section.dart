@@ -136,30 +136,50 @@ class _EventThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (coverImage.isEmpty) {
-      return Container(
+      return const _ThumbFallback(icon: Icons.event);
+    }
+
+    final uri = Uri.tryParse(coverImage);
+    if (uri != null && uri.hasAbsolutePath && uri.scheme.startsWith('http')) {
+      return Image.network(
+        coverImage,
         width: 56,
         height: 56,
-        color: DsColors.publicBackground,
-        child: const Icon(Icons.event, color: DsColors.publicTextSubtle),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const _ThumbFallback(icon: Icons.broken_image);
+        },
       );
     }
 
-    return Image.memory(
-      base64Decode(coverImage),
+    try {
+      return Image.memory(
+        base64Decode(coverImage),
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const _ThumbFallback(icon: Icons.broken_image);
+        },
+      );
+    } on FormatException {
+      return const _ThumbFallback(icon: Icons.broken_image);
+    }
+  }
+}
+
+class _ThumbFallback extends StatelessWidget {
+  const _ThumbFallback({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
       width: 56,
       height: 56,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          width: 56,
-          height: 56,
-          color: DsColors.publicBackground,
-          child: const Icon(
-            Icons.broken_image,
-            color: DsColors.publicTextSubtle,
-          ),
-        );
-      },
+      color: DsColors.publicBackground,
+      child: Icon(icon, color: DsColors.publicTextSubtle),
     );
   }
 }
