@@ -168,27 +168,7 @@ class _MapSectionState extends State<MapSection> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('');
-    debugPrint('================ MAP SECTION ================');
-    debugPrint('PLACES: ${widget.places.length}');
-    debugPrint('EVENTS: ${widget.events.length}');
-
-    for (final event in widget.events) {
-      debugPrint(
-        'EVENT MAP -> '
-        'id=${event.id} | '
-        'title=${event.title} | '
-        'placeId=${event.placeId} | '
-        'lat=${event.address.location.latitude} | '
-        'lng=${event.address.location.longitude}',
-      );
-    }
-
     final circles = MapHeatLayer.build(widget.events);
-
-    debugPrint('MARKERS GERADOS: ${_markers.length}');
-    debugPrint('CIRCLES GERADOS: ${circles.length}');
-    debugPrint('============================================');
 
     return google.GoogleMap(
       initialCameraPosition: google.CameraPosition(

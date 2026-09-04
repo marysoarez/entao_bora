@@ -2,7 +2,6 @@ import 'package:entao_bora/feature/auth/data/datasource/auth_datasource.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/auth/presentation/stores/session_store.dart';
-import 'package:flutter/foundation.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
   AuthRepositoryImpl(this._datasource, this._session);
@@ -29,10 +28,6 @@ class AuthRepositoryImpl implements IAuthRepository {
     }
 
     _session.currentUser = (await _datasource.getCurrentUser())?.toEntity();
-
-    debugPrint(
-      'Auth current user loaded: uid=${_session.currentUser?.id} role=${_session.currentUser?.role.slug} forceRefresh=$forceRefresh',
-    );
 
     return _session.currentUser;
   }

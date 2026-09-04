@@ -22,11 +22,8 @@ class UserAvatar extends StatelessWidget {
         height: radius * 2,
         fit: BoxFit.cover,
         webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-        errorBuilder: (context, error, stackTrace) {
-          debugPrint('Avatar ERROR: $error');
-
-          return _FallbackAvatar(radius: radius);
-        },
+        errorBuilder: (context, error, stackTrace) =>
+            _FallbackAvatar(radius: radius),
       ),
     );
   }

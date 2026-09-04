@@ -23,19 +23,6 @@ class MapMarkers {
     final itemsByPosition = <String, List<_MapMarkerItem>>{};
 
     for (final place in places) {
-      final owner = owners[place.ownerId.id];
-      final isPartner = place.ownerId.isPartner;
-
-      debugPrint(
-        'PLACE: ${place.name}\n'
-        '  ownerId: ${place.ownerId.id}\n'
-        '  owner: ${place.ownerId.name}\n'
-        '  role: ${place.ownerId.role}\n'
-        '  isPartner: $isPartner\n'
-        '  owner: $owner\n'
-        '  photoUrl: ${place.ownerId.photoUrl}',
-      );
-
       final item = _MapMarkerItem.place(place);
       itemsByPosition.putIfAbsent(item.positionKey, () => []).add(item);
     }

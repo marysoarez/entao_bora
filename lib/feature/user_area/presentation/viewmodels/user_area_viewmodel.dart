@@ -5,7 +5,6 @@ import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart'
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/repositories/event_repositor.dart';
 import 'package:entao_bora/feature/notifications/data/notification_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 
 part 'user_area_viewmodel.g.dart';
@@ -92,9 +91,6 @@ abstract class UserAreaViewModelBase with Store {
         return;
       }
 
-      debugPrint('USER AREA UID: ${currentUser.id}');
-      debugPrint('USER AREA ROLE: ${currentUser.role.slug}');
-
       final boraResult = await _eventRepository.getBoraEventsByUserId(
         currentUser.id,
       );
@@ -126,9 +122,6 @@ abstract class UserAreaViewModelBase with Store {
       user = currentUser;
       boraEvents = loadedBoraEvents;
       checkinEvents = loadedCheckinEvents;
-
-      debugPrint('BORAS ENCONTRADOS: ${boraEvents.length}');
-      debugPrint('CHECKINS ENCONTRADOS: ${checkinEvents.length}');
     } catch (e) {
       error = e.toString();
     } finally {

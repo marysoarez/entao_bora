@@ -452,12 +452,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
                                         try {
                                           success = await vm.save();
-                                        } catch (e, stack) {
-                                          debugPrint(
-                                            'ERRO AO CRIAR EVENTO: $e',
-                                          );
-                                          debugPrintStack(stackTrace: stack);
-
+                                        } catch (e) {
                                           if (mounted) {
                                             ScaffoldMessenger.of(
                                               context,
