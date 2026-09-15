@@ -197,7 +197,7 @@ class _ManagePlacesPageState extends State<ManagePlacesPage> {
         icon: Icons.storefront_outlined,
         title: 'Nenhum estabelecimento cadastrado',
         message:
-            'Reivindique ou cadastre um local para controlar informacoes, eventos e cardapio.',
+            'Reivindique ou cadastre um local para controlar informações, eventos e cardapio.',
         actionLabel: 'Novo local',
         onAction: openCreatePlace,
       );

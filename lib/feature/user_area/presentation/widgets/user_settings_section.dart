@@ -4,16 +4,18 @@ import 'package:flutter/material.dart';
 class UserSettingsSection extends StatelessWidget {
   const UserSettingsSection({
     super.key,
-    required this.locationEnabled,
+    required this.locationSharingEnabled,
+    required this.notificationsEnabled,
     required this.activatingNotifications,
     required this.onToggleLocation,
-    required this.onActivateNotifications,
+    required this.onToggleNotifications,
   });
 
-  final bool locationEnabled;
+  final bool locationSharingEnabled;
+  final bool notificationsEnabled;
   final bool activatingNotifications;
   final VoidCallback onToggleLocation;
-  final VoidCallback onActivateNotifications;
+  final VoidCallback onToggleNotifications;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class UserSettingsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Configuracoes pessoais',
+            'Configurações pessoais',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: DsColors.publicText,
               fontWeight: FontWeight.w800,
@@ -31,22 +33,27 @@ class UserSettingsSection extends StatelessWidget {
           const SizedBox(height: DsSpacing.md),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            value: locationEnabled,
+            value: locationSharingEnabled,
             onChanged: (_) => onToggleLocation(),
             activeThumbColor: DsColors.success,
             title: const Text(
-              'Localizacao',
+              'Localização',
               style: TextStyle(color: DsColors.publicText),
             ),
             subtitle: const Text(
-              'Usada para check-ins e recomendacoes por perto.',
+              'Usada para check-ins e recomendações por perto.',
               style: TextStyle(color: DsColors.publicTextMuted),
             ),
           ),
           const Divider(color: Colors.white12),
-          ListTile(
+          SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            leading: activatingNotifications
+            value: notificationsEnabled,
+            onChanged: activatingNotifications
+                ? null
+                : (_) => onToggleNotifications(),
+            activeThumbColor: DsColors.success,
+            secondary: activatingNotifications
                 ? const SizedBox(
                     width: 24,
                     height: 24,
@@ -57,18 +64,13 @@ class UserSettingsSection extends StatelessWidget {
                     color: DsColors.accent,
                   ),
             title: const Text(
-              'Notificacoes',
+              'Notificações',
               style: TextStyle(color: DsColors.publicText),
             ),
             subtitle: const Text(
               'Receba avisos relacionados aos seus roles.',
               style: TextStyle(color: DsColors.publicTextMuted),
             ),
-            trailing: const Icon(
-              Icons.chevron_right,
-              color: DsColors.publicTextSubtle,
-            ),
-            onTap: activatingNotifications ? null : onActivateNotifications,
           ),
         ],
       ),

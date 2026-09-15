@@ -514,7 +514,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                         child: Text(
                                           vm.editingEvent == null
                                               ? 'PUBLICAR EVENTO'
-                                              : 'SALVAR ALTERACOES',
+                                              : 'SALVAR ALTERAÇÕES',
                                         ),
                                       ),
                               ),

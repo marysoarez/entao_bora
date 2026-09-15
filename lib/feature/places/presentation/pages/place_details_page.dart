@@ -141,7 +141,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
               ),
               ListTile(
                 leading: const Icon(Icons.share),
-                title: const Text('Mais opcoes'),
+                title: const Text('Mais opções'),
                 onTap: () async {
                   Navigator.pop(context);
 

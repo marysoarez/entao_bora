@@ -16,13 +16,14 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
     () => super.isLogged,
     name: 'UserAreaViewModelBase.isLogged',
   )).value;
-  Computed<bool>? _$locationEnabledComputed;
+  Computed<bool>? _$hasCurrentLocationComputed;
 
   @override
-  bool get locationEnabled => (_$locationEnabledComputed ??= Computed<bool>(
-    () => super.locationEnabled,
-    name: 'UserAreaViewModelBase.locationEnabled',
-  )).value;
+  bool get hasCurrentLocation =>
+      (_$hasCurrentLocationComputed ??= Computed<bool>(
+        () => super.hasCurrentLocation,
+        name: 'UserAreaViewModelBase.hasCurrentLocation',
+      )).value;
   Computed<int>? _$totalPersonalActionsComputed;
 
   @override
@@ -170,6 +171,50 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
     });
   }
 
+  late final _$locationSharingEnabledAtom = Atom(
+    name: 'UserAreaViewModelBase.locationSharingEnabled',
+    context: context,
+  );
+
+  @override
+  bool get locationSharingEnabled {
+    _$locationSharingEnabledAtom.reportRead();
+    return super.locationSharingEnabled;
+  }
+
+  @override
+  set locationSharingEnabled(bool value) {
+    _$locationSharingEnabledAtom.reportWrite(
+      value,
+      super.locationSharingEnabled,
+      () {
+        super.locationSharingEnabled = value;
+      },
+    );
+  }
+
+  late final _$notificationsEnabledAtom = Atom(
+    name: 'UserAreaViewModelBase.notificationsEnabled',
+    context: context,
+  );
+
+  @override
+  bool get notificationsEnabled {
+    _$notificationsEnabledAtom.reportRead();
+    return super.notificationsEnabled;
+  }
+
+  @override
+  set notificationsEnabled(bool value) {
+    _$notificationsEnabledAtom.reportWrite(
+      value,
+      super.notificationsEnabled,
+      () {
+        super.notificationsEnabled = value;
+      },
+    );
+  }
+
   late final _$loadAsyncAction = AsyncAction(
     'UserAreaViewModelBase.load',
     context: context,
@@ -190,6 +235,16 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
     return _$enableLocationAsyncAction.run(() => super.enableLocation());
   }
 
+  late final _$disableLocationAsyncAction = AsyncAction(
+    'UserAreaViewModelBase.disableLocation',
+    context: context,
+  );
+
+  @override
+  Future<bool> disableLocation() {
+    return _$disableLocationAsyncAction.run(() => super.disableLocation());
+  }
+
   late final _$activateNotificationsAsyncAction = AsyncAction(
     'UserAreaViewModelBase.activateNotifications',
     context: context,
@@ -199,6 +254,18 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
   Future<String> activateNotifications() {
     return _$activateNotificationsAsyncAction.run(
       () => super.activateNotifications(),
+    );
+  }
+
+  late final _$deactivateNotificationsAsyncAction = AsyncAction(
+    'UserAreaViewModelBase.deactivateNotifications',
+    context: context,
+  );
+
+  @override
+  Future<String> deactivateNotifications() {
+    return _$deactivateNotificationsAsyncAction.run(
+      () => super.deactivateNotifications(),
     );
   }
 
@@ -220,18 +287,6 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
   }
 
   @override
-  void disableLocation() {
-    final _$actionInfo = _$UserAreaViewModelBaseActionController.startAction(
-      name: 'UserAreaViewModelBase.disableLocation',
-    );
-    try {
-      return super.disableLocation();
-    } finally {
-      _$UserAreaViewModelBaseActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   String toString() {
     return '''
 loading: ${loading},
@@ -241,8 +296,10 @@ user: ${user},
 boraEvents: ${boraEvents},
 checkinEvents: ${checkinEvents},
 currentLocation: ${currentLocation},
+locationSharingEnabled: ${locationSharingEnabled},
+notificationsEnabled: ${notificationsEnabled},
 isLogged: ${isLogged},
-locationEnabled: ${locationEnabled},
+hasCurrentLocation: ${hasCurrentLocation},
 totalPersonalActions: ${totalPersonalActions},
 recentActivity: ${recentActivity}
     ''';

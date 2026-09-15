@@ -26,4 +26,13 @@ abstract class ILocationRepository {
 
   Future<Either<FailureGetCurrentLocationIfNear, LocationEntity?>>
   getCurrentLocationIfNear(LocationEntity destination, {double radius = 100});
+
+  Future<Either<FailureUpdateLocationSharing, void>> enableLocationSharing({
+    required String userId,
+    required LocationEntity location,
+  });
+
+  Future<Either<FailureUpdateLocationSharing, void>> disableLocationSharing({
+    required String userId,
+  });
 }

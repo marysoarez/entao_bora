@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:entao_bora/core/location/data/data_source/location_data_source.dart';
 import 'package:entao_bora/core/location/data/dtos/address_dto.dart';
 import 'package:entao_bora/core/location/domain/entities/location_entity.dart';
@@ -8,6 +9,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 class LocationDatasourceImpl implements ILocationDatasource {
+  LocationDatasourceImpl(this._firestore);
+
+  final FirebaseFirestore _firestore;
+
   @override
   Future<LocationEntity> getCurrentLocation() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -285,5 +290,25 @@ class LocationDatasourceImpl implements ILocationDatasource {
         longitude: (locationData['lng'] as num).toDouble(),
       ),
     );
+  }
+
+  @override
+  Future<void> enableLocationSharing({
+    required String userId,
+    required LocationEntity location,
+  }) async {
+    await _firestore.collection('users').doc(userId).set({
+      'locationSharingEnabled': true,
+      'lastKnownLocation': GeoPoint(location.latitude, location.longitude),
+      'locationUpdatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> disableLocationSharing({required String userId}) async {
+    await _firestore.collection('users').doc(userId).set({
+      'locationSharingEnabled': false,
+      'locationUpdatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
+import 'package:entao_bora/shared/enum/user_role.dart';
 import 'package:flutter/material.dart';
 
 class UserProfileSummary extends StatelessWidget {
@@ -27,15 +28,17 @@ class UserProfileSummary extends StatelessWidget {
             label: 'E-mail',
             value: user.email ?? 'Nao informado',
           ),
-          _InfoRow(
-            icon: Icons.verified_user_outlined,
-            label: 'Tipo de conta',
-            value: user.isAnonymous ? 'Visitante' : 'Usuario comum',
-          ),
+         _InfoRow(
+  icon: Icons.verified_user_outlined,
+  label: 'Tipo de conta',
+  value: user.role.label,
+),
         ],
       ),
     );
   }
+
+
 }
 
 class _InfoRow extends StatelessWidget {

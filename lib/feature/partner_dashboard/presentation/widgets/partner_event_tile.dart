@@ -67,7 +67,7 @@ class PartnerEventTile extends StatelessWidget {
           if (event.attractions.isNotEmpty) ...[
             const SizedBox(height: 10),
             Text(
-              'Atracoes: ${event.attractions.map((e) => e.name).join(', ')}',
+              'Atrações: ${event.attractions.map((e) => e.name).join(', ')}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

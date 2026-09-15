@@ -35,7 +35,7 @@ Future<void> main() async {
   await _writeSafeSlugUpdates(firestore, placesReport);
   await _writeSafeSlugUpdates(firestore, eventsReport);
 
-  debugPrint('Migracao concluida. Apenas o campo "slug" foi atualizado.');
+  debugPrint('Migração concluida. Apenas o campo "slug" foi atualizado.');
 }
 
 Future<_CollectionSlugReport> _analyzeCollection({

@@ -196,7 +196,7 @@ class _DashboardContent extends StatelessWidget {
         icon: Icons.event_busy_outlined,
         title: 'Nenhum evento criado',
         message:
-            'Crie seu primeiro evento para acompanhar visualizacoes, boras e check-ins por aqui.',
+            'Crie seu primeiro evento para acompanhar visualizações, boras e check-ins por aqui.',
         actionLabel: 'Criar evento',
         onAction: onCreateEvent,
       );

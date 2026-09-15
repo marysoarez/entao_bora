@@ -129,7 +129,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       _drawerItem(
                         context,
                         icon: Icons.settings_outlined,
-                        title: 'Configuracoes',
+                        title: 'Configurações',
                         onTap: () {},
                       ),
                       _drawerItem(

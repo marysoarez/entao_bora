@@ -75,7 +75,7 @@ class PlaceManagementTile extends StatelessWidget {
               ),
 
               PopupMenuButton<String>(
-                tooltip: 'Opcoes',
+                tooltip: 'Opções',
                 onSelected: (value) {
                   switch (value) {
                     case 'open':

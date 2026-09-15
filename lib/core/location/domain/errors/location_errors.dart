@@ -43,3 +43,11 @@ class FailureGetCurrentLocationIfNear extends BaseError {
     super.stackTrace,
   });
 }
+
+class FailureUpdateLocationSharing extends BaseError {
+  FailureUpdateLocationSharing({
+    required super.message,
+    super.exception,
+    super.stackTrace,
+  });
+}

@@ -202,7 +202,7 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
                   controller: _categoryController,
                   decoration: const InputDecoration(
                     labelText: 'Nova categoria personalizada',
-                    hintText: 'Ex: Drinks, Porcoes, Sobremesas',
+                    hintText: 'Ex: Drinks, Porções, Sobremesas',
                   ),
                 ),
 
@@ -219,11 +219,11 @@ class _MenuItemDialogState extends State<MenuItemDialog> {
 
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(labelText: 'Descricao'),
+                  decoration: const InputDecoration(labelText: 'Descrição'),
                   minLines: 3,
                   maxLines: 5,
                   validator: (value) =>
-                      _requiredValidator(value, 'Informe a descricao.'),
+                      _requiredValidator(value, 'Informe a descrição.'),
                 ),
 
                 const SizedBox(height: 12),

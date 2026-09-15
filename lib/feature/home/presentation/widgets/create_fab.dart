@@ -111,7 +111,7 @@ class _CreateFabState extends State<CreateFab>
                                   Icons.notifications_active,
                                   size: 20,
                                 ),
-                                title: const Text('Ativar notificacoes'),
+                                title: const Text('Ativar notificações'),
                                 onTap: () {
                                   setState(() => expanded = false);
                                   widget.onEnableNotifications();

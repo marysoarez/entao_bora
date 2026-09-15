@@ -43,7 +43,7 @@ class PartnerMetricsSection extends StatelessWidget {
               width: cardWidth,
               child: PartnerMetricCard(
                 icon: Icons.visibility_outlined,
-                title: 'Visualizacoes',
+                title: 'Visualizações',
                 value: '$totalViews',
                 subtitle: 'nos eventos listados',
               ),

@@ -13,7 +13,7 @@ Future<String?> showCreateCategoryDialog(BuildContext context) async {
           autofocus: true,
           decoration: const InputDecoration(
             labelText: 'Nome da categoria',
-            hintText: 'Ex: Drinks, Porcoes, Sobremesas',
+            hintText: 'Ex: Drinks, Porções, Sobremesas',
           ),
           onSubmitted: (value) {
             Navigator.of(context).pop(value.trim());

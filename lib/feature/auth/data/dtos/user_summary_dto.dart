@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:entao_bora/core/location/domain/entities/location_entity.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/shared/enum/user_role.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +14,9 @@ class UserSummaryDto extends UserSummaryEntity {
     super.role,
     super.partnerId,
     super.active,
+    super.notificationsEnabled,
+    super.locationSharingEnabled,
+    super.lastKnownLocation,
   });
 
   factory UserSummaryDto.fromEntity(UserSummaryEntity entity) {
@@ -24,10 +29,15 @@ class UserSummaryDto extends UserSummaryEntity {
       role: entity.role,
       partnerId: entity.partnerId,
       active: entity.active,
+      notificationsEnabled: entity.notificationsEnabled,
+      locationSharingEnabled: entity.locationSharingEnabled,
+      lastKnownLocation: entity.lastKnownLocation,
     );
   }
 
   factory UserSummaryDto.fromMap(Map<String, dynamic> map) {
+    final lastKnownLocation = map['lastKnownLocation'];
+
     return UserSummaryDto(
       id: map['id'] as String,
       name: map['name'] as String? ?? '',
@@ -37,6 +47,14 @@ class UserSummaryDto extends UserSummaryEntity {
       role: UserRole.fromSlug(map['role']?.toString()),
       partnerId: map['partnerId'] as String?,
       active: map['active'] as bool? ?? true,
+      notificationsEnabled: map['notificationsEnabled'] as bool? ?? false,
+      locationSharingEnabled: map['locationSharingEnabled'] as bool? ?? false,
+      lastKnownLocation: lastKnownLocation is GeoPoint
+          ? LocationEntity(
+              latitude: lastKnownLocation.latitude,
+              longitude: lastKnownLocation.longitude,
+            )
+          : null,
     );
   }
 
@@ -55,6 +73,9 @@ class UserSummaryDto extends UserSummaryEntity {
       role: UserRole.user,
       partnerId: null,
       active: true,
+      notificationsEnabled: false,
+      locationSharingEnabled: false,
+      lastKnownLocation: null,
     );
   }
 
@@ -68,6 +89,9 @@ class UserSummaryDto extends UserSummaryEntity {
       role: role,
       partnerId: partnerId,
       active: active,
+      notificationsEnabled: notificationsEnabled,
+      locationSharingEnabled: locationSharingEnabled,
+      lastKnownLocation: lastKnownLocation,
     );
   }
 
@@ -81,6 +105,13 @@ class UserSummaryDto extends UserSummaryEntity {
       'role': role.slug,
       'partnerId': partnerId,
       'active': active,
+      'notificationsEnabled': notificationsEnabled,
+      'locationSharingEnabled': locationSharingEnabled,
+      if (lastKnownLocation != null)
+        'lastKnownLocation': GeoPoint(
+          lastKnownLocation!.latitude,
+          lastKnownLocation!.longitude,
+        ),
     };
   }
 }

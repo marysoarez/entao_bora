@@ -5,6 +5,12 @@ enum UserRole {
 
   String get slug => name;
 
+  String get label => switch (this) {
+    UserRole.user => 'Usuário comum',
+    UserRole.partner => 'Parceiro',
+    UserRole.admin => 'Administrador',
+  };
+
   bool get isUser => this == UserRole.user;
 
   bool get isPartner => this == UserRole.partner;

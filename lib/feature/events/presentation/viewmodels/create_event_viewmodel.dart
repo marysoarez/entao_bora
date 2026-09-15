@@ -397,7 +397,7 @@ abstract class CreateEventViewModelBase with Store {
     }
 
     if (description.trim().isEmpty) {
-      return 'Informe uma descricao.';
+      return 'Informe uma descrição.';
     }
 
     if (coverPhoto == null && coverImage == null) {
@@ -464,7 +464,7 @@ abstract class CreateEventViewModelBase with Store {
 
   String? validateDescription(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Informe uma descricao.';
+      return 'Informe uma descrição.';
     }
 
     return null;

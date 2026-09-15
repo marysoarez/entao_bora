@@ -161,4 +161,50 @@ class LocationRepositoryImpl extends HandleLogError
       return Left(failure);
     }
   }
+
+  @override
+  Future<Either<FailureUpdateLocationSharing, void>> enableLocationSharing({
+    required String userId,
+    required LocationEntity location,
+  }) async {
+    try {
+      await datasource.enableLocationSharing(
+        userId: userId,
+        location: location,
+      );
+
+      return const Right(null);
+    } catch (error, stackTrace) {
+      final failure = FailureUpdateLocationSharing(
+        message: 'Erro ao ativar compartilhamento de localizaÃ§Ã£o.',
+        exception: error,
+        stackTrace: stackTrace,
+      );
+
+      logError(error: error, failure: failure, stackTrace: stackTrace);
+
+      return Left(failure);
+    }
+  }
+
+  @override
+  Future<Either<FailureUpdateLocationSharing, void>> disableLocationSharing({
+    required String userId,
+  }) async {
+    try {
+      await datasource.disableLocationSharing(userId: userId);
+
+      return const Right(null);
+    } catch (error, stackTrace) {
+      final failure = FailureUpdateLocationSharing(
+        message: 'Erro ao desativar compartilhamento de localizaÃ§Ã£o.',
+        exception: error,
+        stackTrace: stackTrace,
+      );
+
+      logError(error: error, failure: failure, stackTrace: stackTrace);
+
+      return Left(failure);
+    }
+  }
 }

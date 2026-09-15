@@ -81,9 +81,9 @@ dependency_overrides:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/entao_bora.jpg"
+  image_path: "assets/images/entao_bora_app_icon_logo.png"
   adaptive_icon_background: "#000000"
-  adaptive_icon_foreground: "assets/images/entao_bora.jpg"
+  adaptive_icon_foreground: "assets/images/entao_bora_app_icon_logo.png"
 # The following section is specific to Flutter packages.
 flutter:
   assets:

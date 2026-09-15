@@ -64,7 +64,7 @@ class AppModule extends Module {
     // LOCATION
     //==========================================================
     i.addLazySingleton<HomeViewModel>(HomeViewModel.new);
-    i.addSingleton<ILocationDatasource>(LocationDatasourceImpl.new);
+    i.addSingleton<ILocationDatasource>(() => LocationDatasourceImpl(i()));
     i.addSingleton<ILocationRepository>(
       () => LocationRepositoryImpl(datasource: i()),
     );

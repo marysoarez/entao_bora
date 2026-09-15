@@ -84,12 +84,14 @@ class _UserAreaPageState extends State<UserAreaPage> {
                                 const SizedBox(width: DsSpacing.md),
                                 Expanded(
                                   child: UserSettingsSection(
-                                    locationEnabled: vm.locationEnabled,
+                                    locationSharingEnabled:
+                                        vm.locationSharingEnabled,
+                                    notificationsEnabled:
+                                        vm.notificationsEnabled,
                                     activatingNotifications:
                                         vm.activatingNotifications,
                                     onToggleLocation: _toggleLocation,
-                                    onActivateNotifications:
-                                        _activateNotifications,
+                                    onToggleNotifications: _toggleNotifications,
                                   ),
                                 ),
                               ],
@@ -98,11 +100,12 @@ class _UserAreaPageState extends State<UserAreaPage> {
                             UserProfileSummary(user: user),
                             const SizedBox(height: DsSpacing.md),
                             UserSettingsSection(
-                              locationEnabled: vm.locationEnabled,
+                              locationSharingEnabled: vm.locationSharingEnabled,
+                              notificationsEnabled: vm.notificationsEnabled,
                               activatingNotifications:
                                   vm.activatingNotifications,
                               onToggleLocation: _toggleLocation,
-                              onActivateNotifications: _activateNotifications,
+                              onToggleNotifications: _toggleNotifications,
                             ),
                           ],
                           const SizedBox(height: DsSpacing.md),
@@ -173,23 +176,26 @@ class _UserAreaPageState extends State<UserAreaPage> {
   }
 
   Future<void> _toggleLocation() async {
-    if (vm.locationEnabled) {
-      vm.disableLocation();
-      return;
-    }
+    final success = vm.locationSharingEnabled
+        ? await vm.disableLocation()
+        : await vm.enableLocation();
 
-    final enabled = await vm.enableLocation();
-    if (!mounted || enabled) return;
+    if (!mounted || success) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(vm.error ?? 'Nao foi possivel obter sua localizacao.'),
+        content: Text(
+          vm.error ?? 'Nao foi possivel atualizar sua localizacao.',
+        ),
       ),
     );
   }
 
-  Future<void> _activateNotifications() async {
-    final message = await vm.activateNotifications();
+  Future<void> _toggleNotifications() async {
+    final message = vm.notificationsEnabled
+        ? await vm.deactivateNotifications()
+        : await vm.activateNotifications();
+
     if (!mounted) return;
 
     ScaffoldMessenger.of(

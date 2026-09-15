@@ -321,11 +321,11 @@ abstract class CreatePlaceViewModelBase with Store {
     }
 
     if (description.trim().isEmpty) {
-      return 'Informe uma descricao.';
+      return 'Informe uma descrição.';
     }
 
     if (address == null) {
-      return 'Selecione um endereco.';
+      return 'Selecione um endereço.';
     }
 
     if (musicGenres.isEmpty) {
@@ -362,7 +362,7 @@ abstract class CreatePlaceViewModelBase with Store {
 
   String? validateDescription(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Informe uma descricao.';
+      return 'Informe uma descrição.';
     }
 
     return null;

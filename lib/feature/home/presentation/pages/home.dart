@@ -59,108 +59,102 @@ class _HomePageState extends State<HomePage> {
           drawer: AppDrawer(),
 
           body: Stack(
-  children: [
-    Positioned.fill(
-      child: vm.loading
-          ? const MapSkeleton()
-          : MapSection(
-              places: vm.places,
-              events: vm.events,
-            ),
-    ),
+            children: [
+              Positioned.fill(
+                child: vm.loading
+                    ? const MapSkeleton()
+                    : MapSection(places: vm.places, events: vm.events),
+              ),
 
-    Positioned(
-      right: 16,
-      bottom: 16,
-      child: CreateFab(
-        onMyLocation: () async {
-          if (vm.locationEnabled) {
-            vm.disableLocation();
-            return;
-          }
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: CreateFab(
+                  onMyLocation: () async {
+                    if (vm.locationEnabled) {
+                      vm.disableLocation();
+                      return;
+                    }
 
-          final enabled = await vm.enableLocation();
+                    final enabled = await vm.enableLocation();
 
-          if (!context.mounted) return;
+                    if (!context.mounted) return;
 
-          if (!enabled) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  vm.error ??
-                      'Não foi possível obter sua localização.',
+                    if (!enabled) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            vm.error ??
+                                'Não foi possível obter sua localização.',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  locationEnabled: vm.locationEnabled,
+                  onEnableNotifications: () async {
+                    if (!await auth.ensureLogged(context)) return;
+
+                    var location = vm.currentLocation;
+
+                    if (location == null) {
+                      final enabled = await vm.enableLocation();
+
+                      if (!context.mounted) return;
+
+                      if (!enabled) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              vm.error ??
+                                  'Compartilhe sua localização para melhorar a experiencia.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      location = vm.currentLocation;
+                    }
+
+                    if (location == null || auth.user == null) return;
+
+                    final result = await notifications.activate(
+                      user: auth.user!,
+                    );
+
+                    if (!context.mounted) return;
+
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(result.message)));
+                  },
+                  onCreateEvent: () async {
+                    if (!await auth.ensureLogged(context)) return;
+
+                    final created = await Modular.to.pushNamed<bool>(
+                      '/events/create',
+                    );
+
+                    if (created == true) {
+                      await vm.reloadPlaces();
+                    }
+                  },
+                  onCreatePlace: () async {
+                    if (!await auth.ensureLogged(context)) return;
+
+                    final created = await Modular.to.pushNamed<bool>(
+                      '/places/create',
+                    );
+
+                    if (created == true) {
+                      await vm.reloadPlaces();
+                    }
+                  },
                 ),
               ),
-            );
-          }
-        },
-        locationEnabled: vm.locationEnabled,
-        onEnableNotifications: () async {
-          if (!await auth.ensureLogged(context)) return;
-
-          var location = vm.currentLocation;
-
-          if (location == null) {
-            final enabled = await vm.enableLocation();
-
-            if (!context.mounted) return;
-
-            if (!enabled) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    vm.error ??
-                        'Compartilhe sua localizacao para melhorar a experiencia.',
-                  ),
-                ),
-              );
-              return;
-            }
-
-            location = vm.currentLocation;
-          }
-
-          if (location == null || auth.user == null) return;
-
-          final result = await notifications.activate(
-            user: auth.user!,
-            location: location,
-          );
-
-          if (!context.mounted) return;
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result.message),
-            ),
-          );
-        },
-        onCreateEvent: () async {
-          if (!await auth.ensureLogged(context)) return;
-
-          final created = await Modular.to.pushNamed<bool>(
-            '/events/create',
-          );
-
-          if (created == true) {
-            await vm.reloadPlaces();
-          }
-        },
-        onCreatePlace: () async {
-          if (!await auth.ensureLogged(context)) return;
-
-          final created = await Modular.to.pushNamed<bool>(
-            '/places/create',
-          );
-
-          if (created == true) {
-            await vm.reloadPlaces();
-          }
-        },
-      ),
-    ),
-  ],
-),
+            ],
+          ),
         );
       },
     );
