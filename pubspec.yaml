@@ -89,6 +89,13 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/fonts/OFL-Arimo.txt
+    - docs/licenses/lucide.txt
+
+  fonts:
+    - family: Arimo
+      fonts:
+        - asset: assets/fonts/Arimo.ttf
 
 
   # The following line ensures that the Material Icons font is
