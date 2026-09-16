@@ -88,7 +88,7 @@ class EventEntity {
 
   bool get isRunning {
     final now = DateTime.now();
-    return now.isAfter(startDate) && now.isBefore(endDate);
+    return !now.isBefore(startDate) && !now.isAfter(endDate);
   }
 
   bool get isUpcoming => DateTime.now().isBefore(startDate);

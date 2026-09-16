@@ -32,8 +32,12 @@ abstract class PlaceDetailsViewModelBase with Store {
   Future<void> load(String id) async {
     loading = true;
     error = null;
+    place = null;
 
-    final result = await _placeRepository.getPlaceById(id);
+    var result = await _placeRepository.getPlaceById(id);
+    if (result.isRight() && result.getOrElse(() => null) == null) {
+      result = await _placeRepository.getPlaceBySlug(id);
+    }
 
     result.fold(
       (failure) {

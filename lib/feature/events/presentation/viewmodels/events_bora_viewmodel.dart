@@ -45,8 +45,8 @@ abstract class EventActionsViewModelBase with Store {
   @computed
   bool get canCheckIn =>
       !event.hasCheckedIn &&
-      DateTime.now().isAfter(event.startDate) &&
-      DateTime.now().isBefore(event.endDate);
+      !DateTime.now().isBefore(event.startDate) &&
+      !DateTime.now().isAfter(event.endDate);
 
   @action
   Future<void> toggleBora() async {

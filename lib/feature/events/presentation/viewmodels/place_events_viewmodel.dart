@@ -21,12 +21,11 @@ abstract class PlaceEventsViewModelBase with Store {
   @observable
   ObservableList<EventEntity> events = ObservableList<EventEntity>();
 
-
   @action
   Future<void> load(String placeId) async {
     loading = true;
     error = null;
-   
+
     final result = await _repository.getUpcomingEventsByPlace(placeId);
 
     result.fold(
@@ -37,9 +36,6 @@ abstract class PlaceEventsViewModelBase with Store {
         events
           ..clear()
           ..addAll(data);
-
-    for (final e in events) {
-    }
       },
     );
 
@@ -51,7 +47,6 @@ abstract class PlaceEventsViewModelBase with Store {
     return load(placeId);
   }
 
-  
   bool get hasEvents => events.isNotEmpty;
 
   bool get isEmpty => events.isEmpty;

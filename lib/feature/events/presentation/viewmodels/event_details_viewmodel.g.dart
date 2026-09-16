@@ -8,9 +8,9 @@ part of 'event_details_viewmodel.dart';
 
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
-mixin _$EventDetailsViewModel on _EventDetailsViewModelBase, Store {
+mixin _$EventDetailsViewModel on EventDetailsViewModelBase, Store {
   late final _$loadingAtom = Atom(
-    name: '_EventDetailsViewModelBase.loading',
+    name: 'EventDetailsViewModelBase.loading',
     context: context,
   );
 
@@ -28,7 +28,7 @@ mixin _$EventDetailsViewModel on _EventDetailsViewModelBase, Store {
   }
 
   late final _$errorAtom = Atom(
-    name: '_EventDetailsViewModelBase.error',
+    name: 'EventDetailsViewModelBase.error',
     context: context,
   );
 
@@ -46,7 +46,7 @@ mixin _$EventDetailsViewModel on _EventDetailsViewModelBase, Store {
   }
 
   late final _$eventAtom = Atom(
-    name: '_EventDetailsViewModelBase.event',
+    name: 'EventDetailsViewModelBase.event',
     context: context,
   );
 
@@ -64,7 +64,7 @@ mixin _$EventDetailsViewModel on _EventDetailsViewModelBase, Store {
   }
 
   late final _$placeAtom = Atom(
-    name: '_EventDetailsViewModelBase.place',
+    name: 'EventDetailsViewModelBase.place',
     context: context,
   );
 
@@ -82,7 +82,7 @@ mixin _$EventDetailsViewModel on _EventDetailsViewModelBase, Store {
   }
 
   late final _$loadAsyncAction = AsyncAction(
-    '_EventDetailsViewModelBase.load',
+    'EventDetailsViewModelBase.load',
     context: context,
   );
 

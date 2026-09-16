@@ -7,16 +7,16 @@ import 'package:mobx/mobx.dart';
 
 part 'event_details_viewmodel.g.dart';
 
-class EventDetailsViewModel = _EventDetailsViewModelBase
+class EventDetailsViewModel = EventDetailsViewModelBase
     with _$EventDetailsViewModel;
 
-abstract class _EventDetailsViewModelBase with Store {
+abstract class EventDetailsViewModelBase with Store {
   final IEventRepository eventRepository;
   final IPlaceRepository placeRepository;
   final IAuthRepository _authRepository;
   final Set<String> _registeredViewEventIds = {};
 
-  _EventDetailsViewModelBase(
+  EventDetailsViewModelBase(
     this.eventRepository,
     this.placeRepository,
     this._authRepository,
@@ -38,14 +38,19 @@ abstract class _EventDetailsViewModelBase with Store {
   Future<void> load(String id) async {
     loading = true;
     error = null;
+    event = null;
     place = null;
 
     final userId = _authRepository.currentUser?.id;
 
-    final result = await eventRepository.getEventById(
+    var result = await eventRepository.getEventById(
       eventId: id,
       userId: userId,
     );
+
+    if (result.isRight() && result.getOrElse(() => null) == null) {
+      result = await eventRepository.getEventBySlug(slug: id, userId: userId);
+    }
 
     await result.fold(
       (failure) async {
