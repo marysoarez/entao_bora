@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'package:entao_bora/core/location/domain/entities/location_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
@@ -9,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
 import '../pages/map_seleton.dart';
 import 'home_style.dart';
 import 'map_heat.dart';
+import 'halloween_pin.dart';
 
 class HomeMapItem {
   const HomeMapItem(this.name, this.route, this.position);
@@ -46,14 +46,14 @@ class MapSection extends StatefulWidget {
     required this.places,
     required this.events,
     this.location,
-    this.height = 520,
+    this.height,
     this.onNavigate,
     this.mapBuilder,
   });
   final List<PlaceEntity> places;
   final List<EventEntity> events;
   final LocationEntity? location;
-  final double height;
+  final double? height;
   final ValueChanged<String>? onNavigate;
   final Widget Function(google.GoogleMap)? mapBuilder;
   @override
@@ -68,8 +68,12 @@ class _MapSectionState extends State<MapSection> {
   int _attempt = 0;
   Timer? _timeout;
   google.LatLng? _selected;
-  final Map<int, google.BitmapDescriptor> _numberedPins = {};
-  final Set<int> _pendingPins = {};
+  final Map<(int, double), google.BitmapDescriptor> _numberedPins = {};
+  final Set<(int, double)> _pendingPins = {};
+  late List<BoraHeatPoint> _heat;
+  late BoraTileProvider _tiles;
+  int _heatRevision = 0;
+  late double _zoom;
   Map<google.LatLng, List<HomeMapItem>> get _groups =>
       groupHomeMapItems(widget.places, widget.events);
   void _navigate(String route) {
@@ -83,12 +87,14 @@ class _MapSectionState extends State<MapSection> {
   @override
   void initState() {
     super.initState();
+    _zoom = widget.location == null ? 11 : 14;
+    _updateHeat();
     _startTimeout();
   }
 
   void _startTimeout() {
     _timeout?.cancel();
-    _timeout = Timer(const Duration(seconds: 25), () {
+    _timeout = Timer(const Duration(seconds: 30), () {
       if (mounted && !_idle) {
         setState(() => _error = 'Não foi possível carregar o mapa.');
       }
@@ -98,6 +104,7 @@ class _MapSectionState extends State<MapSection> {
   @override
   void didUpdateWidget(covariant MapSection oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _updateHeat();
     final groups = _groups;
     if (!groups.containsKey(_selected)) _selected = null;
     if (oldWidget.location != widget.location ||
@@ -169,56 +176,52 @@ class _MapSectionState extends State<MapSection> {
     _startTimeout();
   }
 
-  // The cross-platform Marker API has no label. Use a bitmap only for groups;
-  // single items keep Google's default marker and the map keeps its own style.
-  Future<void> _numberedPin(int count) async {
-    if (_numberedPins.containsKey(count) || !_pendingPins.add(count)) return;
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder)..scale(2);
-    final path = Path()
-      ..moveTo(16, 42)
-      ..cubicTo(12, 34, 1, 24, 1, 16)
-      ..arcToPoint(const Offset(31, 16), radius: const Radius.circular(15))
-      ..cubicTo(31, 24, 20, 34, 16, 42)
-      ..close();
-    canvas.drawPath(path, Paint()..color = const Color(0xFFEA4335));
-    final text = TextPainter(
-      text: TextSpan(
-        text: '$count',
-        style: HomeStyle.type(13, color: Colors.white, weight: FontWeight.w700),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    text.paint(canvas, Offset((32 - text.width) / 2, 16 - text.height / 2));
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(64, 88);
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    image.dispose();
-    picture.dispose();
-    _pendingPins.remove(count);
-    if (!mounted || bytes == null) return;
-    setState(
-      () => _numberedPins[count] = google.BitmapDescriptor.bytes(
-        bytes.buffer.asUint8List(),
-        width: 32,
-        height: 44,
-      ),
-    );
+  void _updateHeat() {
+    final next = aggregateBoraHeat(widget.events);
+    if (_heatRevision > 0 &&
+        next.length == _heat.length &&
+        List.generate(
+          next.length,
+          (i) =>
+              next[i].latitude == _heat[i].latitude &&
+              next[i].longitude == _heat[i].longitude &&
+              next[i].count == _heat[i].count,
+        ).every((v) => v)) {
+      return;
+    }
+    _heat = next;
+    _tiles = BoraTileProvider(_heat, _zoom);
+    _heatRevision++;
+  }
+
+  Future<void> _numberedPin(int count, double density) async {
+    final key = (count, density);
+    if (_numberedPins.containsKey(key) || !_pendingPins.add(key)) return;
+    try {
+      final icon = await halloweenPin(count, density);
+      if (mounted) setState(() => _numberedPins[key] = icon);
+    } finally {
+      _pendingPins.remove(key);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final attempt = _attempt;
     final groups = _groups;
     final selected = groups[_selected];
-    for (final group in groups.values.where((g) => g.length > 1)) {
-      _numberedPin(group.length);
+    final density = MediaQuery.devicePixelRatioOf(context);
+    for (final group in groups.values) {
+      _numberedPin(group.length, density);
     }
     final markers = groups.entries
         .map(
           (entry) => google.Marker(
             icon:
-                _numberedPins[entry.value.length] ??
+                _numberedPins[(entry.value.length, density)] ??
                 google.BitmapDescriptor.defaultMarker,
+            visible: _numberedPins.containsKey((entry.value.length, density)),
+            anchor: const Offset(.5, 1),
             markerId: google.MarkerId(
               '${entry.key.latitude},${entry.key.longitude}',
             ),
@@ -243,7 +246,9 @@ class _MapSectionState extends State<MapSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: widget.height,
+          height:
+              widget.height ??
+              (MediaQuery.sizeOf(context).width <= 760 ? 420 : 520),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Stack(
@@ -262,7 +267,28 @@ class _MapSectionState extends State<MapSection> {
                         zoom: widget.location == null ? 11 : 14,
                       ),
                       markers: markers,
-                      circles: MapHeatLayer.build(widget.events),
+                      tileOverlays: {
+                        if (_heat.isNotEmpty)
+                          google.TileOverlay(
+                            tileOverlayId: google.TileOverlayId(
+                              'boras-$_heatRevision',
+                            ),
+                            tileProvider: _tiles,
+                            fadeIn: false,
+                          ),
+                      },
+                      tiltGesturesEnabled: false,
+                      rotateGesturesEnabled: false,
+                      mapToolbarEnabled: false,
+                      onCameraMove: (position) {
+                        if (attempt != _attempt) return;
+                        if (!mounted || position.zoom == _zoom) return;
+                        setState(() {
+                          _zoom = position.zoom;
+                          _tiles = BoraTileProvider(_heat, _zoom);
+                          _heatRevision++;
+                        });
+                      },
                       cloudMapId:
                           const String.fromEnvironment(
                             'GOOGLE_MAPS_MAP_ID',
@@ -271,11 +297,12 @@ class _MapSectionState extends State<MapSection> {
                           : const String.fromEnvironment('GOOGLE_MAPS_MAP_ID'),
                       mapType: google.MapType.normal,
                       onMapCreated: (controller) {
+                        if (!mounted || attempt != _attempt) return;
                         _controller = controller;
                         _fit();
                       },
                       onCameraIdle: () {
-                        if (!mounted) return;
+                        if (!mounted || attempt != _attempt) return;
                         _timeout?.cancel();
                         if (!_idle) {
                           setState(() {
@@ -287,6 +314,18 @@ class _MapSectionState extends State<MapSection> {
                     ),
                   ),
                 ),
+                if (_idle && _error == null) ...[
+                  const Positioned(top: 14, left: 14, child: HauntedMapBadge()),
+                  Positioned(
+                    left: 14,
+                    bottom: 30,
+                    right: 14,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: BoraHeatLegend(hasHeat: _heat.isNotEmpty),
+                    ),
+                  ),
+                ],
                 if (!_idle && _error == null)
                   const Positioned.fill(
                     child: IgnorePointer(child: MapSkeleton()),
@@ -320,9 +359,13 @@ class _MapSectionState extends State<MapSection> {
         if (selected != null && selected.length > 1)
           Container(
             width: double.infinity,
-            margin: const EdgeInsets.only(top: 16),
+            margin: const EdgeInsets.symmetric(vertical: 20),
             padding: const EdgeInsets.all(24),
-            decoration: HomeStyle.box(),
+            decoration: HomeStyle.box(
+              color: const Color(0xFF161616),
+              border: const Color(0xFF353535),
+              radius: 10,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

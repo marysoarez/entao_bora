@@ -30,10 +30,24 @@ val mapsApiKey = sequenceOf(
     localProperties.getProperty("GOOGLE_MAPS_API_KEY"),
 ).mapNotNull { it?.trim()?.takeIf { value -> value.isNotEmpty() } }
     .firstOrNull()
-    ?: throw GradleException(
-        "Missing GOOGLE_MAPS_API_KEY. Supply --dart-define=GOOGLE_MAPS_API_KEY=... " +
-            "to Flutter, set the environment variable, or add it to android/local.properties."
-    )
+    .orEmpty()
+
+// Diagnostic tasks such as signingReport do not need a Maps key.
+// Validate only when building the app, before processing its manifest.
+val validateMapsApiKey = tasks.register("validateMapsApiKey") {
+    doLast {
+        if (mapsApiKey.isEmpty()) {
+            throw GradleException(
+                "Missing GOOGLE_MAPS_API_KEY. Supply --dart-define=GOOGLE_MAPS_API_KEY=... " +
+                    "to Flutter, set the environment variable, or add it to android/local.properties."
+            )
+        }
+    }
+}
+
+tasks.named("preBuild") {
+    dependsOn(validateMapsApiKey)
+}
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")

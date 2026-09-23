@@ -393,7 +393,7 @@ void main() {
     expect(sdkMap.style, isNull);
     expect(sdkMap.circles, isEmpty);
     final initialKey = sdkMap.key;
-    await tester.pump(const Duration(seconds: 26));
+    await tester.pump(const Duration(seconds: 31));
     expect(find.text('Não foi possível carregar o mapa.'), findsOneWidget);
     await tap(tester, 'Tentar novamente');
     expect(sdkMap.key, isNot(initialKey));
@@ -401,6 +401,8 @@ void main() {
     sdkMap.onCameraIdle!();
     await tester.pump();
     expect(find.byType(MapSkeleton), findsNothing);
+    expect(find.text('Mapa assombrado'), findsOneWidget);
+    expect(find.text('Sem Boras nos eventos filtrados'), findsOneWidget);
     sdkMap.markers.single.onTap!();
     await tester.pump();
     expect(find.text('Neste endereço'), findsOneWidget);
