@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.util.Base64
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -7,6 +10,35 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Flutter passes --dart-define values to Gradle as comma-separated Base64.
+val dartDefines = providers.gradleProperty("dart-defines").orNull
+    ?.split(",")
+    ?.filter { it.isNotBlank() }
+    ?.associate {
+        val entry = String(Base64.getDecoder().decode(it), Charsets.UTF_8)
+        entry.substringBefore("=") to entry.substringAfter("=", "")
+    }.orEmpty()
+val localProperties = Properties()
+rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use {
+    localProperties.load(it)
+}
+val mapsApiKey = sequenceOf(
+    dartDefines["GOOGLE_MAPS_API_KEY"],
+    providers.environmentVariable("GOOGLE_MAPS_API_KEY").orNull,
+    localProperties.getProperty("GOOGLE_MAPS_API_KEY"),
+).mapNotNull { it?.trim()?.takeIf { value -> value.isNotEmpty() } }
+    .firstOrNull()
+    ?: throw GradleException(
+        "Missing GOOGLE_MAPS_API_KEY. Supply --dart-define=GOOGLE_MAPS_API_KEY=... " +
+            "to Flutter, set the environment variable, or add it to android/local.properties."
+    )
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
 android {
@@ -32,13 +64,23 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["mapsApiKey"] = mapsApiKey
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

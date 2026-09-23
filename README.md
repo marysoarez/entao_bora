@@ -33,3 +33,25 @@ flutter test
 ```
 
 Esses comandos são referências e não foram executados durante a documentação. O HTML atual também carrega uma chave de Maps diretamente; dart-define não substitui automaticamente essa configuração.
+
+## Google Maps no Android
+
+A chave do SDK nativo é injetada no manifesto em debug, profile e release. Configure
+`GOOGLE_MAPS_API_KEY` por uma destas fontes, em ordem de prioridade:
+
+1. `flutter run --dart-define=GOOGLE_MAPS_API_KEY=SUA_CHAVE_ANDROID`
+   (ou `flutter build appbundle --dart-define=GOOGLE_MAPS_API_KEY=SUA_CHAVE_ANDROID`).
+2. Variável de ambiente `GOOGLE_MAPS_API_KEY`, inclusive no CI.
+3. Entrada `GOOGLE_MAPS_API_KEY=SUA_CHAVE_ANDROID` em `android/local.properties`
+   (arquivo local ignorado pelo Git).
+
+Sem uma chave não vazia, o Gradle interrompe a configuração com uma mensagem
+explicativa. `.env` e `GOOGLE_MAPS_MAP_ID` não configuram a chave do SDK Android.
+Habilite **Maps SDK for Android** no projeto Google Cloud com faturamento ativo e
+restrinja a chave ao pacote `com.marysoarez.entaobora.entao_bora` e aos certificados
+SHA-1 utilizados (debug, release e assinatura do Google Play, conforme aplicável).
+Veja a [configuração oficial](https://developers.google.com/maps/documentation/android-sdk/config).
+
+Para verificar, inspecione o manifesto mesclado da variante: dentro de
+`application`, `com.google.android.geo.API_KEY` deve conter o valor configurado.
+Depois execute a tela do mapa em um dispositivo Android e confirme o carregamento.

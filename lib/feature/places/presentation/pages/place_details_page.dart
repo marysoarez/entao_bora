@@ -67,7 +67,7 @@ class _PlaceDetailsPageState extends State<PlaceDetailsPage> {
   void initState() {
     super.initState();
     vm.setPlace(widget.place);
-    eventsVm.load(widget.place.id);
+    eventsVm.load(widget.place.id, creatorId: widget.place.ownerId.id);
   }
 
   @override

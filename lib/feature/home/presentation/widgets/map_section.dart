@@ -8,6 +8,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google;
 import '../pages/map_seleton.dart';
 import 'home_style.dart';
+import 'map_heat.dart';
 
 class HomeMapItem {
   const HomeMapItem(this.name, this.route, this.position);
@@ -261,6 +262,7 @@ class _MapSectionState extends State<MapSection> {
                         zoom: widget.location == null ? 11 : 14,
                       ),
                       markers: markers,
+                      circles: MapHeatLayer.build(widget.events),
                       cloudMapId:
                           const String.fromEnvironment(
                             'GOOGLE_MAPS_MAP_ID',
