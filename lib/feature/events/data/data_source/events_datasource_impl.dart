@@ -255,12 +255,49 @@ class EventDatasourceImpl implements EventDatasource {
     final doc = firestore.collection(FirestorePaths.events).doc();
 
     final dto = event.copyWith(id: doc.id);
-
-    await doc.set(dto.toMap());
+    if (!dto.featured) {
+      await doc.set(dto.toMap());
+      return;
+    }
+    if (dto.status != 'published') {
+      throw StateError('Somente eventos publicados podem ser destacados.');
+    }
+    final previous = await firestore
+        .collection(FirestorePaths.events)
+        .where('featured', isEqualTo: true)
+        .get();
+    final batch = firestore.batch();
+    for (final candidate in previous.docs) {
+      batch.update(candidate.reference, {'featured': false});
+    }
+    batch.set(doc, dto.toMap());
+    await batch.commit();
   }
 
   @override
   Future<void> updateEvent(EventDto event) async {
+    final ref = firestore.document(FirestorePaths.event(event.id));
+    final existing = await ref.get();
+    if (!existing.exists) throw StateError('Evento não encontrado.');
+    final wasFeatured = existing.data()?['featured'] == true;
+    if (event.featured && !wasFeatured) {
+      if (event.status != 'published') {
+        throw StateError('Somente eventos publicados podem ser destacados.');
+      }
+      final previous = await firestore
+          .collection(FirestorePaths.events)
+          .where('featured', isEqualTo: true)
+          .get();
+      final batch = firestore.batch();
+      for (final candidate in previous.docs) {
+        if (candidate.id != event.id) {
+          batch.update(candidate.reference, {'featured': false});
+        }
+      }
+      batch.update(ref, event.toMap());
+      await batch.commit();
+      return;
+    }
     await firestore.update(FirestorePaths.event(event.id), event.toMap());
   }
 

@@ -4,6 +4,125 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'home_style.dart';
 
+class HomeFeaturedEvent extends StatelessWidget {
+  const HomeFeaturedEvent({
+    super.key,
+    required this.event,
+    required this.onTap,
+  });
+
+  final EventEntity event;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.star, size: 16, color: Color(0xFFFFAD69)),
+              const SizedBox(width: 7),
+              Text(
+                'EM DESTAQUE',
+                style: HomeStyle.type(
+                  11,
+                  color: const Color(0xFFFFAD69),
+                  weight: FontWeight.w800,
+                  tracking: 1,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'Uma dica para seu próximo rolê',
+                style: HomeStyle.type(11, color: HomeStyle.muted),
+              ),
+            ],
+          ),
+        ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 560;
+            final image = HomePhoto(
+              event.coverImage,
+              height: compact ? 150 : 190,
+              width: compact ? double.infinity : constraints.maxWidth * .36,
+            );
+            final details = Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 18 : 24,
+                vertical: compact ? 18 : 14,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    DateFormat.yMMMMEEEEd(
+                      'pt_BR',
+                    ).add_Hm().format(event.startDate.toLocal()),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: HomeStyle.type(11, color: const Color(0xFFFFB276)),
+                  ),
+                  const SizedBox(height: 7),
+                  Text(
+                    event.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: HomeStyle.type(
+                      compact ? 23 : 28,
+                      weight: FontWeight.w700,
+                      tracking: -1,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    event.locationName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: HomeStyle.type(12, color: HomeStyle.muted),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Ver evento  ↗',
+                    style: TextStyle(
+                      color: Color(0xFFFFAD69),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            return _Card(
+              onTap: onTap,
+              radius: 10,
+              child: Container(
+                decoration: const BoxDecoration(color: Color(0xFF171310)),
+                child: compact
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [image, details],
+                      )
+                    : Row(
+                        children: [
+                          image,
+                          Expanded(child: details),
+                        ],
+                      ),
+              ),
+            );
+          },
+        ),
+      ],
+    ),
+  );
+}
+
 class HomeEventCard extends StatelessWidget {
   const HomeEventCard({super.key, required this.event, required this.onTap});
   final EventEntity event;

@@ -2,6 +2,7 @@ import 'package:entao_bora/app/app_module.dart';
 import 'package:entao_bora/app/app_widget.dart';
 import 'package:entao_bora/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,13 @@ Future<void> main() async {
   await initializeDateFormatting('pt_BR');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Google Mobile Ads is supported on Android and iOS only.
+  if (!kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS)) {
+    await MobileAds.instance.initialize();
+  }
 
   runApp(ModularApp(module: AppModule(), child: const AppWidget()));
 }

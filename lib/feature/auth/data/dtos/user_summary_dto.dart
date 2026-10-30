@@ -16,6 +16,7 @@ class UserSummaryDto extends UserSummaryEntity {
     super.active,
     super.notificationsEnabled,
     super.locationSharingEnabled,
+    super.autoCheckinConsentEnabled,
     super.lastKnownLocation,
   });
 
@@ -31,6 +32,7 @@ class UserSummaryDto extends UserSummaryEntity {
       active: entity.active,
       notificationsEnabled: entity.notificationsEnabled,
       locationSharingEnabled: entity.locationSharingEnabled,
+      autoCheckinConsentEnabled: entity.autoCheckinConsentEnabled,
       lastKnownLocation: entity.lastKnownLocation,
     );
   }
@@ -49,6 +51,8 @@ class UserSummaryDto extends UserSummaryEntity {
       active: map['active'] as bool? ?? true,
       notificationsEnabled: map['notificationsEnabled'] as bool? ?? false,
       locationSharingEnabled: map['locationSharingEnabled'] as bool? ?? false,
+      autoCheckinConsentEnabled:
+          map['autoCheckinConsentEnabled'] as bool? ?? false,
       lastKnownLocation: lastKnownLocation is GeoPoint
           ? LocationEntity(
               latitude: lastKnownLocation.latitude,
@@ -75,6 +79,7 @@ class UserSummaryDto extends UserSummaryEntity {
       active: true,
       notificationsEnabled: false,
       locationSharingEnabled: false,
+      autoCheckinConsentEnabled: false,
       lastKnownLocation: null,
     );
   }
@@ -91,6 +96,7 @@ class UserSummaryDto extends UserSummaryEntity {
       active: active,
       notificationsEnabled: notificationsEnabled,
       locationSharingEnabled: locationSharingEnabled,
+      autoCheckinConsentEnabled: autoCheckinConsentEnabled,
       lastKnownLocation: lastKnownLocation,
     );
   }
@@ -107,6 +113,7 @@ class UserSummaryDto extends UserSummaryEntity {
       'active': active,
       'notificationsEnabled': notificationsEnabled,
       'locationSharingEnabled': locationSharingEnabled,
+      'autoCheckinConsentEnabled': autoCheckinConsentEnabled,
       if (lastKnownLocation != null)
         'lastKnownLocation': GeoPoint(
           lastKnownLocation!.latitude,

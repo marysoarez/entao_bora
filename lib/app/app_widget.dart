@@ -1,6 +1,8 @@
 import 'package:entao_bora/core/app_theme.dart';
+import 'package:entao_bora/core/analytics/analytics_routes.dart';
 import 'package:entao_bora/feature/auth/presentation/auth_viewmodel.dart';
 import 'package:entao_bora/feature/notifications/data/notification_service.dart';
+import 'package:entao_bora/core/location/data/auto_checkin_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -15,7 +17,9 @@ class _AppWidgetState extends State<AppWidget> {
   @override
   void initState() {
     super.initState();
+    Modular.setObservers([createScreenAnalyticsObserver()]);
     Modular.get<AuthViewModel>().loadUser();
+    Modular.get<AutoCheckinService>().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       Modular.get<NotificationService>().requestPermissionOnStartup();

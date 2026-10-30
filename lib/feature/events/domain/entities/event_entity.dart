@@ -55,6 +55,7 @@ class EventEntity {
   final DateTime updatedAt;
 
   final EventStatus status;
+  final bool featured;
 
   const EventEntity({
     required this.id,
@@ -82,6 +83,7 @@ class EventEntity {
     required this.createdAt,
     required this.updatedAt,
     required this.status,
+    this.featured = false,
   });
 
   bool get isFinished => endDate.isBefore(DateTime.now());
@@ -120,6 +122,7 @@ class EventEntity {
     DateTime? createdAt,
     DateTime? updatedAt,
     EventStatus? status,
+    bool? featured,
   }) {
     return EventEntity(
       id: id ?? this.id,
@@ -147,6 +150,7 @@ class EventEntity {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
+      featured: featured ?? this.featured,
     );
   }
 }

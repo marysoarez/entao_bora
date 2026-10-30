@@ -51,6 +51,7 @@ class EventDto {
   final Timestamp createdAt;
   final Timestamp updatedAt;
   final String status;
+  final bool featured;
 
   const EventDto({
     required this.id,
@@ -77,6 +78,7 @@ class EventDto {
     required this.createdAt,
     required this.updatedAt,
     required this.status,
+    this.featured = false,
   });
 
   factory EventDto.fromFirestore(
@@ -122,6 +124,7 @@ class EventDto {
       createdAt: map['createdAt'] ?? Timestamp.now(),
       updatedAt: map['updatedAt'] ?? Timestamp.now(),
       status: map['status'] ?? EventStatus.draft.slug,
+      featured: map['featured'] == true,
     );
   }
   factory EventDto.fromEntity(EventEntity entity) {
@@ -151,6 +154,7 @@ class EventDto {
       createdAt: Timestamp.fromDate(entity.createdAt),
       updatedAt: Timestamp.fromDate(entity.updatedAt),
       status: entity.status.slug,
+      featured: entity.featured,
     );
   }
 
@@ -178,6 +182,7 @@ class EventDto {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'status': status,
+      'featured': featured,
     };
   }
 
@@ -209,6 +214,7 @@ class EventDto {
       createdAt: createdAt.toDate(),
       updatedAt: updatedAt.toDate(),
       status: EventStatus.fromSlug(status),
+      featured: featured,
     );
   }
 
@@ -236,6 +242,7 @@ class EventDto {
     Timestamp? createdAt,
     Timestamp? updatedAt,
     String? status,
+    bool? featured,
   }) {
     return EventDto(
       id: id ?? this.id,
@@ -261,6 +268,7 @@ class EventDto {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       status: status ?? this.status,
+      featured: featured ?? this.featured,
     );
   }
 }

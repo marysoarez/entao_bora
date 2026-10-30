@@ -4,6 +4,7 @@ import 'package:entao_bora/core/firestore/data/firestore_client_impl.dart';
 import 'package:entao_bora/core/location/data/data_source/location_data_source.dart';
 import 'package:entao_bora/core/location/data/data_source/location_data_source_impl.dart';
 import 'package:entao_bora/core/location/data/repositories/location_repository_impl.dart';
+import 'package:entao_bora/core/location/data/auto_checkin_service.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
 import 'package:entao_bora/feature/auth/data/datasource/auth_datasource.dart';
 import 'package:entao_bora/feature/auth/data/datasource/auth_datasource_impl.dart';
@@ -68,6 +69,7 @@ class AppModule extends Module {
     i.addSingleton<ILocationRepository>(
       () => LocationRepositoryImpl(datasource: i()),
     );
+    i.addSingleton<AutoCheckinService>(() => AutoCheckinService(i(), i()));
     i.add(CreatePlaceViewModel.new);
     i.add(PlaceDetailsViewModel.new);
     i.add(PlaceEventsViewModel.new);

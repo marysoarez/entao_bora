@@ -434,6 +434,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                             ),
                           ),
 
+                        if (vm.canFeatureEvents)
+                          _FeaturedEventToggle(
+                            initialValue: vm.featured,
+                            onChanged: vm.setFeatured,
+                          ),
+
                         const SizedBox(height: 32),
                         Observer(
                           builder: (_) {
@@ -529,4 +535,34 @@ class _CreateEventPageState extends State<CreateEventPage> {
             ),
     );
   }
+}
+
+class _FeaturedEventToggle extends StatefulWidget {
+  const _FeaturedEventToggle({
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  final bool initialValue;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  State<_FeaturedEventToggle> createState() => _FeaturedEventToggleState();
+}
+
+class _FeaturedEventToggleState extends State<_FeaturedEventToggle> {
+  late bool value = widget.initialValue;
+
+  @override
+  Widget build(BuildContext context) => CheckboxListTile(
+    contentPadding: EdgeInsets.zero,
+    value: value,
+    title: const Text('Evento de destaque na home'),
+    subtitle: const Text('Este será o único destaque ativo.'),
+    onChanged: (next) {
+      if (next == null) return;
+      setState(() => value = next);
+      widget.onChanged(next);
+    },
+  );
 }

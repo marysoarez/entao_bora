@@ -264,7 +264,7 @@ class _MapSectionState extends State<MapSection> {
                                 widget.location!.latitude,
                                 widget.location!.longitude,
                               ),
-                        zoom: widget.location == null ? 11 : 14,
+                        zoom: widget.location == null ? 14 : 16,
                       ),
                       markers: markers,
                       tileOverlays: {

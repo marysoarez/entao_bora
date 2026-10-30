@@ -5,6 +5,7 @@ import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_status_enum.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
+import 'package:entao_bora/shared/widgets/admob_banner.dart';
 import 'package:entao_bora/shared/enum/music_genre.dart';
 import 'package:flutter/material.dart';
 import 'home_style.dart';
@@ -86,6 +87,16 @@ class _HomeExploreState extends State<HomeExplore> {
               (_genre == null || p.musicGenres.contains(_genre)),
         )
         .toList();
+    EventEntity? featuredEvent;
+    for (final candidate in widget.events) {
+      if (candidate.featured &&
+          candidate.status == EventStatus.published &&
+          !candidate.isFinished) {
+        featuredEvent = candidate;
+        break;
+      }
+    }
+    final highlighted = featuredEvent;
     return Theme(
       data: ThemeData(
         brightness: Brightness.dark,
@@ -151,6 +162,15 @@ class _HomeExploreState extends State<HomeExplore> {
                                   widget.error!,
                                   onRetry: widget.onRetry,
                                 ),
+                              if (highlighted != null) ...[
+                                HomeFeaturedEvent(
+                                  event: highlighted,
+                                  onTap: () => widget.onNavigate(
+                                    '/events/${highlighted.slug.isEmpty ? highlighted.id : highlighted.slug}',
+                                  ),
+                                ),
+                              ],
+                              const AdMobBanner(),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 24,

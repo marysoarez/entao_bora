@@ -88,10 +88,12 @@ class _UserAreaPageState extends State<UserAreaPage> {
                                         vm.locationSharingEnabled,
                                     notificationsEnabled:
                                         vm.notificationsEnabled,
+                                    autoCheckinEnabled: vm.autoCheckinEnabled,
                                     activatingNotifications:
                                         vm.activatingNotifications,
                                     onToggleLocation: _toggleLocation,
                                     onToggleNotifications: _toggleNotifications,
+                                    onToggleAutoCheckin: _toggleAutoCheckin,
                                   ),
                                 ),
                               ],
@@ -102,10 +104,12 @@ class _UserAreaPageState extends State<UserAreaPage> {
                             UserSettingsSection(
                               locationSharingEnabled: vm.locationSharingEnabled,
                               notificationsEnabled: vm.notificationsEnabled,
+                              autoCheckinEnabled: vm.autoCheckinEnabled,
                               activatingNotifications:
                                   vm.activatingNotifications,
                               onToggleLocation: _toggleLocation,
                               onToggleNotifications: _toggleNotifications,
+                              onToggleAutoCheckin: _toggleAutoCheckin,
                             ),
                           ],
                           const SizedBox(height: DsSpacing.md),
@@ -201,6 +205,40 @@ class _UserAreaPageState extends State<UserAreaPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _toggleAutoCheckin() async {
+    if (!vm.autoCheckinEnabled) {
+      final accepted = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Ativar check-in automático?'),
+          content: const Text(
+            'A permissão de localização não registra presença por si só. Ao aceitar, o app poderá usar localização em segundo plano para confirmar permanência em estabelecimentos participantes.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Aceitar e ativar'),
+            ),
+          ],
+        ),
+      );
+      if (accepted != true) return;
+    }
+    final success = await vm.setAutoCheckin(!vm.autoCheckinEnabled);
+    if (!mounted || success) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          vm.error ?? 'Não foi possível atualizar o check-in automático.',
+        ),
+      ),
+    );
   }
 
   void _showEditProfileUnavailable() {

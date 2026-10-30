@@ -215,6 +215,24 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
     );
   }
 
+  late final _$autoCheckinEnabledAtom = Atom(
+    name: 'UserAreaViewModelBase.autoCheckinEnabled',
+    context: context,
+  );
+
+  @override
+  bool get autoCheckinEnabled {
+    _$autoCheckinEnabledAtom.reportRead();
+    return super.autoCheckinEnabled;
+  }
+
+  @override
+  set autoCheckinEnabled(bool value) {
+    _$autoCheckinEnabledAtom.reportWrite(value, super.autoCheckinEnabled, () {
+      super.autoCheckinEnabled = value;
+    });
+  }
+
   late final _$loadAsyncAction = AsyncAction(
     'UserAreaViewModelBase.load',
     context: context,
@@ -223,6 +241,16 @@ mixin _$UserAreaViewModel on UserAreaViewModelBase, Store {
   @override
   Future<void> load() {
     return _$loadAsyncAction.run(() => super.load());
+  }
+
+  late final _$setAutoCheckinAsyncAction = AsyncAction(
+    'UserAreaViewModelBase.setAutoCheckin',
+    context: context,
+  );
+
+  @override
+  Future<bool> setAutoCheckin(bool enabled) {
+    return _$setAutoCheckinAsyncAction.run(() => super.setAutoCheckin(enabled));
   }
 
   late final _$enableLocationAsyncAction = AsyncAction(
@@ -298,6 +326,7 @@ checkinEvents: ${checkinEvents},
 currentLocation: ${currentLocation},
 locationSharingEnabled: ${locationSharingEnabled},
 notificationsEnabled: ${notificationsEnabled},
+autoCheckinEnabled: ${autoCheckinEnabled},
 isLogged: ${isLogged},
 hasCurrentLocation: ${hasCurrentLocation},
 totalPersonalActions: ${totalPersonalActions},

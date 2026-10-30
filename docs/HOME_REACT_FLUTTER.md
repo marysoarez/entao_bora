@@ -19,7 +19,7 @@ O estado inicial é Eventos + mapa. Busca, gênero e gratuitos permanecem ao tro
 
 O mapa recebe os dois conjuntos filtrados e omite eventos vinculados a locais. Coordenadas iguais compartilham um marcador com quantidade. O grupo abre abaixo do mapa; um item único abre a rota de detalhes. A contagem continua sendo da aba ativa.
 
-A localização centraliza o mapa com zoom 14 e mantém o rótulo Rio de Janeiro. Sem localização, o centro inicial é −22,9068 / −43,1729, zoom 11; múltiplas coordenadas usam ajuste de limites com padding 50. Não há estilo escuro nem camada de calor. O Map ID pode ser passado com `--dart-define=GOOGLE_MAPS_MAP_ID=...`.
+A localização centraliza o mapa com zoom 16 e mantém o rótulo Rio de Janeiro. Sem localização, o centro inicial é −22,9068 / −43,1729, zoom 14; múltiplas coordenadas usam ajuste de limites com padding 50. A Home também apresenta o único evento publicado marcado como destaque, somente enquanto ele não estiver encerrado. O Map ID pode ser passado com `--dart-define=GOOGLE_MAPS_MAP_ID=...`.
 
 Os dados são renovados a cada minuto. A assinatura dos eventos é recriada com o horário atual e a lista também verifica o término. Operações antigas não reiniciam assinaturas após a saída da página.
 

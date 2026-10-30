@@ -6,16 +6,20 @@ class UserSettingsSection extends StatelessWidget {
     super.key,
     required this.locationSharingEnabled,
     required this.notificationsEnabled,
+    required this.autoCheckinEnabled,
     required this.activatingNotifications,
     required this.onToggleLocation,
     required this.onToggleNotifications,
+    required this.onToggleAutoCheckin,
   });
 
   final bool locationSharingEnabled;
   final bool notificationsEnabled;
+  final bool autoCheckinEnabled;
   final bool activatingNotifications;
   final VoidCallback onToggleLocation;
   final VoidCallback onToggleNotifications;
+  final VoidCallback onToggleAutoCheckin;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +46,21 @@ class UserSettingsSection extends StatelessWidget {
             ),
             subtitle: const Text(
               'Usada para check-ins e recomendações por perto.',
+              style: TextStyle(color: DsColors.publicTextMuted),
+            ),
+          ),
+          const Divider(color: Colors.white12),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: autoCheckinEnabled,
+            onChanged: (_) => onToggleAutoCheckin(),
+            activeThumbColor: DsColors.success,
+            title: const Text(
+              'Check-in automático',
+              style: TextStyle(color: DsColors.publicText),
+            ),
+            subtitle: const Text(
+              'Consentimento separado para validar permanência em locais próximos, inclusive em segundo plano.',
               style: TextStyle(color: DsColors.publicTextMuted),
             ),
           ),
