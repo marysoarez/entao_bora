@@ -49,6 +49,12 @@ tasks.named("preBuild") {
     dependsOn(validateMapsApiKey)
 }
 
+tasks.configureEach {
+    if (name == "minifyReleaseWithR8") {
+        doNotTrackState("R8 outputs cannot be read by Gradle's state tracker in this workspace.")
+    }
+}
+
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {

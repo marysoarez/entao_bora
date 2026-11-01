@@ -281,15 +281,17 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                     initialDate: vm.startDate ?? DateTime.now(),
                                     firstDate: DateTime.now(),
                                     lastDate: DateTime(2100),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
-                                  if (date == null) return;
+                                  if (!context.mounted || date == null) return;
 
                                   final time = await showTimePicker(
                                     context: context,
                                     initialTime: TimeOfDay.fromDateTime(
                                       vm.startDate ?? DateTime.now(),
                                     ),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
                                   if (time == null) return;
@@ -330,9 +332,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                         DateTime.now(),
                                     firstDate: vm.startDate ?? DateTime.now(),
                                     lastDate: DateTime(2100),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
-                                  if (date == null) return;
+                                  if (!context.mounted || date == null) return;
 
                                   final time = await showTimePicker(
                                     context: context,
@@ -341,6 +344,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                           vm.startDate ??
                                           DateTime.now(),
                                     ),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
                                   if (time == null) return;
@@ -533,6 +537,19 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 );
               },
             ),
+    );
+  }
+
+  Widget _buildPickerWithWhiteActions(BuildContext context, Widget? child) {
+    final theme = Theme.of(context);
+
+    return Theme(
+      data: theme.copyWith(
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: Colors.white),
+        ),
+      ),
+      child: child!,
     );
   }
 }

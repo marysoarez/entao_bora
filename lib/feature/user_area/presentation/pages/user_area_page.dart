@@ -8,7 +8,6 @@ import 'package:entao_bora/feature/user_area/presentation/widgets/user_profile_s
 import 'package:entao_bora/feature/user_area/presentation/widgets/user_settings_section.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
-import 'package:entao_bora/shared/widgets/drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -34,8 +33,7 @@ class _UserAreaPageState extends State<UserAreaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: DsColors.publicBackground,
-      appBar: const AppAppBar(title: 'Minha area', showDrawer: true),
-      drawer: Observer(builder: (_) => AppDrawer(user: vm.user)),
+      appBar: const AppAppBar(title: 'Minha area'),
       body: Observer(
         builder: (_) {
           if (vm.loading) {

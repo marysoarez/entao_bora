@@ -107,15 +107,16 @@ abstract class UserAreaViewModelBase with Store {
         return;
       }
 
-      final boraResult = await _eventRepository.getBoraEventsByUserId(
-        currentUser.id,
-      );
-      final checkinResult = await _eventRepository.getCheckinEventsByUserId(
-        currentUser.id,
-      );
+      final results = await Future.wait([
+        _eventRepository.getBoraEventsByUserId(currentUser.id),
+        _eventRepository.getCheckinEventsByUserId(currentUser.id),
+      ]);
 
       var loadedBoraEvents = <EventEntity>[];
       var loadedCheckinEvents = <EventEntity>[];
+
+      final boraResult = results[0];
+      final checkinResult = results[1];
 
       boraResult.fold(
         (failure) {
