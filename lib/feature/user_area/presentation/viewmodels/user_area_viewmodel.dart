@@ -1,5 +1,6 @@
 import 'package:entao_bora/core/location/domain/entities/location_entity.dart';
 import 'package:entao_bora/core/location/domain/repositories/location_repository.dart';
+import 'package:entao_bora/core/location/data/auto_checkin_service.dart';
 import 'package:entao_bora/feature/auth/domain/entities/user_summary_entity.dart';
 import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
 import 'package:entao_bora/feature/events/domain/entities/event_entity.dart';
@@ -17,12 +18,14 @@ abstract class UserAreaViewModelBase with Store {
     this._eventRepository,
     this._locationRepository,
     this._notificationService,
+    this._autoCheckinService,
   );
 
   final IAuthRepository _authRepository;
   final IEventRepository _eventRepository;
   final ILocationRepository _locationRepository;
   final NotificationService _notificationService;
+  final AutoCheckinService _autoCheckinService;
 
   @observable
   bool loading = false;
@@ -50,6 +53,9 @@ abstract class UserAreaViewModelBase with Store {
 
   @observable
   bool notificationsEnabled = false;
+
+  @observable
+  bool autoCheckinEnabled = false;
 
   @computed
   bool get isLogged => user != null;
@@ -82,6 +88,7 @@ abstract class UserAreaViewModelBase with Store {
     currentLocation = null;
     notificationsEnabled = false;
     locationSharingEnabled = false;
+    autoCheckinEnabled = false;
     error = null;
   }
 
@@ -100,15 +107,16 @@ abstract class UserAreaViewModelBase with Store {
         return;
       }
 
-      final boraResult = await _eventRepository.getBoraEventsByUserId(
-        currentUser.id,
-      );
-      final checkinResult = await _eventRepository.getCheckinEventsByUserId(
-        currentUser.id,
-      );
+      final results = await Future.wait([
+        _eventRepository.getBoraEventsByUserId(currentUser.id),
+        _eventRepository.getCheckinEventsByUserId(currentUser.id),
+      ]);
 
       var loadedBoraEvents = <EventEntity>[];
       var loadedCheckinEvents = <EventEntity>[];
+
+      final boraResult = results[0];
+      final checkinResult = results[1];
 
       boraResult.fold(
         (failure) {
@@ -131,6 +139,7 @@ abstract class UserAreaViewModelBase with Store {
       user = currentUser;
       notificationsEnabled = currentUser.notificationsEnabled;
       locationSharingEnabled = currentUser.locationSharingEnabled;
+      autoCheckinEnabled = currentUser.autoCheckinConsentEnabled;
       currentLocation = currentUser.locationSharingEnabled
           ? currentUser.lastKnownLocation
           : null;
@@ -140,6 +149,28 @@ abstract class UserAreaViewModelBase with Store {
       error = e.toString();
     } finally {
       loading = false;
+    }
+  }
+
+  @action
+  Future<bool> setAutoCheckin(bool enabled) async {
+    final currentUser = user;
+    if (currentUser == null) {
+      error = 'Entre para configurar o check-in automático.';
+      return false;
+    }
+    try {
+      await _autoCheckinService.setConsent(
+        userId: currentUser.id,
+        enabled: enabled,
+      );
+      autoCheckinEnabled = enabled;
+      user = currentUser.copyWith(autoCheckinConsentEnabled: enabled);
+      error = null;
+      return true;
+    } catch (cause) {
+      error = cause.toString();
+      return false;
     }
   }
 

@@ -8,7 +8,6 @@ import 'package:entao_bora/feature/user_area/presentation/widgets/user_profile_s
 import 'package:entao_bora/feature/user_area/presentation/widgets/user_settings_section.dart';
 import 'package:entao_bora/shared/design_system/app_design_system.dart';
 import 'package:entao_bora/shared/widgets/app_bar_widget.dart';
-import 'package:entao_bora/shared/widgets/drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -34,8 +33,7 @@ class _UserAreaPageState extends State<UserAreaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: DsColors.publicBackground,
-      appBar: const AppAppBar(title: 'Minha area', showDrawer: true),
-      drawer: Observer(builder: (_) => AppDrawer(user: vm.user)),
+      appBar: const AppAppBar(title: 'Minha area'),
       body: Observer(
         builder: (_) {
           if (vm.loading) {
@@ -88,10 +86,12 @@ class _UserAreaPageState extends State<UserAreaPage> {
                                         vm.locationSharingEnabled,
                                     notificationsEnabled:
                                         vm.notificationsEnabled,
+                                    autoCheckinEnabled: vm.autoCheckinEnabled,
                                     activatingNotifications:
                                         vm.activatingNotifications,
                                     onToggleLocation: _toggleLocation,
                                     onToggleNotifications: _toggleNotifications,
+                                    onToggleAutoCheckin: _toggleAutoCheckin,
                                   ),
                                 ),
                               ],
@@ -102,10 +102,12 @@ class _UserAreaPageState extends State<UserAreaPage> {
                             UserSettingsSection(
                               locationSharingEnabled: vm.locationSharingEnabled,
                               notificationsEnabled: vm.notificationsEnabled,
+                              autoCheckinEnabled: vm.autoCheckinEnabled,
                               activatingNotifications:
                                   vm.activatingNotifications,
                               onToggleLocation: _toggleLocation,
                               onToggleNotifications: _toggleNotifications,
+                              onToggleAutoCheckin: _toggleAutoCheckin,
                             ),
                           ],
                           const SizedBox(height: DsSpacing.md),
@@ -201,6 +203,40 @@ class _UserAreaPageState extends State<UserAreaPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _toggleAutoCheckin() async {
+    if (!vm.autoCheckinEnabled) {
+      final accepted = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Ativar check-in automático?'),
+          content: const Text(
+            'A permissão de localização não registra presença por si só. Ao aceitar, o app poderá usar localização em segundo plano para confirmar permanência em estabelecimentos participantes.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Aceitar e ativar'),
+            ),
+          ],
+        ),
+      );
+      if (accepted != true) return;
+    }
+    final success = await vm.setAutoCheckin(!vm.autoCheckinEnabled);
+    if (!mounted || success) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          vm.error ?? 'Não foi possível atualizar o check-in automático.',
+        ),
+      ),
+    );
   }
 
   void _showEditProfileUnavailable() {

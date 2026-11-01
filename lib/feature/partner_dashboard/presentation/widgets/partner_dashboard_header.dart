@@ -25,12 +25,12 @@ class PartnerDashboardHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Ola, $userName',
+                'Olá, $userName',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 6),
               Text(
-                'Acompanhe os eventos que voce criou e veja os resultados publicados.',
+                'Cuide dos seus estabelecimentos, cardápios e eventos em um só lugar.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],

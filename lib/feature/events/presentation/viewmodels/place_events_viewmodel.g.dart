@@ -69,8 +69,10 @@ mixin _$PlaceEventsViewModel on PlaceEventsViewModelBase, Store {
   );
 
   @override
-  Future<void> load(String placeId) {
-    return _$loadAsyncAction.run(() => super.load(placeId));
+  Future<void> load(String placeId, {required String creatorId}) {
+    return _$loadAsyncAction.run(
+      () => super.load(placeId, creatorId: creatorId),
+    );
   }
 
   late final _$PlaceEventsViewModelBaseActionController = ActionController(
@@ -79,12 +81,12 @@ mixin _$PlaceEventsViewModel on PlaceEventsViewModelBase, Store {
   );
 
   @override
-  Future<void> reload(String placeId) {
+  Future<void> reload(String placeId, {required String creatorId}) {
     final _$actionInfo = _$PlaceEventsViewModelBaseActionController.startAction(
       name: 'PlaceEventsViewModelBase.reload',
     );
     try {
-      return super.reload(placeId);
+      return super.reload(placeId, creatorId: creatorId);
     } finally {
       _$PlaceEventsViewModelBaseActionController.endAction(_$actionInfo);
     }

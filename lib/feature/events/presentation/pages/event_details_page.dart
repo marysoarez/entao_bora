@@ -1,7 +1,9 @@
-import 'package:entao_bora/feature/events/presentation/pages/event_details_skeleton.dart';
+import 'package:entao_bora/feature/auth/domain/repositries/auth_repository.dart';
+import 'package:entao_bora/feature/auth/presentation/widgets/login_widget.dart';
 import 'package:entao_bora/feature/events/presentation/viewmodels/event_details_viewmodel.dart';
 import 'package:entao_bora/feature/events/presentation/widgets/event_card_widget.dart';
-import 'package:entao_bora/shared/design_system/app_design_system.dart';
+import 'package:entao_bora/feature/home/presentation/widgets/home_style.dart';
+import 'package:entao_bora/shared/widgets/public_detail_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -32,23 +34,25 @@ class _EventsDetailsPageState extends State<EventsDetailsPage> {
     return Observer(
       builder: (_) {
         if (vm.loading) {
-          return const EventDetailsSkeleton();
+          return _message('Carregando detalhes…');
         }
 
         if (vm.event == null) {
-          return const Scaffold(
-            backgroundColor: DsColors.publicBackground,
-            body: Center(
-              child: Text(
-                "Evento não encontrado",
-                style: TextStyle(color: DsColors.publicTextMuted),
-              ),
-            ),
-          );
+          return _message(vm.error ?? 'Não encontramos este registro.');
         }
 
         return EventCard(event: vm.event!, place: vm.place);
       },
+    );
+  }
+
+  Widget _message(String text) {
+    final auth = Modular.get<IAuthRepository>();
+    return PublicDetailShell(
+      user: auth.currentUser,
+      onNavigate: Modular.to.navigate,
+      onLogin: () => LoginDialog.show(context),
+      child: HomeMessage(text),
     );
   }
 }

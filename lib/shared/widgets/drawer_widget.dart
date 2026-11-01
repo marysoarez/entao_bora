@@ -95,8 +95,8 @@ class _AppDrawerState extends State<AppDrawer> {
                       if (user?.isPartner == true || user?.isAdmin == true) ...[
                         _drawerItem(
                           context,
-                          icon: Icons.event_note_outlined,
-                          title: 'Meus eventos',
+                          icon: Icons.dashboard_outlined,
+                          title: 'Gestão do estabelecimento',
                           onTap: () => _openPartnerArea(context),
                         ),
                         _drawerItem(

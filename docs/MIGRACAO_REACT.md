@@ -107,7 +107,7 @@ Proposta: preço numérico no banco, moeda brasileira na tela e validações de 
 
 Fontes: [PartnerDashboardViewModel](../lib/feature/partner_dashboard/presentation/viewmodels/partner_dashboard_viewmodel.dart) e [UserAreaViewModel](../lib/feature/user_area/presentation/viewmodels/user_area_viewmodel.dart).
 
-Dashboard soma views/Boras/check-ins, lista eventos por criador e transfere evento a usuário existente por ID, alterando `createdBy` e `updatedAt`. **Selecionar local atualmente não filtra `visibleEvents`**; métricas continuam representando todos os eventos carregados. Confirmar comportamento desejado. Transferência precisa de autorização explícita; não altera automaticamente `placeId`.
+Dashboard soma views/Boras/check-ins, lista eventos por criador e transfere evento a usuário existente por ID, alterando `createdBy` e `updatedAt`. No Flutter atual, selecionar local inclui os eventos vinculados a ele e os eventos avulsos carregados para `user.id`/`partnerId` (`placeId` nulo, vazio ou espaços). Sem locais, os eventos carregados continuam acessíveis. Transferência não altera `placeId`. Contrato atualizado e pendências do React: [Área do parceiro — Flutter → React](AREA_PARCEIRO_FLUTTER_REACT.md).
 
 Área pessoal reúne perfil, Boras, check-ins e preferências. Atividade recente deduplica eventos, ordena por `startDate` decrescente e limita a cinco; não usa horário da interação. Desativar localização muda o booleano, preservando coordenadas no banco.
 
@@ -298,7 +298,7 @@ Reutilizar assets e ícones; comparar telas lado a lado durante implementação.
 | Alta | Base64 e limite apenas por imagem | Inventariar e planejar Storage compatível |
 | Média | createdBy/ownerId em formatos múltiplos | Leitura dupla e escrita canônica |
 | Média | Unicidade de slug consultada antes da escrita | Resolver concorrência, preservar links publicados |
-| Média | Dashboard não filtra eventos por local | Confirmar regra de produto |
+| Média | React exclui eventos avulsos e esconde eventos quando não há locais | Parear com Flutter: incluir avulsos nas seleções e manter eventos acessíveis sem local cadastrado |
 | Média | Limite temporal do stream fixo | Renovar consulta/filtro com tempo |
 | Média | deleteEvent remove só documento principal | Definir limpeza/retenção de interações e arquivos |
 | Média | Rotas dependem de objeto em memória | Adotar edição e seleção recuperáveis por URL |

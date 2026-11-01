@@ -124,14 +124,16 @@ abstract class PartnerDashboardViewModelBase with Store {
     places = uniquePlaces;
     selectedPlace = _resolveSelectedPlace(uniquePlaces);
     events = uniqueEvents;
-    visibleEvents = uniqueEvents;
+    visibleEvents = selectedPlace == null
+        ? uniqueEvents
+        : _eventsForPlace(selectedPlace!);
     loading = false;
   }
 
   @action
   Future<void> selectPlace(PlaceEntity place) async {
     selectedPlace = place;
-    visibleEvents = events;
+    visibleEvents = _eventsForPlace(place);
     error = null;
   }
 
@@ -185,6 +187,13 @@ abstract class PartnerDashboardViewModelBase with Store {
     }
 
     return partnerPlaces.first;
+  }
+
+  List<EventEntity> _eventsForPlace(PlaceEntity place) {
+    return events.where((event) {
+      final placeId = event.placeId?.trim();
+      return placeId == place.id || placeId == null || placeId.isEmpty;
+    }).toList();
   }
 
   Future<List<EventEntity>> _loadEventsByCreatorId(String creatorId) async {
