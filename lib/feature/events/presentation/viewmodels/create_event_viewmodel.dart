@@ -41,6 +41,9 @@ abstract class CreateEventViewModelBase with Store {
   @observable
   String? error;
 
+  bool canFeatureEvents = false;
+  bool featured = false;
+
   @observable
   String title = '';
 
@@ -110,6 +113,8 @@ abstract class CreateEventViewModelBase with Store {
   @action
   void setInstagram(String value) => instagram = value;
 
+  void setFeatured(bool value) => featured = value;
+
   @action
   void setPlace(PlaceEntity value) {
     place = value;
@@ -139,6 +144,7 @@ abstract class CreateEventViewModelBase with Store {
   @action
   void editEvent(EventEntity event) {
     editingEvent = event;
+    featured = event.featured;
     title = event.title;
     description = event.description;
     instagram = event.instagram ?? '';
@@ -210,9 +216,13 @@ abstract class CreateEventViewModelBase with Store {
       final currentUser = await _authRepository.getCurrentUser();
 
       if (currentUser == null) {
+        canFeatureEvents = false;
         error = 'Faca login para criar um evento.';
         return [];
       }
+
+      canFeatureEvents = currentUser.active && currentUser.isAdmin;
+      if (editingEvent == null) featured = false;
 
       final ownerIds = {
         currentUser.id,
@@ -369,6 +379,7 @@ abstract class CreateEventViewModelBase with Store {
       createdAt: editing?.createdAt ?? now,
       updatedAt: now,
       status: editing?.status ?? EventStatus.published,
+      featured: featured,
     );
   }
 

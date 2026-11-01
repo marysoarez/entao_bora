@@ -17,6 +17,22 @@ class NotificationService {
 
   StreamSubscription<String>? _tokenRefreshSubscription;
 
+  Future<void> requestPermissionOnStartup() async {
+    try {
+      if (!await _messaging.isSupported()) return;
+
+      final settings = await _messaging.getNotificationSettings();
+      if (settings.authorizationStatus != AuthorizationStatus.notDetermined) {
+        return;
+      }
+
+      await _messaging.requestPermission(alert: true, badge: true, sound: true);
+    } catch (e, stackTrace) {
+      debugPrint('Erro ao solicitar permissão de notificações: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   Future<NotificationActivationResult> activate({
     required UserSummaryEntity user,
   }) async {

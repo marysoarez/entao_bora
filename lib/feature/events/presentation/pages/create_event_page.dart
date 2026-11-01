@@ -281,15 +281,17 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                     initialDate: vm.startDate ?? DateTime.now(),
                                     firstDate: DateTime.now(),
                                     lastDate: DateTime(2100),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
-                                  if (date == null) return;
+                                  if (!context.mounted || date == null) return;
 
                                   final time = await showTimePicker(
                                     context: context,
                                     initialTime: TimeOfDay.fromDateTime(
                                       vm.startDate ?? DateTime.now(),
                                     ),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
                                   if (time == null) return;
@@ -330,9 +332,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                         DateTime.now(),
                                     firstDate: vm.startDate ?? DateTime.now(),
                                     lastDate: DateTime(2100),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
-                                  if (date == null) return;
+                                  if (!context.mounted || date == null) return;
 
                                   final time = await showTimePicker(
                                     context: context,
@@ -341,6 +344,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                           vm.startDate ??
                                           DateTime.now(),
                                     ),
+                                    builder: _buildPickerWithWhiteActions,
                                   );
 
                                   if (time == null) return;
@@ -432,6 +436,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                               keyboardType: TextInputType.url,
                               onChanged: vm.setTicketUrl,
                             ),
+                          ),
+
+                        if (vm.canFeatureEvents)
+                          _FeaturedEventToggle(
+                            initialValue: vm.featured,
+                            onChanged: vm.setFeatured,
                           ),
 
                         const SizedBox(height: 32),
@@ -529,4 +539,47 @@ class _CreateEventPageState extends State<CreateEventPage> {
             ),
     );
   }
+
+  Widget _buildPickerWithWhiteActions(BuildContext context, Widget? child) {
+    final theme = Theme.of(context);
+
+    return Theme(
+      data: theme.copyWith(
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: Colors.white),
+        ),
+      ),
+      child: child!,
+    );
+  }
+}
+
+class _FeaturedEventToggle extends StatefulWidget {
+  const _FeaturedEventToggle({
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  final bool initialValue;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  State<_FeaturedEventToggle> createState() => _FeaturedEventToggleState();
+}
+
+class _FeaturedEventToggleState extends State<_FeaturedEventToggle> {
+  late bool value = widget.initialValue;
+
+  @override
+  Widget build(BuildContext context) => CheckboxListTile(
+    contentPadding: EdgeInsets.zero,
+    value: value,
+    title: const Text('Evento de destaque na home'),
+    subtitle: const Text('Este será o único destaque ativo.'),
+    onChanged: (next) {
+      if (next == null) return;
+      setState(() => value = next);
+      widget.onChanged(next);
+    },
+  );
 }

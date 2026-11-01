@@ -55,6 +55,9 @@ class _SkeletonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final compact = height <= 170;
+    final medium = height <= 200;
+
     return Container(
       height: height,
       width: double.infinity,
@@ -66,14 +69,31 @@ class _SkeletonCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _bar(width: 180, height: 22),
-          const SizedBox(height: DsSpacing.lg),
-          _bar(width: double.infinity, height: 48),
+          _bar(width: compact ? 144 : 180, height: compact ? 18 : 22),
+          SizedBox(height: compact ? DsSpacing.sm : DsSpacing.lg),
+          _bar(
+            width: double.infinity,
+            height: compact
+                ? 24
+                : medium
+                ? 28
+                : 40,
+          ),
           const SizedBox(height: DsSpacing.sm),
-          _bar(width: double.infinity, height: 48),
-          const Spacer(),
-          _bar(width: 120, height: 18),
+          _bar(
+            width: double.infinity,
+            height: compact
+                ? 24
+                : medium
+                ? 28
+                : 40,
+          ),
+          if (!compact) ...[
+            SizedBox(height: medium ? DsSpacing.sm : DsSpacing.md),
+            _bar(width: 120, height: medium ? 14 : 18),
+          ],
         ],
       ),
     );

@@ -3,8 +3,8 @@ import 'package:entao_bora/feature/partner_dashboard/presentation/event_dashboar
 import 'package:entao_bora/feature/partner_dashboard/presentation/viewmodels/partner_dashboard_viewmodel.dart';
 import 'package:entao_bora/feature/partner_dashboard/presentation/widgets/partner_dashboard_header.dart';
 import 'package:entao_bora/feature/partner_dashboard/presentation/widgets/partner_events_section.dart';
-import 'package:entao_bora/feature/partner_dashboard/presentation/widgets/partner_menu_section.dart';
 import 'package:entao_bora/feature/partner_dashboard/presentation/widgets/partner_metrics_section.dart';
+import 'package:entao_bora/feature/partner_dashboard/presentation/widgets/partner_place_management_section.dart';
 import 'package:entao_bora/feature/partner_dashboard/presentation/widgets/partner_place_selector.dart';
 import 'package:entao_bora/feature/partner_dashboard/presentation/widgets/partner_transfer_event_dialog.dart';
 import 'package:entao_bora/feature/places/domain/entities/place_entity.dart';
@@ -83,6 +83,15 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
     );
   }
 
+  void openPlace() {
+    final place = vm.selectedPlace;
+    if (place == null) return;
+
+    Modular.to.pushNamed(
+      PublicUrlHelper.placePath(slug: place.slug, id: place.id),
+    );
+  }
+
   Future<void> openManageMenu() async {
     final place = vm.selectedPlace;
     if (place == null) return;
@@ -129,7 +138,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
         return Scaffold(
           backgroundColor: DsColors.adminBackground,
           appBar: AppBar(
-            title: const Text('Meus eventos'),
+            title: const Text('Gestão do estabelecimento'),
             actions: [
               IconButton(
                 tooltip: 'Atualizar',
@@ -146,6 +155,7 @@ class _PartnerDashboardPageState extends State<PartnerDashboardPage> {
                     onCreateEvent: openCreateEvent,
                     onCreatePlace: openCreatePlace,
                     onEditPlace: openEditPlace,
+                    onOpenPlace: openPlace,
                     onOpenEvent: openEvent,
                     onEditEvent: openEditEvent,
                     onTransferEvent: transferEvent,
@@ -163,6 +173,7 @@ class _DashboardContent extends StatelessWidget {
   final VoidCallback onCreateEvent;
   final VoidCallback onCreatePlace;
   final VoidCallback onEditPlace;
+  final VoidCallback onOpenPlace;
   final ValueChanged<EventEntity> onOpenEvent;
   final ValueChanged<EventEntity> onEditEvent;
   final ValueChanged<EventEntity> onTransferEvent;
@@ -173,6 +184,7 @@ class _DashboardContent extends StatelessWidget {
     required this.onCreateEvent,
     required this.onCreatePlace,
     required this.onEditPlace,
+    required this.onOpenPlace,
     required this.onOpenEvent,
     required this.onEditEvent,
     required this.onTransferEvent,
@@ -193,12 +205,13 @@ class _DashboardContent extends StatelessWidget {
 
     if (vm.places.isEmpty && vm.events.isEmpty) {
       return DsEmptyState(
-        icon: Icons.event_busy_outlined,
-        title: 'Nenhum evento criado',
+        icon: Icons.storefront_outlined,
+        title: 'Nenhum estabelecimento cadastrado',
         message:
-            'Crie seu primeiro evento para acompanhar visualizações, boras e check-ins por aqui.',
-        actionLabel: 'Criar evento',
-        onAction: onCreateEvent,
+            'Cadastre ou reivindique um local para editar informações, '
+            'criar o cardápio e publicar eventos.',
+        actionLabel: 'Cadastrar estabelecimento',
+        onAction: onCreatePlace,
       );
     }
 
@@ -222,7 +235,15 @@ class _DashboardContent extends StatelessWidget {
             onSelectPlace: vm.selectPlace,
             onEditPlace: onEditPlace,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 36),
+          PartnerPlaceManagementSection(
+            place: vm.selectedPlace!,
+            onOpenPlace: onOpenPlace,
+            onEditPlace: onEditPlace,
+            onManageMenu: onManageMenu,
+            onCreateEvent: onCreateEvent,
+          ),
+          const SizedBox(height: 36),
         ] else
           const SizedBox(height: 24),
         _SectionTitle(title: 'Resumo'),
@@ -243,13 +264,6 @@ class _DashboardContent extends StatelessWidget {
           onEditEvent: onEditEvent,
           onTransferEvent: onTransferEvent,
         ),
-        if (vm.selectedPlace != null) ...[
-          const SizedBox(height: 36),
-          PartnerMenuSection(
-            place: vm.selectedPlace!,
-            onManageMenu: onManageMenu,
-          ),
-        ],
       ],
     );
   }

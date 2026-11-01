@@ -19,6 +19,7 @@ class UserSummaryEntity {
   final bool active;
   final bool notificationsEnabled;
   final bool locationSharingEnabled;
+  final bool autoCheckinConsentEnabled;
   final LocationEntity? lastKnownLocation;
 
   const UserSummaryEntity({
@@ -32,6 +33,7 @@ class UserSummaryEntity {
     this.active = true,
     this.notificationsEnabled = false,
     this.locationSharingEnabled = false,
+    this.autoCheckinConsentEnabled = false,
     this.lastKnownLocation,
   });
 
@@ -50,6 +52,7 @@ class UserSummaryEntity {
     bool? active,
     bool? notificationsEnabled,
     bool? locationSharingEnabled,
+    bool? autoCheckinConsentEnabled,
     LocationEntity? lastKnownLocation,
   }) {
     return UserSummaryEntity(
@@ -64,6 +67,8 @@ class UserSummaryEntity {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       locationSharingEnabled:
           locationSharingEnabled ?? this.locationSharingEnabled,
+      autoCheckinConsentEnabled:
+          autoCheckinConsentEnabled ?? this.autoCheckinConsentEnabled,
       lastKnownLocation: lastKnownLocation ?? this.lastKnownLocation,
     );
   }
