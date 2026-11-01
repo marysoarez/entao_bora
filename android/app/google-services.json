@@ -12,7 +12,20 @@
           "package_name": "com.marysoarez.entaobora.entao_bora"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "325136993258-ph8gdh6kd64m5mbr950mfgunhd9bmn94.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.marysoarez.entaobora.entao_bora",
+            "certificate_hash": "b5dff939a5359c575fc19ebce753577612510b8e"
+          }
+        },
+        {
+          "client_id": "325136993258-1ab5tiv3f1t4l9b8o3j9bra5fg18ainv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC3Yeib8gdpIy2GArKUwGWRRmvoMQ8m9zQ"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "325136993258-1ab5tiv3f1t4l9b8o3j9bra5fg18ainv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "325136993258-e7ojuemoshh3js8gb1jo7alnl5ohs8gn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.marysoarez.entaobora.entaoBora"
+              }
+            }
+          ]
         }
       }
     }
